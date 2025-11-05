@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "SideProjectCharacter.generated.h"
+#include "MainCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -19,7 +19,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  Implements a controllable orbiting camera
  */
 UCLASS(abstract)
-class ASideProjectCharacter : public ACharacter
+class AMainCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -52,13 +52,12 @@ protected:
 public:
 
 	/** Constructor */
-	ASideProjectCharacter();	
+	AMainCharacter();	
 
 protected:
 
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 protected:
 
 	/** Called for movement input */

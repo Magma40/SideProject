@@ -1,6 +1,4 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
-#include "SideProjectCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,8 +9,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SideProject.h"
+#include "MainCharacter.h"
 
-ASideProjectCharacter::ASideProjectCharacter()
+AMainCharacter::AMainCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -50,7 +49,7 @@ ASideProjectCharacter::ASideProjectCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-void ASideProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
@@ -60,11 +59,11 @@ void ASideProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASideProjectCharacter::Move);
-		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASideProjectCharacter::Look);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
+		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASideProjectCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 	}
 	else
 	{
@@ -72,16 +71,14 @@ void ASideProjectCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	}
 }
 
-void ASideProjectCharacter::Move(const FInputActionValue& Value)
+void AMainCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
 }
 
-void ASideProjectCharacter::Look(const FInputActionValue& Value)
+void AMainCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -90,12 +87,13 @@ void ASideProjectCharacter::Look(const FInputActionValue& Value)
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
 
-void ASideProjectCharacter::DoMove(float Right, float Forward)
+void AMainCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController() != nullptr)
 	{
 		// find out which way is forward
-		const FRotator Rotation = GetController()->GetControlRotation();
+		//const FRotator Rotation = GetController()->GetControlRotation();
+		const FRotator Rotation = FollowCamera->GetRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		// get forward vector
@@ -106,28 +104,30 @@ void ASideProjectCharacter::DoMove(float Right, float Forward)
 
 		// add movement 
 		AddMovementInput(ForwardDirection, Forward);
+		//MoveForward(Forward, Right);
 		AddMovementInput(RightDirection, Right);
 	}
 }
 
-void ASideProjectCharacter::DoLook(float Yaw, float Pitch)
+void AMainCharacter::DoLook(float Yaw, float Pitch)
 {
-	if (GetController() != nullptr)
-	{
+	//if (GetController() != nullptr)
+	//{
 		// add yaw and pitch input to controller
-		AddControllerYawInput(Yaw);
-		AddControllerPitchInput(Pitch);
-	}
+	//	AddControllerYawInput(Yaw);
+	//	AddControllerPitchInput(Pitch);
+	//}
 }
 
-void ASideProjectCharacter::DoJumpStart()
+void AMainCharacter::DoJumpStart()
 {
 	// signal the character to jump
 	Jump();
 }
 
-void ASideProjectCharacter::DoJumpEnd()
+void AMainCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
 }
+
