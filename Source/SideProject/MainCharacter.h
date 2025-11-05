@@ -66,6 +66,13 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	UFUNCTION(BlueprintCallable)
+	void SetCameraToActor(AActor* TargetActor);
+	FRotator CachedCameraRotation;
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+	void Tick(float DeltaTime);
+
 public:
 
 	/** Handles move inputs from either controls or UI interfaces */
