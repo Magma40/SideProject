@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SideProject.h"
+#include "Camera/CameraActor.h"
+#include "Kismet/GameplayStatics.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -35,18 +37,25 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f;
-	CameraBoom->bUsePawnControlRotation = true;
-
+	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	//CameraBoom->SetupAttachment(RootComponent);
+	//CameraBoom->TargetArmLength = 400.0f;
+	//CameraBoom->bUsePawnControlRotation = true;
 	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	//FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	//FollowCamera->SetupAttachment(GetRootComponent());
+	//FollowCamera->bUsePawnControlRotation = false;
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+}
+
+void AMainCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	AActor* FoundTheMainCameraInScene = UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass());
+	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
 }
 
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -59,11 +68,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		PlayerInputComponent->BindAxis("MoveForward", this, &AMainCharacter::MoveForward);
-		PlayerInputComponent->BindAxis("MoveRight", this, &AMainCharacter::MoveRight);
-		
-		//EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
-		//EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
+		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
@@ -92,10 +98,10 @@ void AMainCharacter::Look(const FInputActionValue& Value)
 
 void AMainCharacter::DoMove(float Right, float Forward)
 {
-	if (GetController() != nullptr)
+	if (TheMainCameraInScene != nullptr)
 	{
 		// find out which way is forward
-		const FRotator Rotation = GetController()->GetControlRotation();
+		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		// get forward vector
@@ -104,9 +110,10 @@ void AMainCharacter::DoMove(float Right, float Forward)
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
+		// add movement
+		Forward = Forward * SpeedMultiplier;
+		Right = Right * SpeedMultiplier;
 		AddMovementInput(ForwardDirection, Forward);
-		//MoveForward(Forward, Right);
 		AddMovementInput(RightDirection, Right);
 	}
 }
@@ -131,64 +138,6 @@ void AMainCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
-}
-
-void AMainCharacter::SetCameraToActor(AActor* TargetActor)
-{
-	if (!TargetActor || !FollowCamera) return;
-
-	// Get the target transform
-	const FVector TargetLocation = TargetActor->GetActorLocation();
-	const FRotator TargetRotation = TargetActor->GetActorRotation();
-
-	// Move the camera directly to the target's location and rotation
-	FollowCamera->SetWorldLocationAndRotation(TargetLocation, TargetRotation);
-
-	// Optional: disable the camera boom (so camera doesn’t snap back)
-	if (CameraBoom)
-	{
-		CameraBoom->bUsePawnControlRotation = false;
-		CameraBoom->TargetArmLength = 0.f;  // Camera at exact location
-	}
-
-	// Store this rotation as the "view" direction
-	CachedCameraRotation = TargetRotation;
-}
-
-void AMainCharacter::MoveForward(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f))
-	{
-		// Use the cached camera rotation
-		const FRotator YawRotation(0, CachedCameraRotation.Yaw, 0);
-
-		// Get forward vector from camera yaw
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void AMainCharacter::MoveRight(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f))
-	{
-		// Use the cached camera rotation
-		const FRotator YawRotation(0, CachedCameraRotation.Yaw, 0);
-
-		// Get right vector from camera yaw
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void AMainCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (FollowCamera)
-	{
-		CachedCameraRotation = FollowCamera->GetComponentRotation();
-	}
 }
 
 

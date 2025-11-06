@@ -65,13 +65,13 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+	void BeginPlay();
 
-	UFUNCTION(BlueprintCallable)
-	void SetCameraToActor(AActor* TargetActor);
-	FRotator CachedCameraRotation;
-	void MoveForward(float Value);
-	void MoveRight(float Value);
-	void Tick(float DeltaTime);
+	ACameraActor* TheMainCameraInScene = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SpeedMultiplier = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool Sprinting = false;
 
 public:
 
