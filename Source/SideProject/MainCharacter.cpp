@@ -1,5 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 #include "MainCharacter.h"
+
+#include <ios>
+
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -58,6 +61,21 @@ void AMainCharacter::BeginPlay()
 	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
 }
 
+void AMainCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (TheMainCameraInScene != nullptr && !EnabledInput && GetCharacterMovement()->IsFalling())
+	{
+			// Slow rotation while in air
+			GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
+	}
+	else
+	{
+		// Normal rotation rate on ground
+		GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
+	}
+}
+
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -85,6 +103,11 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	DoMove(MovementVector.X, MovementVector.Y);
+	if (EnabledInput)
+	{
+		LastOldRightValue = MovementVector.X;
+		LastOldForwardValue = MovementVector.Y;	
+	}
 }
 
 void AMainCharacter::Look(const FInputActionValue& Value)
@@ -103,19 +126,32 @@ void AMainCharacter::DoMove(float Right, float Forward)
 		// find out which way is forward
 		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		// get forward and right vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
+		// add movement
+		//Forward *= SpeedMultiplier;
+		//Right *= SpeedMultiplier;
+		AddMovementInput(ForwardDirection, Forward);
+		AddMovementInput(RightDirection, Right);
+	}
+}
+
+void AMainCharacter::ContinuousFalling(float Right, float Forward)
+{
+		EnabledInput = false;
+		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement
-		Forward = Forward * SpeedMultiplier;
-		Right = Right * SpeedMultiplier;
+		
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
-	}
 }
 
 void AMainCharacter::DoLook(float Yaw, float Pitch)

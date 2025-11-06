@@ -65,13 +65,28 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-	void BeginPlay();
+	void BeginPlay() override;
+	void Tick(float DeltaTime) override;
+	void ContinuousFalling(float Right, float Forward);
 
 	ACameraActor* TheMainCameraInScene = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpeedMultiplier = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Sprinting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MaxSprintSpeed = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WalkSpeed = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool EnabledInput = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpSpeedForceChange = 1.0f;
+
+	float LastOldForwardValue = 0.0f;
+	float LastOldRightValue = 0.0f;
+
+	float DefaultMaxSprintSpeed = 1.0f;
 
 public:
 
