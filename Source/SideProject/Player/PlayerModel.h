@@ -40,7 +40,37 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UStaticMeshComponent* FindChild(UStaticMeshComponent* Parent, FName Name);
+
+	template <typename T>
+	T* FindChild(USceneComponent* Parent,  FName Name)
+	{
+		if (!Parent) return nullptr;
+		for (USceneComponent* Component : Parent->GetAttachChildren())
+		{
+			if (!Component) continue;
+			if (Component->GetFName() == Name)
+			{
+				if (T* TypedComponent = Cast<T>(Component))
+				{
+					return TypedComponent;
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Found component named %s, but it’s not of type %s"),
+						*Name.ToString(), *T::StaticClass()->GetName());
+				}
+			}
+			if (T* Found = FindChild<T>(Component, Name))
+			{
+				return Found;
+			}
+		}
+		if (Parent == GetRootComponent())
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerModel::FindChild - Could not find component with name: %s"), *Name.ToString());
+		}
+		return nullptr;
+	}
 
 public:	
 	// Called every frame

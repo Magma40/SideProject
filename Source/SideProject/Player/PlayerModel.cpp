@@ -11,25 +11,31 @@ APlayerModel::APlayerModel()
 
 }
 
-UStaticMeshComponent*APlayerModel::FindChild(UStaticMeshComponent* Parent,  FName Name)
-{
-	TArray<USceneComponent*> Childs;
-	for (UStaticMeshComponent* Component : Parent->GetChildrenComponents(true, Childs))
-	{
-		if (IsValid(Component) && Component->GetName() == Name.ToString())
-		{
-			// Found the component
-			return Component;
-		}
-	}
-	UE_LOG(LogTemp, Log, TEXT("PlayerModel::FindChild - Could Not Find The Component"));
-	return nullptr;
-}
+
 
 // Called when the game starts or when spawned
 void APlayerModel::BeginPlay()
 {
 	Super::BeginPlay();
+	Hips = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Leg_L"));
+	Waist = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Waist"));
+	Neck = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Neck"));
+
+	Leg_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Leg_L"));
+	LegJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("LegJoint_L"));
+	FootJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("FootJoint_L"));
+	
+	Leg_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Leg_R"));
+	LegJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("LegJoint_R"));
+	FootJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("FootJoint_R"));
+	
+	Arm_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Arm_L"));
+	ArmJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("ArmJoint_L"));
+	HandJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("HandJoint_L"));
+
+	Arm_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("Arm_R"));
+	ArmJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("ArmJoint_R"));
+	HandJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(), FName("HandJoint_R"));
 }
 
 // Called every frame
