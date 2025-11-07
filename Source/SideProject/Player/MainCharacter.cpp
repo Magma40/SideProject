@@ -59,6 +59,7 @@ void AMainCharacter::BeginPlay()
 	Super::BeginPlay();
 	AActor* FoundTheMainCameraInScene = UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass());
 	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
+	DefaultMaxSprintSpeed = MaxSprintSpeed;
 }
 
 void AMainCharacter::Tick(float DeltaTime)
@@ -68,11 +69,13 @@ void AMainCharacter::Tick(float DeltaTime)
 	{
 			// Slow rotation while in air
 			GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
+			MaxSprintSpeed = DefaultMaxSprintSpeed  + JumpSpeedForceChange;
 	}
 	else
 	{
 		// Normal rotation rate on ground
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
+		MaxSprintSpeed = DefaultMaxSprintSpeed;
 	}
 }
 

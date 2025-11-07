@@ -75,13 +75,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSprintSpeed = 1.0f;
+	float MaxSprintSpeed = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float WalkSpeed = 0.2f;
+	float WalkSpeed = 200.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool EnabledInput = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float JumpSpeedForceChange = 1.0f;
+	float JumpSpeedForceChange = 100.0f;
 
 	float LastOldForwardValue = 0.0f;
 	float LastOldRightValue = 0.0f;
