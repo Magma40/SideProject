@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PropertyCustomizationHelpers.h"
 #include "GameFramework/Actor.h"
 #include "PlayerModel.generated.h"
+
+class ULeg;
 
 UCLASS()
 class SIDEPROJECT_API APlayerModel : public AActor
@@ -15,9 +18,27 @@ public:
 	// Sets default values for this actor's properties
 	APlayerModel();
 
-	UStaticMeshComponent* Hips = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed = 8.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotationSpeed = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HipSwayAmount = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* HipsInModel = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	FTransform MoveTarget;
+
+private:
+	float HipHeight = 1.0f;
+
+#pragma region BodyParts
+
 	UStaticMeshComponent* Neck = nullptr;
 	UStaticMeshComponent* Waist= nullptr;
+	TArray<ULeg*> Legs;
 
 	//Legs 
 	UStaticMeshComponent* Leg_R = nullptr;
@@ -36,10 +57,15 @@ public:
 	UStaticMeshComponent* Arm_L = nullptr;
 	UStaticMeshComponent* ArmJoint_L = nullptr;
 	UStaticMeshComponent* HandJoint_L = nullptr;
-
+#pragma endregion BodyParts
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	template <typename T>
 	T* FindChild(USceneComponent* Parent,  FName Name)
@@ -71,9 +97,4 @@ protected:
 		}
 		return nullptr;
 	}
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };

@@ -16,6 +16,7 @@
   <component name="ChangeListManager">
     <list default="true" id="972e900e-ca4c-4eff-a37a-b1c31a22aafb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.h" afterDir="false" />
     </list>
@@ -31,10 +32,11 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Math/TransformVectorized.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBaseUtility.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/PlayerModel.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/GenericAnimModel.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="Toolset" />
@@ -47,21 +49,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C/C++ Project.SideProject.executor": "Debug",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C/C++ Project.SideProject.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="C/C++ Project.SideProject">
     <configuration name="SideProject" type="CppProject" factoryName="C++ Project">
       <configuration_1 setup="1">
@@ -224,6 +226,11 @@
       <workItem from="1762540483020" duration="747000" />
       <workItem from="1762541979253" duration="564000" />
       <workItem from="1762542670057" duration="5301000" />
+      <workItem from="1762629636129" duration="1457000" />
+      <workItem from="1762631412409" duration="3554000" />
+      <workItem from="1762639727662" duration="675000" />
+      <workItem from="1762640961680" duration="307000" />
+      <workItem from="1762641833576" duration="54000" />
     </task>
     <servers />
   </component>
