@@ -15,20 +15,22 @@ ULeg::ULeg()
 void ULeg::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerModel PlayerModel;
+	APlayerModel* PlayerModel = Cast<APlayerModel>(GetAttachmentRootActor());
+	//APlayerModel PlayerModel;
+	//Bones.Init(nullptr, 3);
 	if (GetName() == FName("Leg_R"))
 	{
-		Bones[0] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("Hips"));
-		Bones[1] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("LegJoint_R"));
-		Bones[2] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("FootJoint_R"));
+		Bones[0] = GetAttachParent();
+		Bones[1] = PlayerModel->FindChild<USceneComponent>(this, FName("LegJoint_R"));
+		Bones[2] = PlayerModel->FindChild<USceneComponent>(this, FName("FootJoint_R"));
 	}
 	else if (GetName() == FName("Leg_L"))
 	{
-		Bones[0] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("Hips"));
-		Bones[1] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("LegJoint_L"));
-		Bones[2] = PlayerModel.FindChild<USceneComponent>(GetAttachmentRoot(), FName("FootJoint_L"));
+		Bones[0] = GetAttachParent();
+		Bones[1] = PlayerModel->FindChild<USceneComponent>(this, FName("LegJoint_L"));
+		Bones[2] = PlayerModel->FindChild<USceneComponent>(this, FName("FootJoint_L"));
 	}
-
+	
 	if (Bones.Num() == 3 && Bones[0] && Bones[1] && Bones[2])
 	{
 		LocalGroundPosition = FVector(0, 0, -GroundOffset);
@@ -39,12 +41,12 @@ void ULeg::BeginPlay()
 void ULeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	if (!bIsStepping && ShouldStep())
 	{
 		DoStep(TargetPose, GetGroundPose());
 	}
-
+	
 	UpdateLeg(DeltaTime);
 }
 

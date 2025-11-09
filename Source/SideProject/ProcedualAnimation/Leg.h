@@ -12,10 +12,10 @@ struct FLegPose
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector Position;
+	FVector Position = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FQuat Rotation;
+	FQuat Rotation = FQuat::Identity;
 };
 
 
@@ -61,7 +61,7 @@ public:
 	FLegPose TargetPose;
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector Pole;
+	FVector Pole = FVector::ZeroVector;
 
 	// Functions
 	FLegPose GetGroundPose() const;
@@ -71,6 +71,6 @@ public:
 
 private:
 	FLegPose CurrentGroundPose;
-	FVector LocalGroundPosition;
+	FVector LocalGroundPosition = FVector::ZeroVector;
 	FTimerHandle StepTimerHandle;
 };

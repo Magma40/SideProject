@@ -68,7 +68,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	template <typename T>
-	T* FindChild(USceneComponent* Parent,  FName Name)
+		T* FindChild(USceneComponent* Parent,  FName Name)
 	{
 		if (!Parent) return nullptr;
 		for (USceneComponent* Component : Parent->GetAttachChildren())
@@ -96,5 +96,5 @@ public:
 			UE_LOG(LogTemp, Error, TEXT("PlayerModel::FindChild - Could not find component with name: %s"), *Name.ToString());
 		}
 		return nullptr;
-	}
+	}	
 };
