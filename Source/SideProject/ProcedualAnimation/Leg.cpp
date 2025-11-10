@@ -164,7 +164,8 @@ void ULeg::UpdateLeg()
 	
 		FVector DirToTarget = RootToEff.GetSafeNormal();
 		FVector PlaneNormal = FVector::CrossProduct(DirToTarget, (Pole - HipPos)).GetSafeNormal();
-		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
+	//THIS WAS CHANGED
+		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle -90), PlaneNormal);
 		FVector NewKneePos = HipPos + RotatedDir * UpperLen;
 	
 	// Set joint transforms
