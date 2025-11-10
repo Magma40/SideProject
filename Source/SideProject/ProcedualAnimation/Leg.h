@@ -29,48 +29,42 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	TArray<USceneComponent*> Bones; // 0=Hip, 1=Knee, 2=Foot
+	UPROPERTY(EditAnywhere, Category="Leg") float StepTrigger = 2.0f;
+	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
+	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
+	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	TArray<FVector> BoneOffsets;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IK") TArray<USceneComponent*> Bones;
+	UPROPERTY() FVector LocalGroundPosition = FVector::ZeroVector;
+	UPROPERTY() FLegPose TargetPose = FLegPose();
+	UPROPERTY() FLegPose SourcePose = FLegPose();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	float StepTrigger = 2.0f;
+	UPROPERTY() bool bIsStepping = false;
+	UPROPERTY() float StepElapsed = 0.0f;
+	UPROPERTY() float LiftAmount  = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	float StepTime = 0.5f;
+	UPROPERTY() TArray<ULeg*> OtherLegs;
+	
+public:
+	UFUNCTION(BlueprintPure)
+	bool IsStepping() const { return bIsStepping; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	float StepHeight = 2.0f;
+	UFUNCTION(BlueprintPure)
+	float GetLiftAmount() const { return LiftAmount; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg")
-	float GroundOffset = 0.5f;
+	UFUNCTION(BlueprintPure)
+	const FLegPose& GetTargetPose() const { return TargetPose; }
 
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsStepping = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	float LiftAmount = 0.f;
-
-	UPROPERTY(BlueprintReadOnly)
-	FLegPose TargetPose;
-
-	UPROPERTY(BlueprintReadOnly)
-	FVector Pole = FVector::ZeroVector;
-
-	// Functions
-	FLegPose GetGroundPose() const;
-	void UpdateLeg(float DeltaTime);
-	bool ShouldStep() const;
-	void DoStep(const FLegPose& Source, const FLegPose& Target);
+	UFUNCTION(BlueprintPure)
+	FVector FootBottom() const;
+	
+	void UpdateLeg();
 
 private:
-	FLegPose CurrentGroundPose;
-	FVector LocalGroundPosition = FVector::ZeroVector;
-	FTimerHandle StepTimerHandle;
+	FLegPose GetGroundPose() const;
+	bool ShouldStep() const;
+	void StartStep();
+	void UpdateStep(float DeltaTime);
 };

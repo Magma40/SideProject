@@ -8,128 +8,93 @@
 // Sets default values
 APlayerModel::APlayerModel()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	USceneComponent* Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
+	MoveTarget = GetActorTransform();
 }
-
-
 
 // Called when the game starts or when spawned
 void APlayerModel::BeginPlay()
 {
 	Super::BeginPlay();
-	HipsInModel = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("Leg_L"));
-	Waist = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Waist"));
-	Neck = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Neck"));
-	
-	Leg_L = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Leg_L"));
-	LegJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("LegJoint_L"));
-	FootJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("FootJoint_L"));
-	
-	Leg_R = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Leg_R"));
-	LegJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("LegJoint_R"));
-	FootJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("FootJoint_R"));
-	
-	Arm_L = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Arm_L"));
-	ArmJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("ArmJoint_L"));
-	HandJoint_L = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("HandJoint_L"));
-	
-	Arm_R = FindChild<UStaticMeshComponent>(GetRootComponent(),			FName("Arm_R"));
-	ArmJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("ArmJoint_R"));
-	HandJoint_R = FindChild<UStaticMeshComponent>(GetRootComponent(),		FName("HandJoint_R"));
-	
-	MoveTarget = FTransform(GetActorRotation(), GetActorLocation());
-	HipSwayAmount = HipsInModel->GetRelativeLocation().Z;
-	Legs.Push(FindChild<ULeg>(GetRootComponent(),					FName("Leg_R")));
-	Legs.Push(FindChild<ULeg>(GetRootComponent(),					FName("Leg_L")));
+	GetComponents(Legs);
+	Hip = FindChild<USceneComponent>(GetRootComponent(),		FName("Hips"));
+	if (Hip)
+	{
+		HipBaseHeight = Hip->GetRelativeLocation().Z;
+	}
 }
 
 // Called every frame
 void APlayerModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Legs.IsEmpty()) return;
-	
-	FVector MoveTargetRef = MoveTarget.GetLocation();
-	FVector Start = MoveTargetRef + FVector::UpVector * 100.0f;
-	FVector End = Start + FVector::DownVector * 200.0f;
-	
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	bool bHit = GetWorld()->SweepSingleByChannel(
-		HitResult,
-		Start,
-		End,
-		FQuat::Identity,
-		ECC_Visibility,
-		FCollisionShape::MakeSphere(2.0f),
-		Params
-	);
-	if (bHit){ MoveTargetRef = HitResult.ImpactPoint + FVector::UpVector * 2.0f; }
-	
-	// Move toward target
-	FVector CurrentLocation = GetActorLocation();
-	FVector TargetLocation = MoveTargetRef;
-	float MoveStep = MoveSpeed * DeltaTime;
-	
-	FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, MoveSpeed);
-	
-	SetActorLocation(NewLocation);
-	
-	//Rotate toward target
-	FQuat CurrentRotation = GetActorQuat();
-	FQuat TargetRotation = MoveTarget.GetRotation(); // assuming MoveTarget is FTransform
-	
-	FQuat NewRotation = FMath::QInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed);
-	SetActorRotation(NewRotation);
-	
+	if (Legs.Num() == 0) return;
+
+	// --- Raycast to find MoveTarget ground position ---
+	FVector TargetPos = MoveTarget.GetLocation();
+	FVector Start = TargetPos + FVector::UpVector * 100.f;
+	FVector End = TargetPos + FVector::DownVector * 200.f;
+
+	FHitResult Hit;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	{
+		TargetPos = Hit.ImpactPoint + Hit.ImpactNormal * 2.f; // Same as Unity spherecast offset
+	}
+
+	// --- Update movement ---
+	FVector CurrentPos = GetActorLocation();
+	FVector NewPos = FMath::VInterpConstantTo(CurrentPos, TargetPos, DeltaTime, MoveSpeed * 100.f); // convert to uu/s
+	//SetActorLocation(NewPos);
+
+	// --- Update rotation ---
+	FQuat CurrentRot = GetActorQuat();
+	FQuat TargetRot = MoveTarget.GetRotation();
+	FQuat NewRot = FQuat::Slerp(CurrentRot, TargetRot, DeltaTime * RotationSpeed);
+	//SetActorRotation(NewRot);
+
+	// --- Calculate feet center & lowest foot ---
 	FVector FeetCenter = FVector::ZeroVector;
-	float HipSway = 0.0f;
 	float LowestFoot = TNumericLimits<float>::Max();
-	
-	if (Legs.Num() > 0)
+	float HipSway = 0.f;
+
+	for (ULeg* Leg : Legs)
 	{
-		for (ULeg* Leg : Legs)
+		if (!Leg) continue;
+
+		Leg->UpdateLeg(); // Equivalent to leg.UpdateLeg();
+
+		FeetCenter += Leg->GetTargetPose().Position;
+		LowestFoot = FMath::Min(LowestFoot, Leg->FootBottom().Z);
+
+		if (Leg->IsStepping())
 		{
-			if (!IsValid(Leg)) continue;
-			Leg->UpdateLeg(DeltaTime);
-	
-			FeetCenter += Leg->GetGroundPose().Position;
-			LowestFoot = FMath::Min(LowestFoot, Leg->GetGroundPose().Position.Z);
-	
-			if (Leg->bIsStepping)
-			{
-				HipSway = Leg->LiftAmount * (Leg->GetOwner()->GetActorLabel().EndsWith(TEXT("_R")) ? 1.0f : -1.0f);
-			}
+			HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 		}
-	
-		 FeetCenter /= Legs.Num();
 	}
-	
+	FeetCenter /= Legs.Num();
+
+	// --- Hip sway and vertical motion ---
 	FVector Right = GetActorRightVector();
-	FVector HipSwayRef = Right * HipSway * HipSwayAmount;
-	
-	float TimeSeconds = GetWorld()->GetTimeSeconds();
-	float Oscillation = FMath::Sin(TimeSeconds * 2.0f) * 0.2f;
-	
-	float HipHeightRef = LowestFoot + HipHeight + Oscillation;
-	
-	FVector NewHipLocation(FeetCenter.X, FeetCenter.Y, HipHeightRef);
-	NewHipLocation += HipSwayRef;
-	
-	if (IsValid(HipsInModel))
-	{
-		HipsInModel->SetWorldLocation(NewHipLocation);
-	}
-	
+	FVector HipSwayOffset = Right * HipSway * HipSwayAmount;
+
+	float DesiredHipHeight = LowestFoot + HipBaseHeight;
+	float CurrentHipZ = Hip->GetComponentLocation().Z;
+	float HipHeight = FMath::FInterpTo(CurrentHipZ, DesiredHipHeight, DeltaTime, HipSmoothSpeed);
+	//float HipHeight = LowestFoot + HipBaseHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.f) * 20.f;
+	FVector HipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
+
+	Hip->SetWorldLocation(HipWorldPos);
+
+	// --- Optional: visualize hip position ---
+	DrawDebugSphere(GetWorld(), HipWorldPos, 8.f, 12, FColor::Cyan);
+
+	// --- Update legs again for final foot alignment ---
 	for (ULeg* Leg : Legs)
 	{
 		if (Leg)
-		{
-			Leg->UpdateLeg(DeltaTime);
-		}
+			Leg->UpdateLeg();
 	}
 }
 

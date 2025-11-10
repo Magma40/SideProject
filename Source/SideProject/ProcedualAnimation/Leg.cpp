@@ -3,51 +3,61 @@
 
 #include "ProcedualAnimation/Leg.h"
 #include "DrawDebugHelpers.h"
-#include "SkeletalMeshAttributes.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/PlayerModel.h"
+#include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 
 ULeg::ULeg()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	StepTrigger = 2.0f;
+	StepTime = 0.5f;
+	StepHeight = 2.0f;
+	GroundOffset = 0.5f;
+	bIsStepping = false;
+	LiftAmount = 0.f;
 }
 
 void ULeg::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerModel* PlayerModel = Cast<APlayerModel>(GetAttachmentRootActor());
-	//APlayerModel PlayerModel;
-	//Bones.Init(nullptr, 3);
-	if (GetName() == FName("Leg_R"))
+	AActor* FoundActor  = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerModel::StaticClass());
+	APlayerModel* PlayerModel = Cast<APlayerModel>(FoundActor);
+	if (!PlayerModel) return;
+
+	Bones.Empty();
+	Bones.Add(this);
+	TArray<USceneComponent*> Children;
+	GetChildrenComponents(true, Children);
+	if (GetName().Contains(TEXT("Leg_L")))
 	{
-		Bones[0] = GetAttachParent();
-		Bones[1] = PlayerModel->FindChild<USceneComponent>(this, FName("LegJoint_R"));
-		Bones[2] = PlayerModel->FindChild<USceneComponent>(this, FName("FootJoint_R"));
+		for (USceneComponent* Child : Children)
+		{
+			if (Child->GetName() == TEXT("LegJoint_L")) Bones.Add(Child);
+			if (Child->GetName() == TEXT("FootJoint_L")) Bones.Add(Child);
+		}	
 	}
-	else if (GetName() == FName("Leg_L"))
+	else
 	{
-		Bones[0] = GetAttachParent();
-		Bones[1] = PlayerModel->FindChild<USceneComponent>(this, FName("LegJoint_L"));
-		Bones[2] = PlayerModel->FindChild<USceneComponent>(this, FName("FootJoint_L"));
-	}
-	
-	if (Bones.Num() == 3 && Bones[0] && Bones[1] && Bones[2])
-	{
-		LocalGroundPosition = FVector(0, 0, -GroundOffset);
-		TargetPose = GetGroundPose();
+		if (GetName().Contains(TEXT("Leg_R")))
+		{
+			for (USceneComponent* Child : Children)
+			{
+				if (Child->GetName() == TEXT("LegJoint_R")) Bones.Add(Child);
+				if (Child->GetName() == TEXT("FootJoint_R")) Bones.Add(Child);
+			}	
+		}
 	}
 }
 
 void ULeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
-	if (!bIsStepping && ShouldStep())
-	{
-		DoStep(TargetPose, GetGroundPose());
-	}
-	
-	UpdateLeg(DeltaTime);
+	if (!bIsStepping && ShouldStep()) StartStep();
+	if (bIsStepping)  UpdateStep(DeltaTime);
+	UpdateLeg();
 }
 
 FLegPose ULeg::GetGroundPose() const
@@ -75,49 +85,107 @@ FLegPose ULeg::GetGroundPose() const
 bool ULeg::ShouldStep() const
 {
 	float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
-	return Dist > StepTrigger;
+	if (Dist < StepTrigger) return false;
+
+	int32 SteppingLegs = 0;
+	for (ULeg* Leg : OtherLegs)
+	{
+		if (Leg && Leg->IsStepping()) SteppingLegs++;
+	}
+
+	if (SteppingLegs > 0) return false;
+	return true;
 }
 
-void ULeg::UpdateLeg(float DeltaTime)
-{
-	if (Bones.Num() != 3) return;
-
-	// Example simplified IK: just point foot toward target
-	FVector Start = Bones[0]->GetComponentLocation();
-	FVector End = TargetPose.Position;
-	Bones[2]->SetWorldLocation(End);
-	Bones[2]->SetWorldRotation(TargetPose.Rotation.Rotator());
-
-	DrawDebugSphere(GetWorld(), TargetPose.Position, 5.f, 8, FColor::Yellow);
-}
-
-void ULeg::DoStep(const FLegPose& Source, const FLegPose& Target)
+void ULeg::StartStep()
 {
 	bIsStepping = true;
+	StepElapsed = 0.f;
+	SourcePose = TargetPose;
+	TargetPose = GetGroundPose();
 
-	float Elapsed = 0.f;
-	float Duration = StepTime;
+	// Add a per-leg offset so legs don't land on the exact same spot
+	FVector LegOffset = FVector::ZeroVector;
+	if (GetName().Contains(TEXT("Leg_L"))) LegOffset = FVector(0.0f, -10.f, 0.f);   // left leg offset
+	else if (GetName().Contains(TEXT("Leg_R"))) LegOffset = FVector(0.0f, 10.f, 0.f); // right leg offset
 
-	GetWorld()->GetTimerManager().SetTimer(
-		StepTimerHandle,
-		[this, Source, Target, Duration, Elapsed]() mutable
-		{
-			Elapsed += GetWorld()->GetDeltaSeconds();
-			float Alpha = FMath::Clamp(Elapsed / Duration, 0.f, 1.f);
+	TargetPose.Position += LegOffset;
+}
 
-			// Parabolic lift curve
-			float Lift = FMath::Sin(Alpha * PI) * StepHeight;
-			FVector Pos = FMath::Lerp(Source.Position, Target.Position, Alpha) + FVector(0, 0, Lift);
-			FQuat Rot = FQuat::Slerp(Source.Rotation, Target.Rotation, Alpha);
+void ULeg::UpdateStep(float DeltaTime)
+{
+	StepElapsed += DeltaTime;
+	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.f, 1.f);
 
-			TargetPose.Position = Pos;
-			TargetPose.Rotation = Rot;
+	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
 
-			if (Alpha >= 1.f)
-			{
-				bIsStepping = false;
-				GetWorld()->GetTimerManager().ClearTimer(StepTimerHandle);
-			}
-		},
-		0.01f, true);
+	FVector Pos = FMath::Lerp(SourcePose.Position, TargetPose.Position, Alpha) + FVector::UpVector * LiftAmount;
+	FQuat Rot = FQuat::Slerp(SourcePose.Rotation, TargetPose.Rotation, Alpha);
+
+	TargetPose.Position = Pos;
+	TargetPose.Rotation = Rot;
+
+	if (Alpha >= 1.f)
+	{
+		bIsStepping = false;
+		LiftAmount = 0.f;
+	}
+}
+
+void ULeg::UpdateLeg()
+{
+	if (Bones.Num() != 3) return;
+	if (!IsValid(Bones[0]) || !IsValid(Bones[1]) || !IsValid(Bones[2])) return;
+	USceneComponent* Hip = Bones[0];
+	USceneComponent* Knee = Bones[1];
+	USceneComponent* Foot = Bones[2];
+
+	FVector HipPos = Hip->GetComponentLocation();
+	FVector KneePos = Knee->GetComponentLocation();
+	FVector FootPos = Foot->GetComponentLocation();
+	FVector Target = TargetPose.Position;
+	
+	// Calculate pole direction (approx same as Unity)
+		FVector Forward = Hip->GetForwardVector();
+		FVector ToUpperLeg = (KneePos - HipPos).GetSafeNormal();
+		FVector Pole = HipPos + Hip->GetForwardVector() * 50.f + FVector(0, 0, 10.f);
+	
+	 // --- TWO BONE IK ---
+		FVector RootToEff = Target - HipPos;
+		float UpperLen = (KneePos - HipPos).Size();
+		float LowerLen = (FootPos - KneePos).Size();
+		float TargetLen = RootToEff.Size();
+		TargetLen = FMath::Clamp(TargetLen, FMath::Abs(UpperLen - LowerLen) + 1e-3f, UpperLen + LowerLen - 1e-3f);
+	
+	// Law of cosines for knee angle
+		float A = (UpperLen * UpperLen + TargetLen * TargetLen - LowerLen * LowerLen) / (2.0f * UpperLen * TargetLen);
+		A = FMath::Clamp(A, -1.f, 1.f);
+		float KneeAngle = FMath::Acos(A);
+	
+		FVector DirToTarget = RootToEff.GetSafeNormal();
+		FVector PlaneNormal = FVector::CrossProduct(DirToTarget, (Pole - HipPos)).GetSafeNormal();
+		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
+		FVector NewKneePos = HipPos + RotatedDir * UpperLen;
+	
+	// Set joint transforms
+		Knee->SetWorldLocation(NewKneePos);
+		Foot->SetWorldLocation(Target);
+	
+	// Orient joints
+		// FRotator HipRot = UKismetMathLibrary::FindLookAtRotation(HipPos, NewKneePos);
+		// FRotator KneeRot = UKismetMathLibrary::FindLookAtRotation(NewKneePos, Target);
+		//
+		// Hip->SetWorldRotation(HipRot);
+		// Knee->SetWorldRotation(KneeRot);
+		// Foot->SetWorldRotation(TargetPose.Rotation.Rotator());
+	
+		DrawDebugLine(GetWorld(), HipPos, NewKneePos, FColor::Red);
+		DrawDebugLine(GetWorld(), NewKneePos, Target, FColor::Green);
+		DrawDebugSphere(GetWorld(), Target, 5.f, 8, FColor::Yellow); 
+}
+
+FVector ULeg::FootBottom() const
+{
+	if (Bones.Num() < 3 || !Bones[2]) return FVector::ZeroVector;
+	return Bones[2]->GetComponentLocation() + FVector::DownVector * GroundOffset;
 }

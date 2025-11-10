@@ -15,58 +15,38 @@ class SIDEPROJECT_API APlayerModel : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	APlayerModel();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveSpeed = 8.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RotationSpeed = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	
+public:
+	// === Movement Settings ===
+	UPROPERTY(EditAnywhere, Category = "Hips")
+	float MoveSpeed = 800.0f; 
+
+	UPROPERTY(EditAnywhere, Category = "Hips")
+	float RotationSpeed = 1.0f; 
+
+	UPROPERTY(EditAnywhere, Category = "Hips")
 	float HipSwayAmount = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* HipsInModel = nullptr;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	FTransform MoveTarget;
+	UPROPERTY(EditAnywhere, Category = "Hips")
+	float HipSmoothSpeed = 1.0f;
 
-private:
-	float HipHeight = 1.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Hips")
+	USceneComponent* Hip = nullptr;
 
-#pragma region BodyParts
+	UPROPERTY(EditAnywhere, Category = "Hips")
+	FTransform MoveTarget = FTransform();
 
-	UStaticMeshComponent* Neck = nullptr;
-	UStaticMeshComponent* Waist= nullptr;
+protected:
 	TArray<ULeg*> Legs;
 
-	//Legs 
-	UStaticMeshComponent* Leg_R = nullptr;
-	UStaticMeshComponent* LegJoint_R = nullptr;
-	UStaticMeshComponent* FootJoint_R = nullptr;
+	float HipBaseHeight = 0.f;
 	
-	UStaticMeshComponent* Leg_L = nullptr;
-	UStaticMeshComponent* LegJoint_L = nullptr;
-	UStaticMeshComponent* FootJoint_L = nullptr;
-
-	//Arms
-	UStaticMeshComponent* Arm_R = nullptr;
-	UStaticMeshComponent* ArmJoint_R = nullptr;
-	UStaticMeshComponent* HandJoint_R = nullptr;
-	
-	UStaticMeshComponent* Arm_L = nullptr;
-	UStaticMeshComponent* ArmJoint_L = nullptr;
-	UStaticMeshComponent* HandJoint_L = nullptr;
-#pragma endregion BodyParts
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	template <typename T>
 		T* FindChild(USceneComponent* Parent,  FName Name)
 	{
