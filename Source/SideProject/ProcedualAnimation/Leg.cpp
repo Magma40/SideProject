@@ -164,14 +164,24 @@ void ULeg::UpdateLeg()
 		float A = (UpperLen * UpperLen + TargetLen * TargetLen - LowerLen * LowerLen) / (2.0f * UpperLen * TargetLen);
 		A = FMath::Clamp(A, -1.f, 1.f);
 		float KneeAngle = FMath::Acos(A);
+
+		FVector ForwardPoleDir = (Hip->GetRightVector() - Hip->GetUpVector()).GetSafeNormal();
+		FVector DirToTarget = (Target - HipPos).GetSafeNormal();
+		FVector PlaneNormal = FVector::CrossProduct(DirToTarget, ForwardPoleDir).GetSafeNormal();
 	
-		FVector DirToTarget = RootToEff.GetSafeNormal();
-		FVector PlaneNormal = FVector::CrossProduct(DirToTarget, (Pole - HipPos)).GetSafeNormal();
+		if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
+	
+		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle + 90), PlaneNormal);
+		FVector NewKneePos = HipPos + RotatedDir * UpperLen;
+
+	
+		//FVector DirToTarget = RootToEff.GetSafeNormal();
+		//FVector PlaneNormal = FVector::CrossProduct(DirToTarget, (Pole - HipPos)).GetSafeNormal();
 	//THIS WAS CHANGED
-		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
+		//FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
 		//RotatedDir.Normalize();
 		//RotatedDir.Z = -1.0f;
-		FVector NewKneePos = HipPos + RotatedDir  * UpperLen;
+		//FVector NewKneePos = HipPos + RotatedDir  * UpperLen;
 	
 	// Set joint transforms
 		//NewKneePos -= Knee->GetUpVector() * 20;
@@ -199,6 +209,9 @@ void ULeg::UpdateLeg()
 	
 		DrawDebugLine(GetWorld(), HipPos, HipPos + PlaneNormal * 50.f, FColor::Blue);
 		DrawDebugLine(GetWorld(), HipPos, HipPos + DirToTarget * 50.f, FColor::Cyan);
+
+		DrawDebugLine(GetWorld(), HipPos, HipPos + ForwardPoleDir * 50.f, FColor::Purple);
+		DrawDebugLine(GetWorld(), HipPos, HipPos + PlaneNormal * 50.f, FColor::Orange);
 }
 
 FVector ULeg::FootBottom() const
