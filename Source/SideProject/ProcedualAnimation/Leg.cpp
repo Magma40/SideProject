@@ -141,14 +141,17 @@ void ULeg::UpdateLeg()
 	USceneComponent* Foot = Bones[2];
 
 	FVector HipPos = Hip->GetComponentLocation();
+	//HipPos -= Hip->GetUpVector() * 20;
+	//HipPos.Z -= 20;
 	FVector KneePos = Knee->GetComponentLocation();
+	//KneePos.Z -= 20;
 	FVector FootPos = Foot->GetComponentLocation();
 	FVector Target = TargetPose.Position;
 	
 	// Calculate pole direction (approx same as Unity)
 		FVector Forward = Hip->GetForwardVector();
 		FVector ToUpperLeg = (KneePos - HipPos).GetSafeNormal();
-		FVector Pole = HipPos + Hip->GetForwardVector() * 50.f + FVector(0, 0, 10.f);
+		FVector Pole = HipPos + -Hip->GetRightVector() * 50.f;// - FVector(0, 0, 200.f);
 	
 	 // --- TWO BONE IK ---
 		FVector RootToEff = Target - HipPos;
@@ -165,24 +168,37 @@ void ULeg::UpdateLeg()
 		FVector DirToTarget = RootToEff.GetSafeNormal();
 		FVector PlaneNormal = FVector::CrossProduct(DirToTarget, (Pole - HipPos)).GetSafeNormal();
 	//THIS WAS CHANGED
-		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle -90), PlaneNormal);
-		FVector NewKneePos = HipPos + RotatedDir * UpperLen;
+		FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
+		//RotatedDir.Normalize();
+		//RotatedDir.Z = -1.0f;
+		FVector NewKneePos = HipPos + RotatedDir  * UpperLen;
 	
 	// Set joint transforms
+		//NewKneePos -= Knee->GetUpVector() * 20;
 		Knee->SetWorldLocation(NewKneePos);
 		Foot->SetWorldLocation(Target);
 	
 	// Orient joints
-		// FRotator HipRot = UKismetMathLibrary::FindLookAtRotation(HipPos, NewKneePos);
-		// FRotator KneeRot = UKismetMathLibrary::FindLookAtRotation(NewKneePos, Target);
-		//
-		// Hip->SetWorldRotation(HipRot);
-		// Knee->SetWorldRotation(KneeRot);
-		// Foot->SetWorldRotation(TargetPose.Rotation.Rotator());
+		//FRotator HipRot = UKismetMathLibrary::FindLookAtRotation(HipPos, NewKneePos);
+		//FRotator KneeRot = UKismetMathLibrary::FindLookAtRotation(NewKneePos, Target);
+		//FRotator AxisCorrection(0.f, 90.f, 0.f); // example: rotate +90° around yaw if your mesh points +Y instead of +X
+		//HipRot += AxisCorrection;
+		//KneeRot += AxisCorrection;
+		
+		
+		//Hip->SetWorldRotation(HipRot);
+		//Knee->SetRelativeRotation(KneeRot);
+		//Foot->SetRelativeRotation(TargetPose.Rotation.Rotator());
+
+		DrawDebugSphere(GetWorld(), HipPos, 8.f, 12, FColor::Red);
+		DrawDebugSphere(GetWorld(), NewKneePos, 8.f, 12, FColor::Green);
 	
 		DrawDebugLine(GetWorld(), HipPos, NewKneePos, FColor::Red);
 		DrawDebugLine(GetWorld(), NewKneePos, Target, FColor::Green);
-		DrawDebugSphere(GetWorld(), Target, 5.f, 8, FColor::Yellow); 
+		DrawDebugSphere(GetWorld(), Target, 5.f, 8, FColor::Yellow);
+	
+		DrawDebugLine(GetWorld(), HipPos, HipPos + PlaneNormal * 50.f, FColor::Blue);
+		DrawDebugLine(GetWorld(), HipPos, HipPos + DirToTarget * 50.f, FColor::Cyan);
 }
 
 FVector ULeg::FootBottom() const

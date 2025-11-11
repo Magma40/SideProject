@@ -22,7 +22,7 @@ void APlayerModel::BeginPlay()
 	Hip = FindChild<USceneComponent>(GetRootComponent(),		FName("Hips"));
 	if (Hip)
 	{
-		HipBaseHeight = Hip->GetRelativeLocation().Z;
+		HipBaseHeight = Hip->GetComponentLocation().Z;
 	}
 }
 
@@ -76,14 +76,14 @@ void APlayerModel::Tick(float DeltaTime)
 	FeetCenter /= Legs.Num();
 
 	// --- Hip sway and vertical motion ---
-	FVector Right = GetActorRightVector();
+	FVector Right = GetActorForwardVector();
 	FVector HipSwayOffset = Right * HipSway * HipSwayAmount;
 
 	float DesiredHipHeight = LowestFoot + HipBaseHeight;
 	float CurrentHipZ = Hip->GetComponentLocation().Z;
-	float HipHeight = FMath::FInterpTo(CurrentHipZ, DesiredHipHeight, DeltaTime, HipSmoothSpeed);
+	//float HipHeight = FMath::FInterpTo(CurrentHipZ, DesiredHipHeight, DeltaTime, HipSmoothSpeed);
 	//float HipHeight = LowestFoot + HipBaseHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.f) * 20.f;
-	FVector HipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
+	FVector HipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, CurrentHipZ); //+ HipSwayOffset;
 
 	Hip->SetWorldLocation(HipWorldPos);
 
