@@ -35,6 +35,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
+	UPROPERTY(EditAnywhere, Category="Leg") FRotator HipRot = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="IK") TArray<USceneComponent*> Bones;
 	UPROPERTY() FVector LocalGroundPosition = FVector::ZeroVector;

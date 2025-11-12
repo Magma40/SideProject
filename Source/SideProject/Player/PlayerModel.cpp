@@ -40,7 +40,7 @@ void APlayerModel::Tick(float DeltaTime)
 	FHitResult Hit;
 	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
 	{
-		TargetPos = Hit.ImpactPoint + Hit.ImpactNormal * 2.f; // Same as Unity spherecast offset
+		TargetPos = Hit.ImpactPoint + Hit.ImpactNormal * 2.f; 
 	}
 
 	// --- Update movement ---
@@ -59,21 +59,21 @@ void APlayerModel::Tick(float DeltaTime)
 	float LowestFoot = TNumericLimits<float>::Max();
 	float HipSway = 0.f;
 
-	for (ULeg* Leg : Legs)
-	{
-		if (!Leg) continue;
-
-		Leg->UpdateLeg(); // Equivalent to leg.UpdateLeg();
-
-		FeetCenter += Leg->GetTargetPose().Position;
-		LowestFoot = FMath::Min(LowestFoot, Leg->FootBottom().Z);
-
-		if (Leg->IsStepping())
-		{
-			HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
-		}
-	}
-	FeetCenter /= Legs.Num();
+	// for (ULeg* Leg : Legs)
+	// {
+	// 	if (!Leg) continue;
+	//
+	// 	Leg->UpdateLeg();
+	//
+	// 	FeetCenter += Leg->GetTargetPose().Position;
+	// 	LowestFoot = FMath::Min(LowestFoot, Leg->FootBottom().Z);
+	//
+	// 	if (Leg->IsStepping())
+	// 	{
+	// 		HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
+	// 	}
+	// }
+	// FeetCenter /= Legs.Num();
 
 	// --- Hip sway and vertical motion ---
 	FVector Right = GetActorForwardVector();
@@ -86,16 +86,13 @@ void APlayerModel::Tick(float DeltaTime)
 	FVector HipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, CurrentHipZ); //+ HipSwayOffset;
 
 	Hip->SetWorldLocation(HipWorldPos);
-
-	// --- Optional: visualize hip position ---
 	DrawDebugSphere(GetWorld(), HipWorldPos, 8.f, 12, FColor::Cyan);
 
-	// --- Update legs again for final foot alignment ---
-	for (ULeg* Leg : Legs)
-	{
-		if (Leg)
-			Leg->UpdateLeg();
-	}
+	// for (ULeg* Leg : Legs)
+	// {
+	// 	if (Leg)
+	// 		Leg->UpdateLeg();
+	// }
 }
 
 

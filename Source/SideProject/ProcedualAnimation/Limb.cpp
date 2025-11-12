@@ -21,24 +21,15 @@ void ULimb::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentT
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(!IsValid(AttachedParent) && !IsValid(AttachedChild)) return;
-	//
-	// FVector ParentPos = AttachedParent->GetComponentLocation();
-	// FVector ChildPos = AttachedChild->GetComponentLocation();
-	//
-	// FVector Direction = (ParentPos - ChildPos).GetSafeNormal();
-	// FRotator LookAtRotation = Direction.Rotation();
-	// FRotator FinalRotation = LookAtRotation + MeshOrientationOffset;
-	//
-	// FVector SizeDirection = (ParentPos - ChildPos);
-	// LookAtRotation += FRotator(90, 0, 0);
-	// ParentPos += GetUpVector() * SizeDirection.Length() / 2.f;
-	// this->SetWorldLocation(ParentPos);
-	// this->SetWorldRotation(LookAtRotation);
-	//  LookAtRotation = FRotator(0, 0, 0);
-	// AttachedChild->SetWorldRotation(LookAtRotation);
+	
+	FVector ParentPos = AttachedParent->GetComponentLocation();
+	FVector ChildPos = AttachedChild->GetComponentLocation();
 
-	// float LegLength = FVector::Distance(ParentPos, ChildPos);
-	// FVector CurrentScale = this->GetComponentScale();
-	// this->SetWorldScale3D(FVector(LegLength / 100.f, CurrentScale.Y, CurrentScale.Z));
-	//UE_LOG(LogTemp, Warning, TEXT("%s An Actor's name is %s"), *this->GetName(), *this->GetComponentRotation().ToString());
+	FVector MidPoint = (ParentPos + ChildPos) * 0.5f;
+	FVector Direction = (ParentPos - ChildPos).GetSafeNormal();
+	FRotator LookAtRotation = Direction.Rotation();
+	LookAtRotation += FRotator(90, 0, 0);
+	
+	SetWorldLocation(MidPoint);
+	SetWorldRotation(LookAtRotation);
 }
