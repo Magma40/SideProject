@@ -39,7 +39,10 @@ public:
 	USceneComponent* Hip = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Hips")
-	FTransform MoveTarget = FTransform();
+	AActor* MoveTarget = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="Hips")
+	float HipsApplyHeight = 0.0f;
 
 protected:
 	TArray<ULeg*> Legs;

@@ -56,7 +56,7 @@ void ULeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTi
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!bIsStepping && ShouldStep()) StartStep();
-	//if (bIsStepping)  UpdateStep(DeltaTime);
+	if (bIsStepping)  UpdateStep(DeltaTime);
 	UpdateLeg();
 }
 
@@ -145,11 +145,6 @@ void ULeg::UpdateLeg()
 	FVector FootPos = Foot->GetComponentLocation();
 	FVector Target = TargetPose.Position;
 	
-	// Calculate pole direction
-		FVector Forward = Hip->GetForwardVector();
-		FVector ToUpperLeg = (KneePos - HipPos).GetSafeNormal();
-		FVector Pole = HipPos + -Hip->GetRightVector() * 50.f;// - FVector(0, 0, 200.f);
-	
 	 // --- TWO BONE IK ---
 		FVector RootToEff = Target - HipPos;
 		float UpperLen = (KneePos - HipPos).Size();
@@ -185,12 +180,6 @@ void ULeg::UpdateLeg()
 		DrawDebugLine(GetWorld(), HipPos, NewKneePos, FColor::Red);
 		DrawDebugLine(GetWorld(), NewKneePos, Target, FColor::Green);
 		DrawDebugSphere(GetWorld(), Target, 5.f, 8, FColor::Yellow);
-	
-		DrawDebugLine(GetWorld(), HipPos, HipPos + PlaneNormal * 50.f, FColor::Blue);
-		DrawDebugLine(GetWorld(), HipPos, HipPos + DirToTarget * 50.f, FColor::Cyan);
-
-		DrawDebugLine(GetWorld(), HipPos, HipPos + ForwardPoleDir * 50.f, FColor::Purple);
-		DrawDebugLine(GetWorld(), HipPos, HipPos + PlaneNormal * 50.f, FColor::Orange);
 }
 
 FVector ULeg::FootBottom() const
