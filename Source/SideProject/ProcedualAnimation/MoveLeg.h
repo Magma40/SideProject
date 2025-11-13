@@ -32,15 +32,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
+	UPROPERTY(EditAnywhere, Category="Leg") float LengthScale = 2.0f;
 	UPROPERTY() FVector LocalGroundPosition = FVector::ZeroVector;
-	FVector LegOffset = FVector::ZeroVector;
 
 	UPROPERTY() bool bIsStepping = false;
 	UPROPERTY() float StepElapsed = 0.0f;
 	UPROPERTY() float LiftAmount  = 0.0f;
 
 	UPROPERTY() FLegsPose TargetPose = FLegsPose();
+	UPROPERTY() FLegsPose SourcePose = FLegsPose();
 	TArray<USceneComponent*> LegParts;
+	UPROPERTY() TArray<UMoveLeg*> OtherLegs;
 
 public:
 	bool IsStepping() const { return bIsStepping; }
@@ -52,4 +54,7 @@ public:
 
 private:
 	FLegsPose GetGroundPose() const;
+	bool ShouldStep() const;
+	void StartStep();
+	void UpdateStep(float DeltaTime);
 };

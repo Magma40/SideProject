@@ -2,6 +2,10 @@
 
 
 #include "ProcedualAnimation/MovingModel.h"
+#include "VectorTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Player/MainCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
@@ -24,15 +28,15 @@ void AMovingModel::Init()
 		if (Child->GetName() == TEXT("Foot_L"))				Foot_L = Child; 					
 	}	
 
-	Pos_Hips = 				Hips->GetComponentLocation();
+	Pos_Hips = 				Hips->GetRelativeLocation();
 
-	Pos_UpperLeg_R = 	UpperLeg_R->GetComponentLocation();
-	Pos_Knee_R = 			Knee_R->GetComponentLocation();
-	Pos_Foot_R = 			Foot_R->GetComponentLocation();
+	Pos_UpperLeg_R = 	UpperLeg_R->GetRelativeLocation();
+	Pos_Knee_R = 			Knee_R->GetRelativeLocation();
+	Pos_Foot_R = 			Foot_R->GetRelativeLocation();
 
-	Pos_UpperLeg_L =	UpperLeg_L->GetComponentLocation();
-	Pos_Knee_L = 			Knee_L->GetComponentLocation();
- 	Pos_Foot_L =				Foot_L->GetComponentLocation();
+	Pos_UpperLeg_L =	UpperLeg_L->GetRelativeLocation();
+	Pos_Knee_L = 			Knee_L->GetRelativeLocation();
+ 	Pos_Foot_L =				Foot_L->GetRelativeLocation();
 }
 
 void AMovingModel::BeginPlay()
@@ -40,13 +44,15 @@ void AMovingModel::BeginPlay()
 	Super::BeginPlay();
 	Init();
 
-	BaseHipHeight = Hips->GetComponentLocation().Z - Foot_R->GetComponentLocation().Z;
+	BaseHipHeight = (Hips->GetRelativeLocation().Z - Foot_R->GetRelativeLocation().Z) * HipHeightScale;
+	MoveTarget  = UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass());
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateHips(DeltaTime);
+	UpdateMovement(DeltaTime);
 	
 	DrawDebugJoints();
 	DrawDebugLimbs();
@@ -54,6 +60,8 @@ void AMovingModel::Tick(float DeltaTime)
 
 void AMovingModel::UpdateHips(float DeltaTime)
 {
+	if (Legs.Num() == 0 || !IsValid(Hips)) return;
+	
 	//NOTE : This is in local space
 	FVector FeetCenter = FVector::ZeroVector;
 	float LowestFoot = TNumericLimits<float>::Max();
@@ -64,10 +72,10 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	{
 		if (!IsValid(Leg)) continue;
 		Leg->UpdateLeg();
-		FVector LocalFootPos = GetTransform().InverseTransformPosition(Leg->GetTargetPose().Position);
+		FVector LocalFootPos = Leg->GetTargetPose().Position;
 		FeetCenter += LocalFootPos;
 		LowestFoot = FMath::Min(LowestFoot, LocalFootPos.Z);
-		//if (Leg->IsStepping()) HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
+		if (Leg->IsStepping()) HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
 	FeetCenter /= Legs.Num();
 
@@ -79,6 +87,34 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
 	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
+}
+
+void AMovingModel::UpdateMovement(float DeltaTime)
+{
+	if (!IsValid(MoveTarget)) return;
+	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  < 200.f) return;
+	
+	//Raycast to find MoveTarget ground position
+	FVector TargetPos = MoveTarget->GetActorLocation();
+	FVector Start = TargetPos + FVector::UpVector * 100.f;
+	FVector End = TargetPos + FVector::DownVector * 200.f;
+
+	FHitResult Hit;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	{
+		TargetPos = Hit.ImpactPoint + Hit.ImpactNormal * 2.f; 
+	}
+
+	//Update Movement
+	FVector CurrentPos = GetActorLocation();
+	FVector NewPos = FMath::VInterpConstantTo(CurrentPos, TargetPos, DeltaTime, MoveSpeed * 100.f);
+	SetActorLocation(NewPos);
+
+	//Update Rotation
+	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), MoveTarget->GetActorLocation());
+	LookAtRot.Pitch = 0.0;
+	LookAtRot.Yaw -= 90.f;
+	SetActorRotation(LookAtRot);
 }
 
 void AMovingModel::DrawDebugJoints()

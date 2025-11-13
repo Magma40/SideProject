@@ -20,6 +20,7 @@ protected:
 
 	void Init();
 	void UpdateHips(float DeltaTime);
+	void UpdateMovement(float DeltaTime);
 	
 	void DrawDebugJoints();
 	void DrawDebugLimbs();
@@ -27,9 +28,13 @@ protected:
 private:
 	//Variables
 	float BaseHipHeight = 0.0f;
-	float HipSwayAmount = 0.0f;
+	UPROPERTY(EditAnywhere, Category = "Hips") float HipSwayAmount = 0.0f;
+	UPROPERTY(EditAnywhere, Category = "Hips") float MoveSpeed = 800.0f; 
+	UPROPERTY(EditAnywhere, Category = "Hips") float RotationSpeed = 1.0f;
+	UPROPERTY(EditAnywhere, Category = "Hips") float HipHeightScale = 1.0f;
 	
 	//Objects
+	AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
 	TArray<UMoveLeg*>  Legs;
 
