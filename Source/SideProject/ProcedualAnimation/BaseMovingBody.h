@@ -21,7 +21,7 @@ struct FBodyPart
 	float Length = 50.f;
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS()
 class SIDEPROJECT_API UBaseMovingBody : public USceneComponent
 {
 	GENERATED_BODY()

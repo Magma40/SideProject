@@ -24,8 +24,8 @@ void UBaseMovingBody::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			BodyParts[i].Mesh->SetRelativeLocation(Offset);
 		}
 	}
-	DrawDebugSphere(GetWorld(), HipWorldPos, 8.f, 12, FColor::Cyan);
-	DrawDebugLine(GetWorld(), HipPos, NewKneePos, FColor::Red);
+	//DrawDebugSphere(GetWorld(), HipWorldPos, 8.f, 12, FColor::Cyan);
+	//DrawDebugLine(GetWorld(), HipPos, NewKneePos, FColor::Red);
 
 }
 
