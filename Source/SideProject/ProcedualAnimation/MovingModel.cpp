@@ -2,6 +2,8 @@
 
 
 #include "ProcedualAnimation/MovingModel.h"
+
+#include "Leg.h"
 #include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -10,33 +12,55 @@
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
-void AMovingModel::Init()
+void AMovingModel::Init() // Make this is disgusting
 {
 	Legs .Empty();
-	TArray<USceneComponent*> FindChildren;
-	GetRootComponent()->GetChildrenComponents(true, FindChildren);
-	for (USceneComponent* Child : FindChildren)
+	Knees.Empty();
+	Feet.Empty();
+	
+	TArray<USceneComponent*> RootChildren; // Get Hips
+	GetRootComponent()->GetChildrenComponents(true, RootChildren);
+	for (USceneComponent* Child : RootChildren)
 	{
-		if (Child->GetName() == TEXT("Hips")) Hips = Child;
+		if (Child->GetName() == TEXT("Hips")) Hips = Child; break;
+	}
+	if (!IsValid(Hips))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Hips component not found!"));
+		return;
+	}
 
-		if (Child->GetName() == TEXT("UpperLeg_R")) 	UpperLeg_R = Child; 	Legs.Add(Cast<UMoveLeg>(Child));
-		if (Child->GetName() == TEXT("Knee_R")) 			Knee_R = Child; 				
-		if (Child->GetName() == TEXT("Foot_R"))				Foot_R = Child; 					
+	TArray<USceneComponent*> HipChildren; //Get UpperLegs
+	Hips->GetChildrenComponents(false, HipChildren);
+	for (USceneComponent* Child : HipChildren)
+	{
+		if (Child->GetName().Contains(TEXT("UpperLeg_")))
+		{
+			UMoveLeg* Leg = Cast<UMoveLeg>(Child);
+			if (IsValid(Leg)) Legs.Add(Leg); 
+			else  UE_LOG(LogTemp, Error, TEXT("UpperLeg component is NOT a UMoveLeg: %s"), *Child->GetName());
+		}
+	}
 
-		if (Child->GetName() == TEXT("UpperLeg_L"))		UpperLeg_L = Child; 		Legs.Add(Cast<UMoveLeg>(Child));
-		if (Child->GetName() == TEXT("Knee_L")) 			Knee_L = Child; 				
-		if (Child->GetName() == TEXT("Foot_L"))				Foot_L = Child; 					
-	}	
+	for (UMoveLeg* Leg : Legs) // Get Knees
+	{
+		TArray<USceneComponent*> LegChildren;
+		Leg->GetChildrenComponents(false, LegChildren);
+		for (USceneComponent* Child : LegChildren)
+		{
+			if (Child->GetName().Contains(TEXT("Knee_"))) Knees.Add(Child);
+		}	
+	}
 
-	Pos_Hips = 				Hips->GetRelativeLocation();
-
-	Pos_UpperLeg_R = 	UpperLeg_R->GetRelativeLocation();
-	Pos_Knee_R = 			Knee_R->GetRelativeLocation();
-	Pos_Foot_R = 			Foot_R->GetRelativeLocation();
-
-	Pos_UpperLeg_L =	UpperLeg_L->GetRelativeLocation();
-	Pos_Knee_L = 			Knee_L->GetRelativeLocation();
- 	Pos_Foot_L =				Foot_L->GetRelativeLocation();
+	for (USceneComponent* Knee : Knees) // Get Feet
+	{
+		TArray<USceneComponent*> KneeChildren;
+		Knee->GetChildrenComponents(false, KneeChildren);
+		for (USceneComponent* Child : KneeChildren)
+		{
+			if (Child->GetName().Contains(TEXT("Foot_"))) Feet.Add(Child); 
+		}	
+	}
 }
 
 void AMovingModel::BeginPlay()
@@ -44,21 +68,21 @@ void AMovingModel::BeginPlay()
 	Super::BeginPlay();
 	Init();
 
-	BaseHipHeight = (Hips->GetRelativeLocation().Z - Foot_R->GetRelativeLocation().Z) * HipHeightScale;
+	BaseHipHeight = (Hips->GetRelativeLocation().Z - Feet[0]->GetRelativeLocation().Z);
 	MoveTarget  = UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass());
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateHips(DeltaTime);
+	UpdateHips();
 	UpdateMovement(DeltaTime);
 	
 	DrawDebugJoints();
 	DrawDebugLimbs();
 }
 
-void AMovingModel::UpdateHips(float DeltaTime)
+void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
 	
@@ -66,26 +90,35 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	FVector FeetCenter = FVector::ZeroVector;
 	float LowestFoot = TNumericLimits<float>::Max();
 	float HipSway = 0.0f;
+	USceneComponent* Root = GetRootComponent();
+	const FTransform RootWorld = Root->GetComponentTransform();
 
 	//Leg Logic
 	for (UMoveLeg* Leg : Legs)
 	{
 		if (!IsValid(Leg)) continue;
 		Leg->UpdateLeg();
-		FVector LocalFootPos = Leg->GetTargetPose().Position;
-		FeetCenter += LocalFootPos;
-		LowestFoot = FMath::Min(LowestFoot, LocalFootPos.Z);
+		FVector FootWorldPos  = Leg->GetTargetPose().Position;
+		FVector FootLocalPos = Root->GetComponentTransform().InverseTransformPosition(FootWorldPos);
+		//FVector LocalFootPos = Leg->GetComponentTransform().TransformPosition(Leg->GetTargetPose().Position);
+		FeetCenter += FootLocalPos;
+		 LowestFoot = FMath::Min(LowestFoot, FootLocalPos.Z);
 		if (Leg->IsStepping()) HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
 	FeetCenter /= Legs.Num();
 
+	float DesiredHipHeight = LowestFoot + BaseHipHeight;
+	float CurrentHipZ = Hips->GetRelativeLocation().Z;
+	float HipHeight = FMath::FInterpTo(CurrentHipZ, DesiredHipHeight, GetWorld()->GetDeltaSeconds(), 5.f);
+	
 	//Apply New Hip Location
 	FVector Right = GetActorRightVector();
-	FVector HipSwayOffset = Right * HipSway * HipSwayAmount;
+	FVector HipSwayLocal(0, HipSway * HipSwayAmount, 0);
+	FVector HipSwayOffset = FVector(0, HipSway * HipSwayAmount, 0); // Local Y axis
 
-	float DesiredHipHeight = LowestFoot + BaseHipHeight;
-	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
-	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
+	//float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
+	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;;
+	//FVector LocalHipPos = GetRootComponent()->GetComponentTransform().InverseTransformPosition(NewHipLocalPos);
 	Hips->SetRelativeLocation(NewHipLocalPos);
 }
 
@@ -119,15 +152,30 @@ void AMovingModel::UpdateMovement(float DeltaTime)
 
 void AMovingModel::DrawDebugJoints()
 {
-	Pos_Hips = 				Hips->GetComponentLocation();
+	FVector Pos_Hips = 				Hips->GetComponentLocation();
+	FVector Pos_UpperLeg_R = FVector::ZeroVector;
+	FVector Pos_Knee_R = 			FVector::ZeroVector;
+	FVector Pos_Foot_R = 			FVector::ZeroVector;
 
-	Pos_UpperLeg_R = 	UpperLeg_R->GetComponentLocation();
-	Pos_Knee_R = 			Knee_R->GetComponentLocation();
-	Pos_Foot_R = 			Foot_R->GetComponentLocation();
+	FVector Pos_UpperLeg_L =	FVector::ZeroVector;
+	FVector Pos_Knee_L = 			FVector::ZeroVector;
+	FVector Pos_Foot_L =			FVector::ZeroVector;
 
-	Pos_UpperLeg_L =	UpperLeg_L->GetComponentLocation();
-	Pos_Knee_L = 			Knee_L->GetComponentLocation();
-	Pos_Foot_L =				Foot_L->GetComponentLocation();
+	for(UMoveLeg* Leg : Legs)
+	{
+		if (Leg->GetName().EndsWith(TEXT("_R"))) Pos_UpperLeg_R = Leg->GetComponentLocation();
+		else  Pos_UpperLeg_L = Leg->GetComponentLocation();
+	}
+	for(USceneComponent* Knee : Knees)
+	{
+		if (Knee->GetName().EndsWith(TEXT("_R"))) Pos_Knee_R = Knee->GetComponentLocation();
+		else  Pos_Knee_L = Knee->GetComponentLocation();
+	}
+	for(USceneComponent* Foot : Feet)
+	{
+		if (Foot->GetName().EndsWith(TEXT("_R"))) Pos_Foot_R = Foot->GetComponentLocation();
+		else  Pos_Foot_L = Foot->GetComponentLocation();
+	}
 
 	DrawDebugSphere(GetWorld(), Pos_Hips, 				8.f, 12, FColor::Cyan);
 
@@ -141,15 +189,30 @@ void AMovingModel::DrawDebugJoints()
 }
 void AMovingModel::DrawDebugLimbs()
 {
-	Pos_Hips = 				Hips->GetComponentLocation();
+	FVector Pos_Hips = 				Hips->GetComponentLocation();
+	FVector Pos_UpperLeg_R = FVector::ZeroVector;
+	FVector Pos_Knee_R = 			FVector::ZeroVector;
+	FVector Pos_Foot_R = 			FVector::ZeroVector;
 
-	Pos_UpperLeg_R = 	UpperLeg_R->GetComponentLocation();
-	Pos_Knee_R = 			Knee_R->GetComponentLocation();
-	Pos_Foot_R = 			Foot_R->GetComponentLocation();
+	FVector Pos_UpperLeg_L =	FVector::ZeroVector;
+	FVector Pos_Knee_L = 			FVector::ZeroVector;
+	FVector Pos_Foot_L =			FVector::ZeroVector;
 
-	Pos_UpperLeg_L =	UpperLeg_L->GetComponentLocation();
-	Pos_Knee_L = 			Knee_L->GetComponentLocation();
-	Pos_Foot_L =				Foot_L->GetComponentLocation();
+	for(UMoveLeg* Leg : Legs)
+	{
+		if (Leg->GetName().EndsWith(TEXT("_R"))) Pos_UpperLeg_R = Leg->GetComponentLocation();
+		else  Pos_UpperLeg_L = Leg->GetComponentLocation();
+	}
+	for(USceneComponent* Knee : Knees)
+	{
+		if (Knee->GetName().EndsWith(TEXT("_R"))) Pos_Knee_R = Knee->GetComponentLocation();
+		else  Pos_Knee_L = Knee->GetComponentLocation();
+	}
+	for(USceneComponent* Foot : Feet)
+	{
+		if (Foot->GetName().EndsWith(TEXT("_R"))) Pos_Foot_R = Foot->GetComponentLocation();
+		else  Pos_Foot_L = Foot->GetComponentLocation();
+	}
 
 	DrawDebugLine(GetWorld(), Pos_Hips, Pos_UpperLeg_R, FColor::Cyan);
 	DrawDebugLine(GetWorld(), Pos_Hips, Pos_UpperLeg_L, FColor::Cyan);

@@ -19,7 +19,7 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	void Init();
-	void UpdateHips(float DeltaTime);
+	void UpdateHips();
 	void UpdateMovement(float DeltaTime);
 	
 	void DrawDebugJoints();
@@ -37,23 +37,6 @@ private:
 	AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
 	TArray<UMoveLeg*>  Legs;
-
-	USceneComponent* UpperLeg_R = nullptr;
-	USceneComponent* Knee_R = nullptr;
-	USceneComponent* Foot_R = nullptr;
-
-	USceneComponent* UpperLeg_L = nullptr;
-	USceneComponent* Knee_L = nullptr;
-	USceneComponent* Foot_L = nullptr;
-
-	//Positions
-	FVector Pos_Hips = FVector::ZeroVector;
-
-	FVector Pos_UpperLeg_R = FVector::ZeroVector;
-	FVector Pos_Knee_R = FVector::ZeroVector;
-	FVector Pos_Foot_R = FVector::ZeroVector;
-
-	FVector Pos_UpperLeg_L = FVector::ZeroVector;
-	FVector Pos_Knee_L = FVector::ZeroVector;
-	FVector Pos_Foot_L = FVector::ZeroVector;
+	TArray<USceneComponent*> Knees;
+	TArray<USceneComponent*> Feet;
 };

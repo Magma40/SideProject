@@ -41,18 +41,21 @@ protected:
 
 	UPROPERTY() FLegsPose TargetPose = FLegsPose();
 	UPROPERTY() FLegsPose SourcePose = FLegsPose();
+	UPROPERTY() FLegsPose CurrentPose = FLegsPose();
 	TArray<USceneComponent*> LegParts;
 	UPROPERTY() TArray<UMoveLeg*> OtherLegs;
 
 public:
 	bool IsStepping() const { return bIsStepping; }
 	float GetLiftAmount() const { return LiftAmount; }
-	const FLegsPose& GetTargetPose() const { return TargetPose; }
+	const FLegsPose& GetTargetPose() const { return CurrentPose; } // this was changed
+	FVector GetFootWorldPos() const { return LegParts[2]->GetComponentLocation(); }
 	FVector FootBottom() const;
 
 	void UpdateLeg();
 
 private:
+	void Init();
 	FLegsPose GetGroundPose() const;
 	bool ShouldStep() const;
 	void StartStep();
