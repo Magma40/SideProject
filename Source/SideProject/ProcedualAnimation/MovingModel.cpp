@@ -67,17 +67,19 @@ void AMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
-
-	BaseHipHeight = (Hips->GetRelativeLocation().Z - Feet[0]->GetRelativeLocation().Z);
+	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
+	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
+	float FootLocalZ = ParentXform.InverseTransformPosition(Feet[0]->GetComponentLocation()).Z;
+	BaseHipHeight = HipLocalZ - FootLocalZ;
 	MoveTarget  = UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass());
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateHips();
 	UpdateMovement(DeltaTime);
-	
+	UpdateHips();
+
 	DrawDebugJoints();
 	DrawDebugLimbs();
 }
@@ -86,40 +88,27 @@ void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
 	
-	//NOTE : This is in local space
+	// Parent transform to convert world -> local
+	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
 	FVector FeetCenter = FVector::ZeroVector;
-	float LowestFoot = TNumericLimits<float>::Max();
 	float HipSway = 0.0f;
-	USceneComponent* Root = GetRootComponent();
-	const FTransform RootWorld = Root->GetComponentTransform();
 
 	//Leg Logic
 	for (UMoveLeg* Leg : Legs)
 	{
 		if (!IsValid(Leg)) continue;
 		Leg->UpdateLeg();
-		FVector FootWorldPos  = Leg->GetTargetPose().Position;
-		FVector FootLocalPos = Root->GetComponentTransform().InverseTransformPosition(FootWorldPos);
-		//FVector LocalFootPos = Leg->GetComponentTransform().TransformPosition(Leg->GetTargetPose().Position);
-		FeetCenter += FootLocalPos;
-		 LowestFoot = FMath::Min(LowestFoot, FootLocalPos.Z);
+		FVector FootLocalPos  = Leg->GetTargetPose().Position;
+		FeetCenter += FootLocalPos += FVector(0,0,-20);
 		if (Leg->IsStepping()) HipSway = Leg->GetLiftAmount() * (Leg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
 	FeetCenter /= Legs.Num();
-
-	float DesiredHipHeight = LowestFoot + BaseHipHeight;
-	float CurrentHipZ = Hips->GetRelativeLocation().Z;
-	float HipHeight = FMath::FInterpTo(CurrentHipZ, DesiredHipHeight, GetWorld()->GetDeltaSeconds(), 5.f);
 	
 	//Apply New Hip Location
-	FVector Right = GetActorRightVector();
-	FVector HipSwayLocal(0, HipSway * HipSwayAmount, 0);
-	FVector HipSwayOffset = FVector(0, HipSway * HipSwayAmount, 0); // Local Y axis
-
-	//float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
-	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;;
-	//FVector LocalHipPos = GetRootComponent()->GetComponentTransform().InverseTransformPosition(NewHipLocalPos);
-	Hips->SetRelativeLocation(NewHipLocalPos);
+	float DesiredHipHeight = BaseHipHeight;
+	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
+	FVector NewHipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight);
+	Hips->SetRelativeLocation(NewHipWorldPos);
 }
 
 void AMovingModel::UpdateMovement(float DeltaTime)

@@ -26,14 +26,16 @@ void UMoveLeg::Init()
 		if (Child->GetName().Contains(TEXT("Foot_"))) LegParts.Add(Child);
 	}
 
-	// Initialize TargetPose to current foot world position
+	// Initialize TargetPose to current LOCAL SPACE position
 	if (LegParts.Num() >= 3)
 	{
-		FVector FootWorld = LegParts[2]->GetComponentLocation();
-		TargetPose.Position = FootWorld;
+		const FTransform ParentXform = GetAttachParent()->GetComponentTransform();
+		FVector FootLocal = ParentXform.InverseTransformPosition(LegParts[2]->GetComponentLocation());
+		FootLocal.Z += ParentXform.GetLocation().Z;
+		TargetPose.Position = FootLocal;
 		TargetPose.Rotation = LegParts[2]->GetComponentQuat();
 		CurrentPose = TargetPose;
-		LocalGroundPosition = LegParts[2]->GetRelativeLocation();
+		LocalGroundPosition = FootLocal;
 	}
 	
 	USceneComponent* Parent = GetAttachParent(); // Get Other Leg
@@ -68,9 +70,10 @@ void UMoveLeg::UpdateLeg()
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
-	FVector UpperLegPos = UpperLeg->GetComponentLocation();
-	FVector KneePos = Knee->GetComponentLocation();
-	FVector FootPos = Foot->GetComponentLocation();
+	const FTransform Xform = UpperLeg->GetComponentTransform();
+	FVector UpperLegPos = Xform.InverseTransformPosition(UpperLeg->GetComponentLocation());
+	FVector KneePos     = Xform.InverseTransformPosition(Knee->GetComponentLocation());
+	FVector FootPos     = Xform.InverseTransformPosition(Foot->GetComponentLocation());
 	FVector Target = CurrentPose.Position;
 	
 	// --- TWO BONE IK ---
@@ -92,26 +95,33 @@ void UMoveLeg::UpdateLeg()
 	
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
 	FVector NewKneePos = UpperLegPos + RotatedDir * UpperLen;
+	
+	Knee->SetRelativeLocation(NewKneePos);
+	FVector FootWorldPos = UpperLeg->GetComponentTransform().TransformPosition(Target);
+	FVector FootLocalToKnee = Knee->GetComponentTransform().InverseTransformPosition(FootWorldPos);
+	Foot->SetRelativeLocation(FootLocalToKnee);
 
-	Knee->SetWorldLocation(NewKneePos);
-	Foot->SetWorldLocation(Target);
+	// //Target.Z += FootPos.Z;
+	// Target -= FVector(0,0, 50);
+	// FVector KneeToFootWorldPos = 
+	// Foot->SetRelativeLocation(Target);
 }
 
 bool UMoveLeg::ShouldStep() const
 {
-	float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
-	return Dist > StepTrigger && !bIsStepping;
 	// float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
-	// if (Dist < StepTrigger) return false;
-	//
-	// int32 SteppingLegs = 0;
-	// for (UMoveLeg* Leg : OtherLegs)
-	// {
-	// 	if (Leg && Leg->IsStepping()) SteppingLegs++;
-	// }
-	//
-	// if (SteppingLegs > 0) return false;
-	// return true;
+	// return Dist > StepTrigger && !bIsStepping;
+	float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
+	if (Dist < StepTrigger) return false;
+	
+	int32 SteppingLegs = 0;
+	for (UMoveLeg* Leg : OtherLegs)
+	{
+		if (Leg && Leg->IsStepping()) SteppingLegs++;
+	}
+	
+	if (SteppingLegs > 0) return false;
+	return true;
 }
 void UMoveLeg::StartStep()
 {
@@ -122,7 +132,7 @@ void UMoveLeg::StartStep()
 
 	// Add a per-leg offset so legs don't land on the exact same spot
 	FVector LegOffset = FVector::ZeroVector;
-//	if (GetName().Contains(TEXT("UpperLeg_L"))) LegOffset = FVector(-20.0f, 0.0f, 0.0f);   // left leg offset
+	//if (GetName().Contains(TEXT("UpperLeg_L"))) LegOffset = FVector(-20.0f, 0.0f, 0.0f);   // left leg offset
 	//else if (GetName().Contains(TEXT("UpperLeg_R"))) LegOffset = FVector(20.0f, 0.0f, 0.0f); // right leg offset
 
 	TargetPose.Position += LegOffset;
@@ -130,7 +140,7 @@ void UMoveLeg::StartStep()
 void UMoveLeg::UpdateStep(float DeltaTime)
 {
 	StepElapsed += DeltaTime;
-	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.f, 1.f);
+	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.0f, 1.0f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
 
 	FVector Pos = FMath::Lerp(SourcePose.Position, TargetPose.Position, Alpha) + FVector::UpVector * LiftAmount;
@@ -139,10 +149,10 @@ void UMoveLeg::UpdateStep(float DeltaTime)
 	CurrentPose.Position = Pos;
 	CurrentPose.Rotation = Rot;
 
-	if (Alpha >= 1.f)
+	if (Alpha >= 1.0f)
 	{
 		bIsStepping = false;
-		LiftAmount = 0.f;
+		LiftAmount = 0.0f;
 		CurrentPose = TargetPose;
 	}
 }
@@ -150,9 +160,18 @@ void UMoveLeg::UpdateStep(float DeltaTime)
 FLegsPose UMoveLeg::GetGroundPose() const
 {
 	FLegsPose Pose;
-	FVector FootWorld = LegParts[2]->GetComponentLocation();
-	FVector StartWorld = FootWorld + FVector(0, 0, 50.f);
-	FVector EndWorld   = FootWorld + FVector(0, 0, -100.f);
+	// const FTransform ParentXform = GetOwner()->GetRootComponent()->GetComponentTransform();
+	// FVector HipLocalZ  = ParentXform.InverseTransformPosition(GetAttachParent()->GetComponentLocation());
+	// FVector FootLocalZ = ParentXform.InverseTransformPosition(LegParts[2]->GetComponentLocation())
+	// BaseHipHeight = HipLocalZ - FootLocalZ;
+	
+	USceneComponent* Root = GetOwner()->GetRootComponent();
+	const FTransform RootXform = Root->GetComponentTransform();
+
+	
+    FTransform UpperLegWorld = this->GetComponentTransform();
+	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f);
+	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f);
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -160,15 +179,21 @@ FLegsPose UMoveLeg::GetGroundPose() const
 
 	if (GetWorld()->LineTraceSingleByChannel(Hit, StartWorld, EndWorld, ECC_Visibility, Params))
 	{
-		Pose.Position = Hit.ImpactPoint + Hit.ImpactNormal * GroundOffset;
-		Pose.Rotation = FQuat::FindBetweenNormals(FVector::UpVector, Hit.ImpactNormal);
+		FVector LocalPoint = UpperLegWorld.InverseTransformPosition(Hit.ImpactPoint + Hit.ImpactNormal * GroundOffset);
+		Pose.Position = LocalPoint;
+
+		FVector UpLocal = UpperLegWorld.InverseTransformVector(FVector::UpVector);
+		FVector NormalLocal = UpperLegWorld.InverseTransformVector(Hit.ImpactNormal);
+
+		Pose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
 	}
-	else
-	{
-		Pose.Position = FootWorld;
-		Pose.Rotation = FQuat::Identity;
-	}
-	DrawDebugSphere(GetWorld(), Pose.Position, 	8.f, 12, FColor::Red);
+	// else
+	// {
+	// 	Pose.Position = LegParts[2]->GetRelativeLocation();
+	// 	Pose.Rotation = FQuat::Identity;
+	// }
+	FVector WorldPos = UpperLegWorld.TransformPosition(Pose.Position);
+	DrawDebugSphere(GetWorld(), WorldPos, 	8.f, 12, FColor::Red);
 	return Pose;
 }
 
