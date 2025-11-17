@@ -6,10 +6,22 @@
 #include "GameFramework/Actor.h"
 #include "MovingModel.generated.h"
 
+
+USTRUCT()
+struct FLimbChain
+{
+	GENERATED_BODY()
+
+	USceneComponent* Upper = nullptr;     // or UMoveArm for arms
+	USceneComponent* Middle = nullptr; // Knee or Elbow
+	USceneComponent* End = nullptr;    // Foot or Hand
+};
+
 class UMoveLeg;
+class UMoveArm;
 
 UCLASS()
-class SIDEPROJECT_API AMovingModel : public AActor
+class SIDEPROJECT_API AMovingModel : public APawn
 {
 	GENERATED_BODY()
 
@@ -25,6 +37,10 @@ protected:
 	void DrawDebugJoints();
 	void DrawDebugLimbs();
 
+	USceneComponent* FindChildByExactName(USceneComponent* Parent, const FString& Target);
+	TArray<USceneComponent*> FindChildrenByPrefix(USceneComponent* Parent, const FString& Prefix);
+	template<typename TUpperClass>
+	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix);
 private:
 	//Variables
 	float BaseHipHeight = 0.0f;
@@ -36,7 +52,8 @@ private:
 	//Objects
 	AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
-	TArray<UMoveLeg*>  Legs;
-	TArray<USceneComponent*> Knees;
-	TArray<USceneComponent*> Feet;
+	USceneComponent* Chest = nullptr;
+	
+	TArray<FLimbChain> Legs;
+	TArray<FLimbChain> Arms;
 };
