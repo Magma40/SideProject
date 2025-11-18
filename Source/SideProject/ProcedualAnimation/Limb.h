@@ -17,11 +17,9 @@ protected:
 virtual void BeginPlay() override;
 virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-private:
-USceneComponent* AttachedParent = nullptr;
-USceneComponent* AttachedChild = nullptr;
-
 public:
-	UPROPERTY(EditAnywhere, Category=	"Limb")
-	FRotator MeshOrientationOffset = FRotator(0.f, 0.f, 0.f);
+	USceneComponent* AttachedParent = nullptr;
+	USceneComponent* AttachedChild = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Limb") FString AttachedParentName;
+	UPROPERTY(EditAnywhere, Category = "Limb") FString AttachedChildName; 
 };

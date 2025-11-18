@@ -4,6 +4,7 @@
 #include "ProcedualAnimation/MovingModel.h"
 
 #include "Leg.h"
+#include "Limb.h"
 #include "MoveArm.h"
 #include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,7 +14,7 @@
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
-void AMovingModel::Init()
+void AMovingModel::InitSceneComponents()
 {
 	// Get Hips
 	Hips = FindChildByExactName(GetRootComponent(), TEXT("Hips"));
@@ -40,7 +41,7 @@ void AMovingModel::Init()
 void AMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
-	Init();
+	InitSceneComponents();
 	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
@@ -52,21 +53,23 @@ void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UpdateMovement(DeltaTime);
-	UpdateHips();
-
+	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  > 200.f)
+	{
+		UpdateHips(DeltaTime);
+	}
 	DrawDebugJoints();
 	DrawDebugLimbs();
 }
 
-void AMovingModel::UpdateHips()
+void AMovingModel::UpdateHips(float DeltaTime)
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
 	
 	// Parent transform to convert world -> local
-	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
 	FVector FeetCenter = FVector::ZeroVector;
 	float HipSway = 0.0f;
 
+	//Arm Logic
 	for (FLimbChain& Arm: Arms)
 	{
 		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
@@ -79,6 +82,9 @@ void AMovingModel::UpdateHips()
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		if (!IsValid(UpperLeg)) continue;
+
+		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
+		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
 		UpperLeg->UpdateLeg();
 		FVector FootLocalPos  = UpperLeg->GetTargetPose().Position;
 		FeetCenter += FootLocalPos += FVector(0,0,-20);
@@ -86,11 +92,13 @@ void AMovingModel::UpdateHips()
 	}
 	FeetCenter /= Legs.Num();
 	
+	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
+
 	//Apply New Hip Location
 	float DesiredHipHeight = BaseHipHeight;
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
-	FVector NewHipWorldPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight);
-	Hips->SetRelativeLocation(NewHipWorldPos);
+	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
+	Hips->SetRelativeLocation(NewHipLocalPos);
 	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
 	LookAtRot.Pitch = 0.0;
 	LookAtRot.Yaw -= 90.f;

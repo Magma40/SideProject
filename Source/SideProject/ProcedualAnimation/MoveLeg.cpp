@@ -3,8 +3,9 @@
 
 #include "ProcedualAnimation/MoveLeg.h"
 
-UMoveLeg::UMoveLeg() { PrimaryComponentTick.bCanEverTick = true; }
+#include "ComponentUtils.h"
 
+UMoveLeg::UMoveLeg() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UMoveLeg::Init()
 {
@@ -29,13 +30,9 @@ void UMoveLeg::Init()
 	// Initialize TargetPose to current LOCAL SPACE position
 	if (LegParts.Num() >= 3)
 	{
-		const FTransform ParentXform = GetAttachParent()->GetComponentTransform();
-		FVector FootLocal = ParentXform.InverseTransformPosition(LegParts[2]->GetComponentLocation());
-		FootLocal.Z += ParentXform.GetLocation().Z;
+		FVector FootLocal = GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
 		TargetPose.Position = FootLocal;
 		TargetPose.Rotation = LegParts[2]->GetComponentQuat();
-		CurrentPose = TargetPose;
-		LocalGroundPosition = FootLocal;
 	}
 	
 	USceneComponent* Parent = GetAttachParent(); // Get Other Leg
@@ -55,12 +52,7 @@ void UMoveLeg::BeginPlay()
 	Init();
 }
 
-void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!bIsStepping && ShouldStep()) StartStep();
-	if (bIsStepping)  UpdateStep(DeltaTime);
-}
+void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) { Super::TickComponent(DeltaTime, TickType, ThisTickFunction); }
 
 void UMoveLeg::UpdateLeg()
 {
@@ -70,11 +62,11 @@ void UMoveLeg::UpdateLeg()
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
-	const FTransform Xform = UpperLeg->GetComponentTransform();
-	FVector UpperLegPos = Xform.InverseTransformPosition(UpperLeg->GetComponentLocation());
-	FVector KneePos     = Xform.InverseTransformPosition(Knee->GetComponentLocation());
-	FVector FootPos     = Xform.InverseTransformPosition(Foot->GetComponentLocation());
-	FVector Target = CurrentPose.Position;
+	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
+	FVector UpperLegPos = UpperLegXform.InverseTransformPosition(UpperLeg->GetComponentLocation());
+	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
+	FVector FootPos     = UpperLegXform.InverseTransformPosition(Foot->GetComponentLocation());
+	FVector Target = TargetPose.Position;
 	
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperLegPos;
@@ -89,7 +81,7 @@ void UMoveLeg::UpdateLeg()
 	float KneeAngle = FMath::Acos(A);
 
 	FVector ForwardPoleDirWS = UpperLeg->GetRightVector() - UpperLeg->GetUpVector();
-	FVector ForwardPoleDir = Xform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
+	FVector ForwardPoleDir = UpperLegXform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
 	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, -1, 0); 
 	
 	FVector DirToTarget = RootToEff.GetSafeNormal();
@@ -103,61 +95,47 @@ void UMoveLeg::UpdateLeg()
 	FVector FixedKneePos = UpperLegPos + UpperLegToKnee;
 
 	FVector KneeToFoot = (Target - FixedKneePos).GetSafeNormal() * LowerLen;
-	FVector FixedHandPos = FixedKneePos + KneeToFoot;
+	FVector FixedFootPos = FixedKneePos + KneeToFoot;
 	
 	Knee->SetRelativeLocation(FixedKneePos);
-	FVector FootWorldPos = UpperLeg->GetComponentTransform().TransformPosition(FixedHandPos);
+	FVector FootWorldPos = UpperLeg->GetComponentTransform().TransformPosition(FixedFootPos);
 	FVector FootLocalToKnee = Knee->GetComponentTransform().InverseTransformPosition(FootWorldPos);
 	Foot->SetRelativeLocation(FootLocalToKnee);
 }
 
 bool UMoveLeg::ShouldStep() const
 {
-	// float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
-	// return Dist > StepTrigger && !bIsStepping;
 	float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
 	if (Dist < StepTrigger) return false;
 	
-	int32 SteppingLegs = 0;
-	for (UMoveLeg* Leg : OtherLegs)
+	for (UMoveLeg* L : OtherLegs)
 	{
-		if (Leg && Leg->IsStepping()) SteppingLegs++;
+		if (L && L->IsStepping()) return false;	
 	}
 	
-	if (SteppingLegs > 0) return false;
 	return true;
 }
 void UMoveLeg::StartStep()
 {
 	bIsStepping = true;
 	StepElapsed = 0.0f;
-	SourcePose = CurrentPose;
-	TargetPose = GetGroundPose();
-
-	// Add a per-leg offset so legs don't land on the exact same spot
-	FVector LegOffset = FVector::ZeroVector;
-	//if (GetName().Contains(TEXT("UpperLeg_L"))) LegOffset = FVector(-20.0f, 0.0f, 0.0f);   // left leg offset
-	//else if (GetName().Contains(TEXT("UpperLeg_R"))) LegOffset = FVector(20.0f, 0.0f, 0.0f); // right leg offset
-
-	TargetPose.Position += LegOffset;
+	SourcePose = TargetPose;       // where the foot is now (planted)
+	StepTargetPose = GetGroundPose(); // where it SHOULD move
 }
-void UMoveLeg::UpdateStep(float DeltaTime)
+void UMoveLeg::UpdateStep(float DeltaTime )
 {
 	StepElapsed += DeltaTime;
 	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.0f, 1.0f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
 
-	FVector Pos = FMath::Lerp(SourcePose.Position, TargetPose.Position, Alpha) + FVector::UpVector * LiftAmount;
-	FQuat Rot = FQuat::Slerp(SourcePose.Rotation, TargetPose.Rotation, Alpha);
-
-	CurrentPose.Position = Pos;
-	CurrentPose.Rotation = Rot;
+	TargetPose.Position  = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) +  FVector(0, 0, LiftAmount);
+	TargetPose.Rotation = FQuat::Slerp(SourcePose.Rotation, StepTargetPose.Rotation, Alpha);
 
 	if (Alpha >= 1.0f)
 	{
 		bIsStepping = false;
 		LiftAmount = 0.0f;
-		CurrentPose = TargetPose;
+		TargetPose = StepTargetPose;
 	}
 }
 
@@ -185,11 +163,5 @@ FLegsPose UMoveLeg::GetGroundPose() const
 	FVector WorldPos = UpperLegWorld.TransformPosition(Pose.Position);
 	DrawDebugSphere(GetWorld(), WorldPos, 	8.f, 12, FColor::Red);
 	return Pose;
-}
-
-FVector UMoveLeg::FootBottom() const
-{
-	if (LegParts.Num() < 3 || !LegParts[2]) return FVector::ZeroVector;
-	return LegParts[2]->GetComponentLocation() + FVector::DownVector * GroundOffset;
 }
 

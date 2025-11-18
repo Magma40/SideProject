@@ -19,6 +19,7 @@ struct FLimbChain
 
 class UMoveLeg;
 class UMoveArm;
+class ULimb;
 
 UCLASS()
 class SIDEPROJECT_API AMovingModel : public APawn
@@ -30,17 +31,20 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	void Init();
-	void UpdateHips();
+	void InitSceneComponents();
+	void InitBodyLimbs();
+	void UpdateHips(float DeltaTime);
 	void UpdateMovement(float DeltaTime);
 	
 	void DrawDebugJoints();
 	void DrawDebugLimbs();
 
+public:
 	USceneComponent* FindChildByExactName(USceneComponent* Parent, const FString& Target);
 	TArray<USceneComponent*> FindChildrenByPrefix(USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix);
+	
 private:
 	//Variables
 	float BaseHipHeight = 0.0f;
@@ -56,4 +60,7 @@ private:
 	
 	TArray<FLimbChain> Legs;
 	TArray<FLimbChain> Arms;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsMoving = false;
 };
