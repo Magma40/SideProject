@@ -50,9 +50,13 @@ void UMoveLeg::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
+	LockedFootPosition = TargetPose.Position;
 }
 
-void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) { Super::TickComponent(DeltaTime, TickType, ThisTickFunction); }
+void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
 void UMoveLeg::UpdateLeg()
 {
@@ -64,10 +68,18 @@ void UMoveLeg::UpdateLeg()
 
 	//Get each leg parts position relative to the UpperLeg
 	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
-	FVector UpperLegPos = UpperLegXform.InverseTransformPosition(UpperLeg->GetComponentLocation());
+	FVector UpperLegPos = FVector::ZeroVector;
 	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
 	FVector FootPos     = UpperLegXform.InverseTransformPosition(Foot->GetComponentLocation());
-	FVector Target = TargetPose.Position;
+
+	FVector Target = FVector::ZeroVector;
+	if ( bIsStepping) Target = TargetPose.Position;
+	else
+	{
+		Target = UpperLegXform.InverseTransformPosition(LockedFootPosition);
+	}
+
+	// World → Local space for IK
 	
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperLegPos;
@@ -111,8 +123,9 @@ void UMoveLeg::UpdateLeg()
 
 bool UMoveLeg::ShouldStep() const
 {
-	float Dist = FVector::Dist(TargetPose.Position, GetGroundPose().Position);
-	if (Dist < StepTrigger) return false;
+	float newStepTrigger = 0.5f; //Change this
+    float Dist = FVector::Dist(GetGroundPose().Position, LockedFootPosition);
+	if (Dist < newStepTrigger) return false;
 	
 	for (UMoveLeg* L : OtherLegs)
 	{
@@ -125,21 +138,26 @@ void UMoveLeg::StartStep() //Reset Step variables
 {
 	bIsStepping = true;
 	StepElapsed = 0.0f;
-	SourcePose = TargetPose;				  // where the foot is now (planted)
-	StepTargetPose = GetGroundPose(); // where it SHOULD move
+	//SourcePose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
+	SourcePose = TargetPose;// where the foot is now (planted) //This is snapping, this needs to begin at where 
+	StepTargetPose = GetGroundPose();// where it SHOULD move
 }
+
 void UMoveLeg::UpdateStep(float DeltaTime )
 {
 	StepElapsed += DeltaTime;
-	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.0f, 1.0f);
+	float newStepTime = 2.0f;
+	float Alpha = FMath::Clamp(StepElapsed / newStepTime, 0.0f, 1.0f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
-
+	
 	TargetPose.Position  = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) +  FVector(0, 0, LiftAmount);
 	TargetPose.Rotation = FQuat::Slerp(SourcePose.Rotation, StepTargetPose.Rotation, Alpha);
 
 	if (Alpha >= 1.0f) // If we have completed one whole step
 	{
 		bIsStepping = false;
+		bFootPlanted = true;
+		LockedFootPosition = LegParts[0]->GetComponentTransform().TransformPosition(StepTargetPose.Position);
 		LiftAmount = 0.0f;
 		TargetPose = StepTargetPose;
 	}
@@ -171,3 +189,8 @@ FLegsPose UMoveLeg::GetGroundPose() const
 	return Pose;
 }
 
+/*
+- After a step is done: Save "LockedFootPosition"
+- When setting the IK: if (bIsStepping) { use normal foot pos }
+else : use LockedFootPosition
+ */

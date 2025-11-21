@@ -37,12 +37,17 @@ protected:
 	bool bIsStepping = false;
 	float StepElapsed = 0.0f;
 	float LiftAmount  = 0.0f;
+	FVector LockedFootPosition;
+	bool bFootPlanted = true;
 
 	FLegsPose TargetPose = FLegsPose();
 	FLegsPose SourcePose = FLegsPose();
 	FLegsPose StepTargetPose  = FLegsPose();
-	TArray<USceneComponent*> LegParts;
-	TArray<UMoveLeg*> OtherLegs;
+	FLegsPose TotalDeltaPose = FLegsPose();
+	FLegsPose PreviousTargetPose = FLegsPose();
+
+	UPROPERTY() TArray<USceneComponent*> LegParts;
+	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
 
 public:
 	bool IsStepping() const { return bIsStepping; }

@@ -11,9 +11,9 @@ struct FLimbChain
 {
 	GENERATED_BODY()
 
-	USceneComponent* Upper = nullptr;     // UpperLeg or UpperArm
-	USceneComponent* Middle = nullptr; // Knee or Elbow
-	USceneComponent* End = nullptr;    // Foot or Hand
+	UPROPERTY()  USceneComponent* Upper = nullptr;     // UpperLeg or UpperArm
+	UPROPERTY()  USceneComponent* Middle = nullptr; // Knee or Elbow
+	UPROPERTY()  USceneComponent* End = nullptr;    // Foot or Hand
 };
 
 class UMoveLeg;
@@ -52,10 +52,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Hips") float HipHeightScale = 1.0f;
 	
 	//Objects
-	AActor* MoveTarget = nullptr;
+	UPROPERTY()  AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
 	USceneComponent* Chest = nullptr;
 	
-	TArray<FLimbChain> Legs;
-	TArray<FLimbChain> Arms;
+	UPROPERTY()  TArray<FLimbChain> Legs;
+	UPROPERTY() TArray<FLimbChain> Arms;
 };
