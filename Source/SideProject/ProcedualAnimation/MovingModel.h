@@ -6,13 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "MovingModel.generated.h"
 
-
 USTRUCT()
 struct FLimbChain
 {
 	GENERATED_BODY()
 
-	USceneComponent* Upper = nullptr;     // or UMoveArm for arms
+	USceneComponent* Upper = nullptr;     // UpperLeg or UpperArm
 	USceneComponent* Middle = nullptr; // Knee or Elbow
 	USceneComponent* End = nullptr;    // Foot or Hand
 };
@@ -32,7 +31,6 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	void InitSceneComponents();
-	void InitBodyLimbs();
 	void UpdateHips(float DeltaTime);
 	void UpdateMovement(float DeltaTime);
 	
@@ -40,10 +38,10 @@ protected:
 	void DrawDebugLimbs();
 
 public:
-	USceneComponent* FindChildByExactName(USceneComponent* Parent, const FString& Target);
-	TArray<USceneComponent*> FindChildrenByPrefix(USceneComponent* Parent, const FString& Prefix);
+	static USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target);
+	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
-	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix);
+	 TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
 	
 private:
 	//Variables
@@ -60,7 +58,4 @@ private:
 	
 	TArray<FLimbChain> Legs;
 	TArray<FLimbChain> Arms;
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsMoving = false;
 };

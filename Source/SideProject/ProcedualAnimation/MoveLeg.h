@@ -32,29 +32,28 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
-	UPROPERTY() FVector LocalGroundPosition = FVector::ZeroVector;
+	
+	FVector LocalGroundPosition = FVector::ZeroVector;
+	bool bIsStepping = false;
+	float StepElapsed = 0.0f;
+	float LiftAmount  = 0.0f;
 
-	UPROPERTY() bool bIsStepping = false;
-	UPROPERTY() float StepElapsed = 0.0f;
-	UPROPERTY() float LiftAmount  = 0.0f;
-
-	UPROPERTY() FLegsPose TargetPose = FLegsPose();
-	UPROPERTY() FLegsPose SourcePose = FLegsPose();
-	UPROPERTY() FLegsPose StepTargetPose  = FLegsPose();
+	FLegsPose TargetPose = FLegsPose();
+	FLegsPose SourcePose = FLegsPose();
+	FLegsPose StepTargetPose  = FLegsPose();
 	TArray<USceneComponent*> LegParts;
-	UPROPERTY() TArray<UMoveLeg*> OtherLegs;
+	TArray<UMoveLeg*> OtherLegs;
 
 public:
 	bool IsStepping() const { return bIsStepping; }
+	float GetLiftAmount() const { return LiftAmount; }
+	const FLegsPose& GetTargetPose() const { return TargetPose; }
+	
+	FLegsPose GetGroundPose() const;
 	bool ShouldStep() const;
 	void StartStep();
 	void UpdateStep(float DeltaTime);
-	float GetLiftAmount() const { return LiftAmount; }
 	
-	const FLegsPose& GetTargetPose() const { return TargetPose; } // this was changed
-	FLegsPose GetGroundPose() const;
-
-	FVector GetFootWorldPos() const { return LegParts[2]->GetComponentLocation(); }
 	void UpdateLeg();
 
 private:

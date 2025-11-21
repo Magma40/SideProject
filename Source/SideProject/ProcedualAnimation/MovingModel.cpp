@@ -2,15 +2,12 @@
 
 
 #include "ProcedualAnimation/MovingModel.h"
-
-#include "Leg.h"
-#include "Limb.h"
-#include "MoveArm.h"
 #include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/MainCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
+#include "ProcedualAnimation/MoveArm.h"
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -24,17 +21,17 @@ void AMovingModel::InitSceneComponents()
 		return;
 	}
 
-	// LEG chains
+	// Leg chains
 	Legs = BuildLimbChains<UMoveLeg>(Hips,TEXT("UpperLeg_"),TEXT("Knee_"),TEXT("Foot_"));
 
-	// ARM chains
+	// Get Chest
 	Chest = FindChildByExactName(Hips, TEXT("Chest"));
 	if (!Chest)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Chest not found"));
 		return;
 	}
-
+	// Arm chains
 	Arms = BuildLimbChains<UMoveArm>( Chest,TEXT("UpperArm_"),TEXT("Elbow_"),TEXT("Hand_"));
 }
 
@@ -64,8 +61,6 @@ void AMovingModel::Tick(float DeltaTime)
 void AMovingModel::UpdateHips(float DeltaTime)
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
-	
-	// Parent transform to convert world -> local
 	FVector FeetCenter = FVector::ZeroVector;
 	float HipSway = 0.0f;
 
@@ -86,19 +81,21 @@ void AMovingModel::UpdateHips(float DeltaTime)
 		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
 		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
 		UpperLeg->UpdateLeg();
+		
 		FVector FootLocalPos  = UpperLeg->GetTargetPose().Position;
 		FeetCenter += FootLocalPos += FVector(0,0,-20);
 		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
 	FeetCenter /= Legs.Num();
 	
-	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
-
 	//Apply New Hip Location
+	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
 	float DesiredHipHeight = BaseHipHeight;
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
 	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
+
+	//Apply New Hip Rotation
 	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
 	LookAtRot.Pitch = 0.0;
 	LookAtRot.Yaw -= 90.f;
@@ -135,24 +132,24 @@ void AMovingModel::UpdateMovement(float DeltaTime)
 
 void AMovingModel::DrawDebugJoints()
 {
-	FVector Pos_Hips = 				Hips->GetComponentLocation();
-	FVector Pos_Chest =				Chest->GetComponentLocation();
+	FVector Pos_Hips = 					Hips->GetComponentLocation();
+	FVector Pos_Chest =					Chest->GetComponentLocation();
 	
-	FVector Pos_UpperLeg_R = FVector::ZeroVector;
-	FVector Pos_Knee_R = 			FVector::ZeroVector;
-	FVector Pos_Foot_R = 			FVector::ZeroVector;
+	FVector Pos_UpperLeg_R =		FVector::ZeroVector;
+	FVector Pos_Knee_R = 				FVector::ZeroVector;
+	FVector Pos_Foot_R = 				FVector::ZeroVector;
 
-	FVector Pos_UpperLeg_L =	FVector::ZeroVector;
-	FVector Pos_Knee_L = 			FVector::ZeroVector;
-	FVector Pos_Foot_L =			FVector::ZeroVector;
+	FVector Pos_UpperLeg_L =		FVector::ZeroVector;
+	FVector Pos_Knee_L = 				FVector::ZeroVector;
+	FVector Pos_Foot_L =				FVector::ZeroVector;
 
-	FVector Pos_UpperArm_L =	FVector::ZeroVector;
+	FVector Pos_UpperArm_L =		FVector::ZeroVector;
 	FVector Pos_Elbow_L = 			FVector::ZeroVector;
-	FVector Pos_Hand_L =			FVector::ZeroVector;
+	FVector Pos_Hand_L =				FVector::ZeroVector;
 
-	FVector Pos_UpperArm_R =	FVector::ZeroVector;
+	FVector Pos_UpperArm_R =		FVector::ZeroVector;
 	FVector Pos_Elbow_R = 			FVector::ZeroVector;
-	FVector Pos_Hand_R =			FVector::ZeroVector;
+	FVector Pos_Hand_R =				FVector::ZeroVector;
 
 	for(FLimbChain& Leg : Legs)
 	{
@@ -199,24 +196,24 @@ void AMovingModel::DrawDebugJoints()
 }
 void AMovingModel::DrawDebugLimbs()
 {
-	FVector Pos_Hips = 				Hips->GetComponentLocation();
-	FVector Pos_Chest =				Chest->GetComponentLocation();
+	FVector Pos_Hips = 					Hips->GetComponentLocation();
+	FVector Pos_Chest =					Chest->GetComponentLocation();
 	
-	FVector Pos_UpperLeg_R = FVector::ZeroVector;
-	FVector Pos_Knee_R = 			FVector::ZeroVector;
-	FVector Pos_Foot_R = 			FVector::ZeroVector;
+	FVector Pos_UpperLeg_R =		 FVector::ZeroVector;
+	FVector Pos_Knee_R = 				FVector::ZeroVector;
+	FVector Pos_Foot_R = 				FVector::ZeroVector;
 
-	FVector Pos_UpperLeg_L =	FVector::ZeroVector;
-	FVector Pos_Knee_L = 			FVector::ZeroVector;
-	FVector Pos_Foot_L =			FVector::ZeroVector;
+	FVector Pos_UpperLeg_L =		FVector::ZeroVector;
+	FVector Pos_Knee_L = 				FVector::ZeroVector;
+	FVector Pos_Foot_L =				FVector::ZeroVector;
 
-	FVector Pos_UpperArm_L =	FVector::ZeroVector;
+	FVector Pos_UpperArm_L =		FVector::ZeroVector;
 	FVector Pos_Elbow_L = 			FVector::ZeroVector;
-	FVector Pos_Hand_L =			FVector::ZeroVector;
+	FVector Pos_Hand_L =				FVector::ZeroVector;
 
-	FVector Pos_UpperArm_R =	FVector::ZeroVector;
+	FVector Pos_UpperArm_R =		FVector::ZeroVector;
 	FVector Pos_Elbow_R = 			FVector::ZeroVector;
-	FVector Pos_Hand_R =			FVector::ZeroVector;
+	FVector Pos_Hand_R =				FVector::ZeroVector;
 
 	for(FLimbChain& Leg : Legs)
 	{
@@ -263,7 +260,7 @@ void AMovingModel::DrawDebugLimbs()
 	DrawDebugLine(GetWorld(), Pos_Elbow_L, Pos_Hand_L, FColor::Red);
 }
 
-USceneComponent* AMovingModel::FindChildByExactName(USceneComponent* Parent, const FString& Target)
+USceneComponent* AMovingModel::FindChildByExactName(const USceneComponent* Parent, const FString& Target)
 {
 	TArray<USceneComponent*> FindChildren;
 	Parent->GetChildrenComponents(false, FindChildren);
@@ -275,7 +272,7 @@ USceneComponent* AMovingModel::FindChildByExactName(USceneComponent* Parent, con
 	return nullptr;
 }
 
-TArray<USceneComponent*> AMovingModel::FindChildrenByPrefix(USceneComponent* Parent, const FString& Prefix)
+ TArray<USceneComponent*> AMovingModel::FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix)
 {
 	TArray<USceneComponent*> Matches;
 	TArray<USceneComponent*> FindChildren;
@@ -289,7 +286,7 @@ TArray<USceneComponent*> AMovingModel::FindChildrenByPrefix(USceneComponent* Par
 }
 
 template<typename TUpperClass>
-TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix)
+TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const
 {
 	TArray<FLimbChain> OutChains;
 

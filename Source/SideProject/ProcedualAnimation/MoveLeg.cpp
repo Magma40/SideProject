@@ -35,7 +35,7 @@ void UMoveLeg::Init()
 		TargetPose.Rotation = LegParts[2]->GetComponentQuat();
 	}
 	
-	USceneComponent* Parent = GetAttachParent(); // Get Other Leg
+	USceneComponent* Parent = GetAttachParent(); // Get Other Legs
 	if (!IsValid(Parent)) return;
 	TArray<USceneComponent*> Siblings;
 	Parent->GetChildrenComponents(false, Siblings);
@@ -62,6 +62,7 @@ void UMoveLeg::UpdateLeg()
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
+	//Get each leg parts position relative to the UpperLeg
 	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
 	FVector UpperLegPos = UpperLegXform.InverseTransformPosition(UpperLeg->GetComponentLocation());
 	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
@@ -80,20 +81,25 @@ void UMoveLeg::UpdateLeg()
 	A = FMath::Clamp(A, -1.f, 1.f);
 	float KneeAngle = FMath::Acos(A);
 
+	//Get which direction the knee should face
 	FVector ForwardPoleDirWS = UpperLeg->GetRightVector() - UpperLeg->GetUpVector();
 	FVector ForwardPoleDir = UpperLegXform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
 	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, -1, 0); 
-	
+
+	//Check which tilt the knee should face
 	FVector DirToTarget = RootToEff.GetSafeNormal();
 	FVector PlaneNormal = FVector::CrossProduct(DirToTarget,  ForwardPoleDir).GetSafeNormal();
 	if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
-	
+
+	//Assemble a new position where knee should be to be
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
 	FVector NewKneePos = UpperLegPos + RotatedDir * UpperLen;
 
+	//Make sure UpperLegLimb stays the same length 
 	FVector UpperLegToKnee = (NewKneePos - UpperLegPos).GetSafeNormal() * UpperLen;
 	FVector FixedKneePos = UpperLegPos + UpperLegToKnee;
 
+	//Make sure LowerLegLimb stays the same length
 	FVector KneeToFoot = (Target - FixedKneePos).GetSafeNormal() * LowerLen;
 	FVector FixedFootPos = FixedKneePos + KneeToFoot;
 	
@@ -115,11 +121,11 @@ bool UMoveLeg::ShouldStep() const
 	
 	return true;
 }
-void UMoveLeg::StartStep()
+void UMoveLeg::StartStep() //Reset Step variables
 {
 	bIsStepping = true;
 	StepElapsed = 0.0f;
-	SourcePose = TargetPose;       // where the foot is now (planted)
+	SourcePose = TargetPose;				  // where the foot is now (planted)
 	StepTargetPose = GetGroundPose(); // where it SHOULD move
 }
 void UMoveLeg::UpdateStep(float DeltaTime )
@@ -131,7 +137,7 @@ void UMoveLeg::UpdateStep(float DeltaTime )
 	TargetPose.Position  = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) +  FVector(0, 0, LiftAmount);
 	TargetPose.Rotation = FQuat::Slerp(SourcePose.Rotation, StepTargetPose.Rotation, Alpha);
 
-	if (Alpha >= 1.0f)
+	if (Alpha >= 1.0f) // If we have completed one whole step
 	{
 		bIsStepping = false;
 		LiftAmount = 0.0f;
