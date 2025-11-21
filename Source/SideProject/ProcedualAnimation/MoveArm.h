@@ -38,5 +38,4 @@ public:
 private:
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
-	FArmsPose CurrentArmPose;
 };
