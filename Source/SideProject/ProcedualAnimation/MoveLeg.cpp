@@ -45,6 +45,18 @@ void UMoveLeg::Init()
 		// Skip myself
 		if (Other && Other != this)  OtherLegs.Add(Other);
 	}
+
+	if (LegParts[0]->GetName().EndsWith(TEXT("_R")))
+	{
+		LegParts[0]->SetRelativeLocation(FVector(0, 10, -10));
+	}
+	else
+	{
+		LegParts[0]->SetRelativeLocation(FVector(0, -10, -10));
+	}
+	
+	LegParts[1]->SetRelativeLocation(FVector(0, 0, -50)); 
+	LegParts[2]->SetRelativeLocation(FVector(0, 0, -50)); 
 }
 void UMoveLeg::BeginPlay()
 {
@@ -74,12 +86,7 @@ void UMoveLeg::UpdateLeg()
 
 	FVector Target = FVector::ZeroVector;
 	if ( bIsStepping) Target = TargetPose.Position;
-	else
-	{
-		Target = UpperLegXform.InverseTransformPosition(LockedFootPosition);
-	}
-
-	// World → Local space for IK
+	else Target = UpperLegXform.InverseTransformPosition(LockedFootPosition);
 	
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperLegPos;
@@ -96,11 +103,13 @@ void UMoveLeg::UpdateLeg()
 	//Get which direction the knee should face
 	FVector ForwardPoleDirWS = UpperLeg->GetRightVector() - UpperLeg->GetUpVector();
 	FVector ForwardPoleDir = UpperLegXform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
+	//If the computed direction is degenerate, use default
 	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, -1, 0); 
 
-	//Check which tilt the knee should face
+	//Build a plane normal that defines the leg's bending plane so knee bends consistently and does not twist unpredictably
 	FVector DirToTarget = RootToEff.GetSafeNormal();
 	FVector PlaneNormal = FVector::CrossProduct(DirToTarget,  ForwardPoleDir).GetSafeNormal();
+	//If the vectors are almost parallel, use world up as the plane normal.
 	if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
 
 	//Assemble a new position where knee should be to be
@@ -123,9 +132,8 @@ void UMoveLeg::UpdateLeg()
 
 bool UMoveLeg::ShouldStep() const
 {
-	float newStepTrigger = 0.5f; //Change this
     float Dist = FVector::Dist(GetGroundPose().Position, LockedFootPosition);
-	if (Dist < newStepTrigger) return false;
+	if (Dist < StepTrigger) return false;
 	
 	for (UMoveLeg* L : OtherLegs)
 	{
@@ -138,16 +146,14 @@ void UMoveLeg::StartStep() //Reset Step variables
 {
 	bIsStepping = true;
 	StepElapsed = 0.0f;
-	//SourcePose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
-	SourcePose = TargetPose;// where the foot is now (planted) //This is snapping, this needs to begin at where 
+	SourcePose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
 	StepTargetPose = GetGroundPose();// where it SHOULD move
 }
 
 void UMoveLeg::UpdateStep(float DeltaTime )
 {
 	StepElapsed += DeltaTime;
-	float newStepTime = 2.0f;
-	float Alpha = FMath::Clamp(StepElapsed / newStepTime, 0.0f, 1.0f);
+	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.0f, 1.0f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
 	
 	TargetPose.Position  = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) +  FVector(0, 0, LiftAmount);
@@ -157,9 +163,8 @@ void UMoveLeg::UpdateStep(float DeltaTime )
 	{
 		bIsStepping = false;
 		bFootPlanted = true;
-		LockedFootPosition = LegParts[0]->GetComponentTransform().TransformPosition(StepTargetPose.Position);
+		LockedFootPosition = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);
 		LiftAmount = 0.0f;
-		TargetPose = StepTargetPose;
 	}
 }
 

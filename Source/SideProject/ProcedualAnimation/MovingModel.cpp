@@ -50,7 +50,7 @@ void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//UpdateMovement(DeltaTime);
-	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  > 200.f)
+	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  > 200.f || MoveTarget == GetRootComponent()->GetAttachmentRootActor())
 	{
 		UpdateHips(DeltaTime);
 	}
@@ -61,7 +61,6 @@ void AMovingModel::Tick(float DeltaTime)
 void AMovingModel::UpdateHips(float DeltaTime)
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
-	FVector FeetCenter = FVector::ZeroVector;
 	float HipSway = 0.0f;
 
 	//Arm Logic
@@ -80,19 +79,17 @@ void AMovingModel::UpdateHips(float DeltaTime)
 
 		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
 		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
-		UpperLeg->UpdateLeg();
-		
-		FVector FootLocalPos  = UpperLeg->GetTargetPose().Position;
-		FeetCenter += FootLocalPos += FVector(0,0,-20);
+		UpperLeg->UpdateLeg();   // This could be updated in the latter for better smoothness
+
 		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
-	FeetCenter /= Legs.Num();
+	if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
 	
 	//Apply New Hip Location
 	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
 	float DesiredHipHeight = BaseHipHeight;
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
-	FVector NewHipLocalPos = FVector(FeetCenter.X, FeetCenter.Y, HipHeight) + HipSwayOffset;
+	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 
 	//Apply New Hip Rotation

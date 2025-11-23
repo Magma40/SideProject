@@ -43,8 +43,6 @@ protected:
 	FLegsPose TargetPose = FLegsPose();
 	FLegsPose SourcePose = FLegsPose();
 	FLegsPose StepTargetPose  = FLegsPose();
-	FLegsPose TotalDeltaPose = FLegsPose();
-	FLegsPose PreviousTargetPose = FLegsPose();
 
 	UPROPERTY() TArray<USceneComponent*> LegParts;
 	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
