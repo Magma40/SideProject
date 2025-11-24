@@ -3,6 +3,7 @@
 
 #include "ProcedualAnimation/MovingModel.h"
 #include "VectorTypes.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/MainCharacter.h"
@@ -76,11 +77,13 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		if (!IsValid(UpperLeg)) continue;
+		AMainCharacter* MainCharacter= Cast<AMainCharacter>(MoveTarget);
 
 		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
 		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
-		UpperLeg->UpdateLeg();   // This could be updated in the latter for better smoothness
-
+		
+		UpperLeg->UpdateLeg(MainCharacter->GetCharacterMovement()->IsFalling(), DeltaTime);   // This could be updated in the latter for better smoothness
+		
 		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
 	
@@ -310,4 +313,3 @@ TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const F
 
 	return OutChains;
 }
-

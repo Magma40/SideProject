@@ -22,44 +22,49 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UMoveLeg : public USceneComponent
 {
 	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, Category="Leg") float StepTrigger = 2.0f;
-	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
-	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
-	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
 	
-protected:
+protected: // Functions
 	UMoveLeg();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	FVector LocalGroundPosition = FVector::ZeroVector;
-	bool bIsStepping = false;
-	float StepElapsed = 0.0f;
-	float LiftAmount  = 0.0f;
-	FVector LockedFootPosition;
-	bool bFootPlanted = true;
-
-	FLegsPose TargetPose = FLegsPose();
-	FLegsPose SourcePose = FLegsPose();
-	FLegsPose StepTargetPose  = FLegsPose();
-
-	UPROPERTY() TArray<USceneComponent*> LegParts;
-	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
+	void Init();
 
 public:
 	bool IsStepping() const { return bIsStepping; }
 	float GetLiftAmount() const { return LiftAmount; }
 	const FLegsPose& GetTargetPose() const { return TargetPose; }
-	
 	FLegsPose GetGroundPose() const;
+	
 	bool ShouldStep() const;
 	void StartStep();
 	void UpdateStep(float DeltaTime);
-	
-	void UpdateLeg();
+	void UpdateLeg(bool IsJumping, float DeltaTime);
 
-private:
-	void Init();
+protected: // Variables
+	bool bIsStepping = false;
+	float StepElapsed = 0.0f;
+	float LiftAmount  = 0.0f;
+	bool bFootPlanted = true;
+	
+	float AirElapsedTime = 0.0f;
+	float AirRiseSpeed = 20.0f;
+	float MaxAirRise = 60.0f;
+	
+	bool bIsJumping = false;
+	bool bJustLanded = false;
+	float LastLandTime = 0.f;
+
+	FLegsPose TargetPose = FLegsPose();
+	FLegsPose SourcePose = FLegsPose();
+	FLegsPose StepTargetPose  = FLegsPose();
+	FLegsPose LockedFootPosition = FLegsPose();
+
+	UPROPERTY(BlueprintReadWrite) TArray<USceneComponent*> LegParts;
+	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepTrigger = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepTime = 0.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepHeight = 40.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float GroundOffset = 0.0f;
 };

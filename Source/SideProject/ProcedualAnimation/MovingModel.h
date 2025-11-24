@@ -12,8 +12,8 @@ struct FLimbChain
 	GENERATED_BODY()
 
 	UPROPERTY()  USceneComponent* Upper = nullptr;     // UpperLeg or UpperArm
-	UPROPERTY()  USceneComponent* Middle = nullptr; // Knee or Elbow
-	UPROPERTY()  USceneComponent* End = nullptr;    // Foot or Hand
+	UPROPERTY()  USceneComponent* Middle = nullptr;   // Knee or Elbow
+	UPROPERTY()  USceneComponent* End = nullptr;		 // Foot or Hand
 };
 
 class UMoveLeg;
@@ -25,7 +25,7 @@ class SIDEPROJECT_API AMovingModel : public APawn
 {
 	GENERATED_BODY()
 
-protected:
+protected: // Functions
 	AMovingModel();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -41,12 +41,11 @@ public:
 	static USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target);
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
-	 TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
+	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
 
-private:
+protected: // Variables
 	float BaseHipHeight = 0.0f;
 	
-	//Objects
 	UPROPERTY()  AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
 	USceneComponent* Chest = nullptr;
@@ -55,8 +54,7 @@ private:
 	UPROPERTY() TArray<FLimbChain> Arms;
 	
 public:
-	//Variables
-	UPROPERTY(EditAnywhere, Category = "Hips") float HipSwayAmount = 5.0f;
-	UPROPERTY(EditAnywhere, Category = "Hips") float MoveSpeed = 1.0f; 
-	UPROPERTY(EditAnywhere, Category = "Hips") float RotationSpeed = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float HipSwayAmount = 0.1f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float MoveSpeed = 1.0f; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float RotationSpeed = 100.0f;
 };
