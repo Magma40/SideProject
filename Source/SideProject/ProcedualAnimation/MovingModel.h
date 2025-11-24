@@ -42,13 +42,9 @@ public:
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
 	 TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
-	
+
 private:
-	//Variables
 	float BaseHipHeight = 0.0f;
-	UPROPERTY(EditAnywhere, Category = "Hips") float HipSwayAmount = 0.0f;
-	UPROPERTY(EditAnywhere, Category = "Hips") float MoveSpeed = 800.0f; 
-	UPROPERTY(EditAnywhere, Category = "Hips") float RotationSpeed = 1.0f;
 	
 	//Objects
 	UPROPERTY()  AActor* MoveTarget = nullptr;
@@ -57,4 +53,10 @@ private:
 	
 	UPROPERTY()  TArray<FLimbChain> Legs;
 	UPROPERTY() TArray<FLimbChain> Arms;
+	
+public:
+	//Variables
+	UPROPERTY(EditAnywhere, Category = "Hips") float HipSwayAmount = 5.0f;
+	UPROPERTY(EditAnywhere, Category = "Hips") float MoveSpeed = 1.0f; 
+	UPROPERTY(EditAnywhere, Category = "Hips") float RotationSpeed = 100.0f;
 };

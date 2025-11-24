@@ -83,7 +83,6 @@ void AMovingModel::UpdateHips(float DeltaTime)
 
 		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
-	if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
 	
 	//Apply New Hip Location
 	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
@@ -92,6 +91,7 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 
+	if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
 	//Apply New Hip Rotation
 	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
 	LookAtRot.Pitch = 0.0;

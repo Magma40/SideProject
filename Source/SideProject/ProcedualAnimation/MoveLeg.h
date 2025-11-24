@@ -23,15 +23,16 @@ class SIDEPROJECT_API UMoveLeg : public USceneComponent
 {
 	GENERATED_BODY()
 
-protected:
-	UMoveLeg();
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+public:
 	UPROPERTY(EditAnywhere, Category="Leg") float StepTrigger = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Leg") float StepTime = 0.5f;
 	UPROPERTY(EditAnywhere, Category="Leg") float StepHeight = 2.0f;
 	UPROPERTY(EditAnywhere, Category="Leg") float GroundOffset = 0.5f;
+	
+protected:
+	UMoveLeg();
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	FVector LocalGroundPosition = FVector::ZeroVector;
 	bool bIsStepping = false;

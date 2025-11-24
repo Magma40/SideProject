@@ -48,11 +48,11 @@ void UMoveLeg::Init()
 
 	if (LegParts[0]->GetName().EndsWith(TEXT("_R")))
 	{
-		LegParts[0]->SetRelativeLocation(FVector(0, 10, -10));
+		LegParts[0]->SetRelativeLocation(FVector(10, 0, -10));
 	}
 	else
 	{
-		LegParts[0]->SetRelativeLocation(FVector(0, -10, -10));
+		LegParts[0]->SetRelativeLocation(FVector(-10, 0, -10));
 	}
 	
 	LegParts[1]->SetRelativeLocation(FVector(0, 0, -50)); 
@@ -78,6 +78,18 @@ void UMoveLeg::UpdateLeg()
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
+	if (UpperLeg->GetName().EndsWith(TEXT("_R")))
+	{
+		UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
+	}
+	else
+	{
+		UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
+	}
+	
+	Knee->SetRelativeLocation(FVector(0, 0, -50)); 
+	Foot->SetRelativeLocation(FVector(0, 0, -50)); 
+	
 	//Get each leg parts position relative to the UpperLeg
 	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
 	FVector UpperLegPos = FVector::ZeroVector;
@@ -132,7 +144,8 @@ void UMoveLeg::UpdateLeg()
 
 bool UMoveLeg::ShouldStep() const
 {
-    float Dist = FVector::Dist(GetGroundPose().Position, LockedFootPosition);
+	FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition);
+    float Dist = FVector::Dist(GetGroundPose().Position, LocalLockedFootPos);
 	if (Dist < StepTrigger) return false;
 	
 	for (UMoveLeg* L : OtherLegs)
