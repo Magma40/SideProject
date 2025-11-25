@@ -99,14 +99,14 @@ void UMoveLeg::UpdateLeg(bool IsJumping, float DeltaTime)
 	else if (IsJumping)
 	{
 		MaxAirRise = 60.0f;
-		AirRiseSpeed = 20.0f;
+		AirRiseSpeed = 100.0f;
 		if (!WasJumping)
 		{
 			AirElapsedTime = 0.0f;
 		}
 		AirElapsedTime += DeltaTime;
 		float RiseAmount = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
-		TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position +  FVector(0, 0, RiseAmount));
+		TargetLocal = TargetPose.Position +  FVector(0, 0, RiseAmount);
 	}
 	else { TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position); }
 	
@@ -198,8 +198,8 @@ FLegsPose UMoveLeg::GetGroundPose() const
 {
 	FLegsPose Pose;
     FTransform UpperLegWorld = this->GetComponentTransform();
-	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f);
-	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f);
+	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
+	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;

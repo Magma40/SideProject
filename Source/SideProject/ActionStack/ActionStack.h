@@ -18,12 +18,10 @@ class IActionInterface
 	GENERATED_BODY()
 
 public:
-
-	// Add virtual interface functions here
-	virtual void OnBegin(bool bFirstTime) = 0;
-	virtual void OnUpdate() = 0;
-	virtual void OnEnd() = 0;
-	virtual bool IsDone() const = 0;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void OnBegin(bool bFirstTime);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void OnUpdate();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void OnEnd();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) bool IsDone() const;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -38,63 +36,77 @@ protected:
 	virtual void UpdateActions();
 
 private:
-	// TArray<TScriptInterface<UActionInterface>> ActionStack = TArray<TScriptInterface<UActionInterface>>();
-	// TSet<TScriptInterface<UActionInterface>> FirstTimeActions = TSet<TScriptInterface<UActionInterface>>();
-	// TScriptInterface<UActionInterface> CurrentAction = nullptr;
-	// static UActionStack* Main;
+	TArray<TScriptInterface<IActionInterface>> ActionStack = TArray<TScriptInterface<IActionInterface>>();
+	TSet<TScriptInterface<IActionInterface>> FirstTimeActions = TSet<TScriptInterface<IActionInterface>>();
+	TScriptInterface<IActionInterface> CurrentAction = nullptr;
+	static UActionStack* Main;
 
 public:
-	//TArray<TScriptInterface<UActionInterface>> GetActionStack() { return ActionStack; }
-	//TScriptInterface<UActionInterface> GetAction() const { return CurrentAction; }
+	TArray<TScriptInterface<IActionInterface>> GetActionStack() { return ActionStack; }
+	TScriptInterface<IActionInterface> GetCurrentAction() const { return CurrentAction; }
 	
-	// bool IsEmpty() const;
-	// static UActionStack* GetMain();
-	// void PushAction(const TScriptInterface<UActionInterface>& Action);
-	//
-	// template<typename T>
-	// T* GetAction();
-	// bool Contains(TScriptInterface<UActionInterface> Action) const { return Action  != nullptr && ActionStack.Contains(Action); }
-	// void RemoveAction(TScriptInterface<UActionInterface> Action);
+	 bool IsEmpty() const;
+	 static UActionStack* GetMain();
+	 void PushAction(const TScriptInterface<IActionInterface>& Action);
+	
+	 template<typename T>
+	 T* GetAction();
+	 bool Contains(TScriptInterface<IActionInterface> Action) const
+	 {
+		 return Action  != nullptr && ActionStack.Contains(Action);
+	 }
+	 void RemoveAction(TScriptInterface<IActionInterface> Action);	
 };
 
-// UCLASS(Abstract, Blueprintable) // Why is this needed?
-// class SIDEPROJECT_API UAction : public UActionInterface
-// {
-// 	GENERATED_BODY()
-//
-// public:
-//  	virtual bool IsDone() const { return true; }
-// 	virtual void OnBegin(bool bFirstTime) { }
-// 	virtual void OnUpdate() { }
-// 	virtual void OnEnd() { }
-//
-// 	//override ToString();
-// };
-//
-// UCLASS(Abstract, Blueprintable)
-// class SIDEPROJECT_API UActionBehaviour : public UActionInterface // public MonoBehaviour
-// {
-// 	GENERATED_BODY()
-//
-// public:
-// 	virtual bool IsDone() const { return true; }
-// 	virtual void OnBegin(bool bFirstTime) { }
-// 	virtual void OnUpdate() { }
-// 	virtual void OnEnd() { }
-//
-// 	//override ToString();
-// };
-//
-// UCLASS(Abstract, Blueprintable)
-// class SIDEPROJECT_API UActionObject : public UActionInterface // public ScriptableObject
-// {
-// 	GENERATED_BODY()
-//
-// public:
-// 	virtual bool IsDone() const { return true; }
-// 	virtual void OnBegin(bool bFirstTime) { }
-// 	virtual void OnUpdate() { }
-// 	virtual void OnEnd() { }
-//
-// 	//override ToString();
-// };
+UCLASS(Abstract, Blueprintable) // Why is this needed?
+class SIDEPROJECT_API UAction : public UObject, public IActionInterface
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnBegin_Implementation(bool bFirstTime) override {}
+	virtual void OnUpdate_Implementation() override {}
+	virtual void OnEnd_Implementation() override {}
+	virtual bool IsDone_Implementation() const override { return true; }
+
+	//override ToString();
+};
+
+UCLASS(Abstract, Blueprintable)
+class SIDEPROJECT_API UActionBehaviour : public UObject, public IActionInterface// public MonoBehaviour
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnBegin_Implementation(bool bFirstTime) override {}
+	virtual void OnUpdate_Implementation() override {}
+	virtual void OnEnd_Implementation() override {}
+	virtual bool IsDone_Implementation() const override { return true; }
+
+	//override ToString();
+};
+
+UCLASS(Abstract, Blueprintable)
+class SIDEPROJECT_API UActionObject  : public UObject, public IActionInterface// public ScriptableObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual void OnBegin_Implementation(bool bFirstTime) override {}
+	virtual void OnUpdate_Implementation() override {}
+	virtual void OnEnd_Implementation() override {}
+	virtual bool IsDone_Implementation() const override { return true; }
+
+	//override ToString();
+};
+
+template<typename T>
+T* UActionStack::GetAction()
+{
+	static_assert(TIsDerivedFrom<T, UObject>::IsDerived, "T must be a UObject type");
+	for (TScriptInterface Action : ActionStack)
+	{
+		if (Action && Action.GetObject()->IsA(T::StaticClass())) return Cast<T>(Action);
+	}
+	return nullptr;
+}

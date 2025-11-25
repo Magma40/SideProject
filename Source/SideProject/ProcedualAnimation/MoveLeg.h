@@ -58,6 +58,7 @@ protected: // Variables
 	FLegsPose SourcePose = FLegsPose();
 	FLegsPose StepTargetPose  = FLegsPose();
 	FLegsPose LockedFootPosition = FLegsPose();
+	FVector LockedJumpFootLocal = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite) TArray<USceneComponent*> LegParts;
 	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
@@ -67,4 +68,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepTime = 0.4f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepHeight = 40.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float GroundOffset = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float FootRangeStepForward = 20.0f;
 };
