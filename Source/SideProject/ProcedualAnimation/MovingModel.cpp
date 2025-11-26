@@ -55,8 +55,8 @@ void AMovingModel::Tick(float DeltaTime)
 	{
 		UpdateHips(DeltaTime);
 	}
-	DrawDebugJoints();
-	DrawDebugLimbs();
+	//DrawDebugJoints();
+	//DrawDebugLimbs();
 }
 
 void AMovingModel::UpdateHips(float DeltaTime)

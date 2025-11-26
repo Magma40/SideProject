@@ -7,111 +7,81 @@
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
 
-class USpringArmComponent;
+class AMovingModel;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-
-/**
- *  A simple player-controllable third person character
- *  Implements a controllable orbiting camera
- */
 UCLASS(abstract)
 class AMainCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FollowCamera;
 	
-protected:
-
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* JumpAction;
-
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* LookAction;
-
-	/** Mouse Look Input Action */
-	UPROPERTY(EditAnywhere, Category="Input")
-	UInputAction* MouseLookAction;
-
-public:
-
-	/** Constructor */
-	AMainCharacter();	
-
-protected:
-
-	/** Initialize input action bindings */
+protected: //Functions
+	AMainCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
-	/** Called for movement input */
+	//Movement
 	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
-	void Look(const FInputActionValue& Value);
-	void BeginPlay() override;
-	void Tick(float DeltaTime) override;
 	void ContinuousFalling(float Right, float Forward);
 
-	ACameraActor* TheMainCameraInScene = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SpeedMultiplier = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Sprinting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MaxSprintSpeed = 500.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float WalkSpeed = 200.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool EnabledInput = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float JumpSpeedForceChange = 100.0f;
+	//PickUpAndDrop
+	UFUNCTION(BlueprintCallable) bool AbleToPickUpItem(); 						//Should be able to pick up item/ press E?
+	UFUNCTION(BlueprintCallable) bool TryToPickUpItem(); 						//Should Drop item
+	UFUNCTION(BlueprintCallable) bool TryToInsertItemIntoSocket(); 		//Should Pick up item
+	UFUNCTION(BlueprintCallable) void DropItemInHand();							//Should Place down item into Socket
+	UFUNCTION(BlueprintCallable) void PickUpItemToHand();
+	UFUNCTION(BlueprintCallable) void InsertItemIntoSocket();
+	UFUNCTION(BlueprintCallable) AActor* GetClosestActorItem(AActor* InActor); 	//Should Place down item into Socket
+	UFUNCTION(BlueprintCallable) USceneComponent* GetClosestComponentItem(USceneComponent* InComponent); 	//Should Place down item into Socket
+	static UPrimitiveComponent* GetPrimitiveFromActor(AActor* Actor);
+	static void DisablePhysicsRecursively(USceneComponent* Comp);
+	static void EnablePhysicsRecursively(USceneComponent* Comp);
 
+public:
+	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoMove(float Right, float Forward);
+	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpStart() { Jump(); }
+	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpEnd() { StopJumping(); }
+
+protected: //Variables
+	UPROPERTY(EditAnywhere, Category="Input") UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, Category="Input") UInputAction* MoveAction;
+	UPROPERTY(EditAnywhere, Category="Input") UInputAction* LookAction;
+	UPROPERTY(EditAnywhere, Category="Input") UInputAction* MouseLookAction;
+
+	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool EnabledInput = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float JumpSpeedForceChange = 100.0f;
+	
 	float LastOldForwardValue = 0.0f;
 	float LastOldRightValue = 0.0f;
-
 	float DefaultMaxSprintSpeed = 1.0f;
 
-public:
-
-	/** Handles move inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoMove(float Right, float Forward);
-
-	/** Handles look inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoLook(float Yaw, float Pitch);
-
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoJumpStart();
-
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category="Input")
-	virtual void DoJumpEnd();
-
-public:
-
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") TSubclassOf<UObject> ItemInHand;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
+	AMovingModel* MovingModel = nullptr;
+	float LastKnownClosestDistance = 0.0f;
+	AActor* ClosestActor = nullptr;
+	USceneComponent* ClosestComponent = nullptr;
 };
+
+
+static void GetAllComponentsWithTag( UWorld* World, FName Tag, TArray<USceneComponent*>& OutComponents)
+{
+	for (TObjectIterator<USceneComponent> It; It; ++It)
+	{
+		USceneComponent* Comp = *It;
+
+		if (Comp->GetWorld() == World && Comp->ComponentTags.Contains(Tag))
+		{
+			OutComponents.Add(Comp);
+		}
+	}
+}
 

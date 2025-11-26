@@ -10,12 +10,11 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API ULimb : public UStaticMeshComponent
 {
 	GENERATED_BODY()
-
-	ULimb();
 	
 protected:
-virtual void BeginPlay() override;
-virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	ULimb();
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
 	USceneComponent* AttachedParent = nullptr;

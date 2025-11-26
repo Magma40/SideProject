@@ -42,6 +42,14 @@ public:
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
+	USceneComponent* GetRightHand() const
+	{
+		for(FLimbChain Arm : Arms)
+		{
+			if (Arm.End->GetName().EndsWith(TEXT("_R"))) return Arm.End;
+		}
+		return nullptr;
+	}
 
 protected: // Variables
 	float BaseHipHeight = 0.0f;

@@ -13,8 +13,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SideProject.h"
+#include "VectorTypes.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -38,20 +40,6 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
-
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	//CameraBoom->SetupAttachment(RootComponent);
-	//CameraBoom->TargetArmLength = 400.0f;
-	//CameraBoom->bUsePawnControlRotation = true;
-	// Create a follow camera
-	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	//FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	//FollowCamera->SetupAttachment(GetRootComponent());
-	//FollowCamera->bUsePawnControlRotation = false;
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
 void AMainCharacter::BeginPlay()
@@ -60,6 +48,14 @@ void AMainCharacter::BeginPlay()
 	AActor* FoundTheMainCameraInScene = UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass());
 	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
 	DefaultMaxSprintSpeed = MaxSprintSpeed;
+
+	TArray<AActor*> ChildrenActors;
+	GetAllChildActors(ChildrenActors, true);
+	for (AActor* Comp : ChildrenActors)
+	{
+		if (!Comp) continue;
+		MovingModel = Cast<AMovingModel>(Comp);
+	}
 }
 
 void AMainCharacter::Tick(float DeltaTime)
@@ -90,10 +86,6 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainCharacter::Move);
-		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainCharacter::Look);
 	}
 	else
 	{
@@ -113,15 +105,6 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AMainCharacter::Look(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	// route the input
-	DoLook(LookAxisVector.X, LookAxisVector.Y);
-}
-
 void AMainCharacter::DoMove(float Right, float Forward)
 {
 	if (TheMainCameraInScene != nullptr)
@@ -129,13 +112,11 @@ void AMainCharacter::DoMove(float Right, float Forward)
 		// find out which way is forward
 		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
 		// get forward and right vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement
-		//Forward *= SpeedMultiplier;
-		//Right *= SpeedMultiplier;
+		
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
 	}
@@ -157,26 +138,258 @@ void AMainCharacter::ContinuousFalling(float Right, float Forward)
 		AddMovementInput(RightDirection, Right);
 }
 
-void AMainCharacter::DoLook(float Yaw, float Pitch)
+bool AMainCharacter::AbleToPickUpItem()
 {
-	//if (GetController() != nullptr)
-	//{
-		// add yaw and pitch input to controller
-	//	AddControllerYawInput(Yaw);
-	//	AddControllerPitchInput(Pitch);
-	//}
+		if (IsValid(ClosestActor) || IsValid(ClosestComponent)) return false;
+		return true;
 }
 
-void AMainCharacter::DoJumpStart()
+bool AMainCharacter::TryToPickUpItem() // Is this even needed?
 {
-	// signal the character to jump
-	Jump();
+	LastKnownClosestDistance = FLT_MAX;
+	ClosestActor = nullptr;
+	ClosestComponent = nullptr;
+	
+	TArray<AActor*> ActorsAround;
+	UGameplayStatics::GetAllActorsWithTag (GetWorld(), "HandHeldItem", ActorsAround);
+	if (ActorsAround.Num() > 0)
+	{
+		for(AActor* FoundActor : ActorsAround)
+		{
+			AActor*  NewClosestActor = GetClosestActorItem(FoundActor);
+			if (NewClosestActor != nullptr) ClosestActor =NewClosestActor;
+		}
+	}
+
+	TArray<USceneComponent*> ComponentsAround;
+	GetAllComponentsWithTag(GetWorld(), "HandHeldItem", ComponentsAround);
+	if (ComponentsAround.Num() > 0)
+	{
+		for(USceneComponent* FoundComponent : ComponentsAround)
+		{
+			USceneComponent*  NewClosestComponent = GetClosestComponentItem(FoundComponent);
+			if (NewClosestComponent != nullptr) ClosestComponent = NewClosestComponent;
+		}
+	}
+	
+	if (IsValid(ClosestActor) && IsValid(ClosestComponent)) // This is getting too bloated
+	{
+		float ActorDistance =		 UE::Geometry::Distance(this->GetActorLocation(), ClosestActor->GetActorLocation());
+		float ComponentDistance = UE::Geometry::Distance(this->GetActorLocation(), ClosestComponent->GetComponentLocation());
+		if (ActorDistance < ComponentDistance)
+		{
+			ClosestComponent = nullptr;
+			if (ActorDistance <= MinDistanceToPickUpItem) return true;
+		}
+		else if (ComponentDistance < ActorDistance)
+		{
+			ClosestActor = nullptr;
+			if (ComponentDistance <= MinDistanceToPickUpItem) return true;
+		}	
+	}
+	else if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
+	{
+		float ActorDistance = UE::Geometry::Distance(this->GetActorLocation(), ClosestActor->GetActorLocation());
+		if (ActorDistance <= MinDistanceToPickUpItem) return true;
+	}
+	else if (IsValid(ClosestComponent) && !IsValid(ClosestActor))
+	{
+		float ComponentDistance = UE::Geometry::Distance(this->GetActorLocation(), ClosestComponent->GetComponentLocation());
+		if (ComponentDistance <= MinDistanceToPickUpItem) return true;
+	}
+	
+	return false;
 }
 
-void AMainCharacter::DoJumpEnd()
+bool AMainCharacter::TryToInsertItemIntoSocket()
 {
-	// signal the character to stop jumping
-	StopJumping();
+	return true;
+	// if (IsValid(ClosestSocket))
+	// {
+	// 	if (IsValid(ClosestSocket->CurrentActorInSocket))
+	// 	{
+	// 		AQuestItemScript* SocketsCastItem = Cast< AQuestItemScript>(ClosestSocket->CurrentActorInSocket);
+	// 		SocketsCastItem->SetActorTransform(SocketsCastItem->InitTransform);
+	// 	}
+	// 	return true;
+	// 	// if (ClosestSocket->CurrentActorInSocket == nullptr && IsInRangeToSocket && !ClosestSocket->SocketIsFrozen)
+	// 	// {
+	// 	// 	return true;
+	// 	// }
+	// 	// else return false; // this will drop the item
+	// }
+	// else
+	// {
+	// 	return false;
+	// }
 }
 
+void AMainCharacter::DropItemInHand()
+{
+	if (!GetCharacterMovement()->IsFalling() && (IsValid(ClosestActor) || IsValid(ClosestComponent)))
+	{
+		FVector Start = GetActorLocation() + FVector(0, 0, 50); 
+		FVector End = Start + (GetActorForwardVector() * 100.0f);
+		
+		FHitResult HitResult(ForceInit);
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(ClosestActor);
+		CollisionParams.AddIgnoredComponent(Cast<UPrimitiveComponent>(ClosestComponent));
+		CollisionParams.bTraceComplex = true;
+		
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
+		if (!bHit) // Only drop if nothing was hit
+		{
+			if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
+			{
+				USceneComponent* RootComp = ClosestActor->GetRootComponent();
+				if (!IsValid(RootComp)) return;
+				
+				ClosestActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+				ClosestActor->SetActorLocation(End);
+				EnablePhysicsRecursively(RootComp);
+				ClosestActor = nullptr;
+			}
+			else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
+			{
+				AActor* ComponentOwner = ClosestComponent->GetOwner();
+				USceneComponent* RootComp = ComponentOwner->GetRootComponent();
+				if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
+				
+				ComponentOwner->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+				ComponentOwner->SetActorLocation(End);
+				EnablePhysicsRecursively(RootComp);
+				ClosestComponent = nullptr;
+			}
+		}
+	}
+}
+	
+void AMainCharacter::PickUpItemToHand()
+{
+	if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
+	{
+		USceneComponent* RootComp = ClosestActor->GetRootComponent();
+		if (!IsValid(RootComp)) return;
+		
+	    DisablePhysicsRecursively(RootComp);
+		ClosestActor->AttachToComponent(MovingModel->GetRightHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+	else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
+	{
+		AActor*ComponentOwner = ClosestComponent->GetOwner();
+		USceneComponent* RootComp = ComponentOwner->GetRootComponent();
+		if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
+		
+		DisablePhysicsRecursively(RootComp);
+		ComponentOwner->AttachToComponent(MovingModel->GetRightHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
+	
+//Should Place down item into Socket
+void AMainCharacter::InsertItemIntoSocket()
+{
+	//ClosestSocket->AttachToActor(PickedUpItem);
+	//ClosestSocket->UpdateQuest(); //This is not in c++ yet
+	//PickedUpItem = nullptr;
+}
+
+AActor* AMainCharacter::GetClosestActorItem(AActor* InActor)
+{
+	if (IsValid(InActor) && !InActor->IsHidden())
+	{
+		float DistanceToItem = GetDistanceTo(InActor);
+		if (DistanceToItem < LastKnownClosestDistance)
+		{
+			LastKnownClosestDistance = DistanceToItem;
+			return InActor;
+		}
+	}
+	return nullptr;
+}
+
+USceneComponent* AMainCharacter::GetClosestComponentItem(USceneComponent* InComponent)
+{
+	if (IsValid(InComponent))
+	{
+		float DistanceToItem =UE::Geometry::Distance(this->GetActorLocation(), InComponent->GetComponentLocation());
+		if (DistanceToItem < LastKnownClosestDistance)
+		{
+			LastKnownClosestDistance = DistanceToItem;
+			return InComponent;
+		}
+	}
+	return nullptr;
+}
+
+UPrimitiveComponent* AMainCharacter::GetPrimitiveFromActor(AActor* Actor)
+{
+	if (!Actor) return nullptr;
+
+	TArray<USceneComponent*> Components;
+	Actor->GetComponents<USceneComponent>(Components);
+
+	for (USceneComponent* Comp : Components)
+	{
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+		{
+			return Prim; // first found
+		}
+
+		// check children recursively
+		TArray<USceneComponent*> Children;
+		Comp->GetChildrenComponents(true, Children);
+		for (USceneComponent* ChildComp : Children)
+		{
+			if (UPrimitiveComponent* PrimChild = Cast<UPrimitiveComponent>(ChildComp))
+			{
+				return PrimChild;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+void AMainCharacter::DisablePhysicsRecursively(USceneComponent* Comp)
+{
+	if (!Comp) return;
+
+	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+	{
+		Prim->SetMobility(EComponentMobility::Movable);
+		Prim->SetSimulatePhysics(false);
+		Prim->SetEnableGravity(false);
+		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	TArray<USceneComponent*> Children;
+	Comp->GetChildrenComponents(true, Children);
+	for (USceneComponent* Child : Children)
+	{
+		DisablePhysicsRecursively(Child);
+	}
+}
+
+void AMainCharacter::EnablePhysicsRecursively(USceneComponent* Comp)
+{
+	if (!Comp) return;
+
+	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+	{
+		Prim->SetMobility(EComponentMobility::Movable);
+		Prim->SetSimulatePhysics(true);
+		Prim->SetEnableGravity(true);
+		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+
+	TArray<USceneComponent*> Children;
+	Comp->GetChildrenComponents(true, Children);
+	for (USceneComponent* Child : Children)
+	{
+		EnablePhysicsRecursively(Child);
+	}
+}
 

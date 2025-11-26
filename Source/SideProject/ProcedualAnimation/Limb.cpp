@@ -5,10 +5,7 @@
 
 #include "MovingModel.h"
 
-ULimb::ULimb()
-{
-	PrimaryComponentTick.bCanEverTick = true;
-}
+ULimb::ULimb() { PrimaryComponentTick.bCanEverTick = true; }
 
 void ULimb::BeginPlay()
 {
