@@ -124,7 +124,7 @@ FArmsPose  UMoveArm::ShouldHoldUpHands() const
 	}
 	else
 	{
-		Pose.Position = FVector(0,0,  -50);
+		Pose.Position = FVector(0,25,  -50);
 		Pose.Rotation = FQuat::Identity;
 	}
 	FVector WorldPos = UpperArmWorld.TransformPosition(Pose.Position);

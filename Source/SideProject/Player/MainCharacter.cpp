@@ -249,7 +249,14 @@ void AMainCharacter::DropItemInHand()
 				
 				ClosestActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 				ClosestActor->SetActorLocation(End);
-				EnablePhysicsRecursively(RootComp);
+				if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+				{
+					Prim->SetMobility(EComponentMobility::Movable);
+					Prim->SetSimulatePhysics(true);
+					Prim->SetEnableGravity(true);
+					Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				}
+				//EnablePhysicsRecursively(RootComp);
 				ClosestActor = nullptr;
 			}
 			else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
@@ -260,7 +267,14 @@ void AMainCharacter::DropItemInHand()
 				
 				ComponentOwner->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 				ComponentOwner->SetActorLocation(End);
-				EnablePhysicsRecursively(RootComp);
+				if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+				{
+					Prim->SetMobility(EComponentMobility::Movable);
+					Prim->SetSimulatePhysics(true);
+					Prim->SetEnableGravity(true);
+					Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				}
+				//EnablePhysicsRecursively(RootComp);
 				ClosestComponent = nullptr;
 			}
 		}
@@ -274,7 +288,14 @@ void AMainCharacter::PickUpItemToHand()
 		USceneComponent* RootComp = ClosestActor->GetRootComponent();
 		if (!IsValid(RootComp)) return;
 		
-	    DisablePhysicsRecursively(RootComp);
+	    //DisablePhysicsRecursively(RootComp);
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+		{
+			Prim->SetMobility(EComponentMobility::Movable);
+			Prim->SetSimulatePhysics(false);
+			Prim->SetEnableGravity(false);
+			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 		ClosestActor->AttachToComponent(MovingModel->GetRightHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 	else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
@@ -283,7 +304,14 @@ void AMainCharacter::PickUpItemToHand()
 		USceneComponent* RootComp = ComponentOwner->GetRootComponent();
 		if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
 		
-		DisablePhysicsRecursively(RootComp);
+		//DisablePhysicsRecursively(RootComp);
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+		{
+			Prim->SetMobility(EComponentMobility::Movable);
+			Prim->SetSimulatePhysics(false);
+			Prim->SetEnableGravity(false);
+			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 		ComponentOwner->AttachToComponent(MovingModel->GetRightHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
 }

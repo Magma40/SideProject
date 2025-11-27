@@ -199,7 +199,7 @@ void AMovingModel::DrawDebugLimbs()
 	FVector Pos_Hips = 					Hips->GetComponentLocation();
 	FVector Pos_Chest =					Chest->GetComponentLocation();
 	
-	FVector Pos_UpperLeg_R =		 FVector::ZeroVector;
+	FVector Pos_UpperLeg_R =		FVector::ZeroVector;
 	FVector Pos_Knee_R = 				FVector::ZeroVector;
 	FVector Pos_Foot_R = 				FVector::ZeroVector;
 
@@ -266,8 +266,7 @@ USceneComponent* AMovingModel::FindChildByExactName(const USceneComponent* Paren
 	Parent->GetChildrenComponents(false, FindChildren);
 
 	for (USceneComponent* Child : FindChildren)
-		if (Child->GetName() == Target)
-			return Child;
+		if (Child->GetName() == Target)return Child;
 
 	return nullptr;
 }
