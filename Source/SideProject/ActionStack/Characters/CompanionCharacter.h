@@ -6,12 +6,17 @@
 #include "ActionStack/Characters/ActionCharacter.h"
 #include "CompanionCharacter.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SIDEPROJECT_API UCompanionCharacter : public UActionCharacter
 {
 	GENERATED_BODY()
-	
+
+public:
+	void Initialize(APawn* InActorOwner);
+	APawn* GetOwnerCharacter() const { return ActorOwner; }
+	void OnBegin_Implementation(bool bFirstTime) override;
+
+private:
+	UPROPERTY() APawn* ActorOwner = nullptr;
 };
+

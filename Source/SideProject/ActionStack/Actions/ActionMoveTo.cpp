@@ -2,20 +2,29 @@
 
 
 #include "ActionStack/Actions/ActionMoveTo.h"
-
 #include "AIController.h"
 #include "VectorTypes.h"
 #include "ActionStack/Characters/CompanionCharacter.h"
+#include "GameFramework/Character.h"
 #include "Navigation/PathFollowingComponent.h"  
 
-UActionMoveTo::UActionMoveTo(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation) : CompanionCharacter(InCompanionCharacter), TargetLocation(InTargetLocation) { }
+UActionMoveTo::UActionMoveTo(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
+
+void UActionMoveTo::Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation)
+{
+	CompanionCharacter = InCompanionCharacter;
+	TargetLocation = InTargetLocation;
+}
 
 void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
-	if (!CompanionCharacter || !CompanionCharacter->ActorOwner) return;
-
-	AAIController* AIController = CompanionCharacter->ActorOwner->GetController<AAIController>();
+	if (!CompanionCharacter) return;
+	
+	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
+	if (!Pawn) return;
+	
+    AAIController* AIController = Pawn->GetController<AAIController>();
 	if (!AIController) return;
 
 	FAIMoveRequest MoveRequest;
@@ -34,10 +43,13 @@ void UActionMoveTo::OnUpdate_Implementation()
 
 bool UActionMoveTo::IsDone_Implementation() const
 {
-	if (!CompanionCharacter || !CompanionCharacter->ActorOwner) return true;
-	if (UE::Geometry::Distance( CompanionCharacter->ActorOwner->GetActorLocation(), TargetLocation) <= MinDistance) return true;
+	if (!CompanionCharacter) return true;
+	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
+	if (!Pawn) return true;
 	
-	AAIController* AIController = CompanionCharacter->ActorOwner->GetController<AAIController>();
+	if (FVector::Dist( Pawn->GetActorLocation(), TargetLocation) <= MinDistance) return true;
+	
+	AAIController* AIController = Pawn->GetController<AAIController>();
 	if (AIController && AIController->GetMoveStatus() == EPathFollowingStatus::Idle) return true;
 
 	return false;

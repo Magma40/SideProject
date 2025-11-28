@@ -13,13 +13,12 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 {
 	GENERATED_BODY()
 
-protected:
-	UActionMoveTo(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation);
-
 public:
-		void OnUpdate_Implementation() override;
-		bool IsDone_Implementation() const override;
-		void OnBegin_Implementation(bool bFirstTime) override;
+	UActionMoveTo(const FObjectInitializer& ObjectInitializer);
+	void Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation);
+	void OnUpdate_Implementation() override;
+	bool IsDone_Implementation() const override;
+	void OnBegin_Implementation(bool bFirstTime) override;
 
 private:
 	UCompanionCharacter* CompanionCharacter = nullptr;

@@ -93,7 +93,7 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 
 void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
 {
-	if (Contains(Action)) return; // This might be wrong?
+	if (!Contains(Action)) return; // This might be wrong?
 	if (CurrentAction == Action)
 	{
 		Action->OnEnd();

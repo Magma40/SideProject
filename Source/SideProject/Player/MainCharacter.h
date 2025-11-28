@@ -42,6 +42,10 @@ protected: //Functions
 	static void EnablePhysicsRecursively(USceneComponent* Comp);
 
 public:
+	FVector GetActionLocation() const { return NewActionLocation; }
+	void SetActionLocation(const FVector& InNewActionLocation) { NewActionLocation = InNewActionLocation; }
+
+public:
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoMove(float Right, float Forward);
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpStart() { Jump(); }
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpEnd() { StopJumping(); }
@@ -69,6 +73,8 @@ protected: //Variables
 	float LastKnownClosestDistance = 0.0f;
 	AActor* ClosestActor = nullptr;
 	USceneComponent* ClosestComponent = nullptr;
+
+	FVector NewActionLocation = FVector::ZeroVector;
 };
 
 
