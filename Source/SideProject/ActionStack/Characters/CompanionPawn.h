@@ -15,10 +15,17 @@ class SIDEPROJECT_API ACompanionPawn : public APawn
 public:
 	ACompanionPawn();
 	UFUNCTION(BlueprintCallable) UCompanionCharacter* GetCompanionData() const { return CompanionData; }
+	UFUNCTION(BlueprintCallable) void SetMoveToLocation(FVector InLocation){ Location = InLocation; }
+	UFUNCTION(BlueprintCallable) FVector GetMoveToLocation(){ return Location; }
+
+	UFUNCTION(BlueprintCallable) void AddNewMoveTo(FVector InLocation);
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 public:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly) UCompanionCharacter* CompanionData;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly) FVector Location;
+	bool DefaultMovement = true;
 };

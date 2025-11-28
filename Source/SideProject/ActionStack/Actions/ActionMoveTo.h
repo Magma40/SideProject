@@ -3,11 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AITypes.h"
 #include "ActionStack/ActionStack.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "ActionMoveTo.generated.h"
 
 class UCompanionCharacter;
 
+/**
+ * Moves a CompanionCharacter to a target location using AIController, I had no idea this is how you write a summary in unreal
+ */
 UCLASS()
 class SIDEPROJECT_API UActionMoveTo : public UAction
 {
@@ -24,4 +29,7 @@ private:
 	UCompanionCharacter* CompanionCharacter = nullptr;
 	FVector TargetLocation = FVector::ZeroVector;
 	float MinDistance = 200.0f;
+	
+	bool bMoveCompleted = false;
+	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 };

@@ -39,14 +39,14 @@ private:
 	TArray<TScriptInterface<IActionInterface>> ActionStack = TArray<TScriptInterface<IActionInterface>>();
 	TSet<TScriptInterface<IActionInterface>> FirstTimeActions = TSet<TScriptInterface<IActionInterface>>();
 	TScriptInterface<IActionInterface> CurrentAction = nullptr;
-	static UActionStack* Main;
-
+	
 public:
+	static UActionStack* Main;
 	TArray<TScriptInterface<IActionInterface>> GetActionStack() { return ActionStack; }
 	TScriptInterface<IActionInterface> GetCurrentAction() const { return CurrentAction; }
 	
 	 bool IsEmpty() const;
-	 static UActionStack* GetMain();
+	 static UActionStack* GetMain(UObject* WorldContext = nullptr);
 	 void PushAction(const TScriptInterface<IActionInterface>& Action);
 	
 	 template<typename T>

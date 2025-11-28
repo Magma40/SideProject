@@ -2,6 +2,10 @@
 
 
 #include "ActionStack/ActionStack.h"
+#include "Core/MainGameMode.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/MainCharacter.h"
 
 UActionStack* UActionStack::Main = nullptr;
 
@@ -30,7 +34,6 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 		bool bFirstTime = !FirstTimeActions.Contains(CurrentAction);
 		FirstTimeActions.Add(CurrentAction);
 		CurrentAction->Execute_OnBegin(CurrentAction.GetObject(), bFirstTime);
-		CurrentAction->OnBegin(bFirstTime);
 		if (CurrentAction != nullptr)
 		{
 			if (ActionStack.Num() > 0 && CurrentAction != ActionStack[0])
@@ -44,13 +47,13 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 	if (CurrentAction != nullptr)
 	{
-		CurrentAction->OnUpdate();
+		CurrentAction->Execute_OnUpdate(CurrentAction.GetObject());
 		if (ActionStack.Num() > 0 && CurrentAction == ActionStack[0])
 		{
-			if (CurrentAction->IsDone())
+			if (CurrentAction->Execute_IsDone(CurrentAction.GetObject()))
 			{
 				ActionStack.RemoveAt(0);
-				CurrentAction->OnEnd();
+				CurrentAction->Execute_OnEnd(CurrentAction.GetObject());
 				FirstTimeActions.Remove(CurrentAction);
 				CurrentAction = nullptr;
 			}
@@ -69,13 +72,27 @@ bool UActionStack::IsEmpty() const
 	return false;
 }
 
-UActionStack* UActionStack::GetMain()
+UActionStack* UActionStack::GetMain(UObject* WorldContext)
 {
-	if (!IsValid(Main) && GEngine)
+    if (IsValid(Main)) return Main; 
+	UWorld* World = nullptr;
+	if (WorldContext)
 	{
-		Main = NewObject<UActionStack>();
-		Main->AddToRoot();
+		World = WorldContext->GetWorld();
 	}
+	else if (GEngine && GEngine->GetWorldContexts().Num() > 0)
+	{
+		World = GEngine->GetWorldContexts()[0].World();
+	}
+
+	if (!World) return nullptr;
+    AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
+	if (!GM || !GM->ActionStack)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
+		return nullptr;
+	}
+	Main = GM->ActionStack;
 	return Main;
 }
 
@@ -87,7 +104,10 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 		  return A.GetObject() == Action.GetObject();
 	});
 	ActionStack.Insert(Action, 0);
-	if (CurrentAction && CurrentAction.GetObject() != Action.GetObject()) { CurrentAction = nullptr; }
+	if (CurrentAction && CurrentAction.GetObject() != Action.GetObject())
+	{
+		CurrentAction = nullptr;
+	}
 }
 
 
@@ -96,7 +116,7 @@ void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
 	if (!Contains(Action)) return; // This might be wrong?
 	if (CurrentAction == Action)
 	{
-		Action->OnEnd();
+		Action->Execute_OnEnd(CurrentAction.GetObject());
 		CurrentAction = nullptr;
 	}
 	ActionStack.Remove(Action);

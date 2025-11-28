@@ -75,6 +75,9 @@ protected: //Variables
 	USceneComponent* ClosestComponent = nullptr;
 
 	FVector NewActionLocation = FVector::ZeroVector;
+
+public:
+	UPROPERTY() UActionStack* ActionStack;
 };
 
 

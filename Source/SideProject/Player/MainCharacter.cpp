@@ -14,6 +14,7 @@
 #include "InputActionValue.h"
 #include "SideProject.h"
 #include "VectorTypes.h"
+#include "ActionStack/ActionStack.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
@@ -40,11 +41,15 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
+	ActionStack = CreateDefaultSubobject<UActionStack>(TEXT("ActionStack"));
+
 }
 
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UActionStack::Main = ActionStack;
 	AActor* FoundTheMainCameraInScene = UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass());
 	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
 	DefaultMaxSprintSpeed = MaxSprintSpeed;
