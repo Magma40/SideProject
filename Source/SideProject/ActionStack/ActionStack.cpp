@@ -52,10 +52,7 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 		{
 			if (CurrentAction->Execute_IsDone(CurrentAction.GetObject()))
 			{
-				ActionStack.RemoveAt(0);
-				CurrentAction->Execute_OnEnd(CurrentAction.GetObject());
-				FirstTimeActions.Remove(CurrentAction);
-				CurrentAction = nullptr;
+				RemoveAction(CurrentAction);
 			}
 		}
 		else
@@ -108,17 +105,20 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 	{
 		CurrentAction = nullptr;
 	}
+	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The Stack"),*Action.GetObject()->GetFName().ToString());
 }
 
 
 void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
 {
 	if (!Contains(Action)) return; // This might be wrong?
+	ActionStack.RemoveAt(0);
 	if (CurrentAction == Action)
 	{
 		Action->Execute_OnEnd(CurrentAction.GetObject());
 		CurrentAction = nullptr;
 	}
 	ActionStack.Remove(Action);
+	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The Stack"),*Action.GetObject()->GetFName().ToString());
 }
 

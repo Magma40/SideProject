@@ -28,7 +28,7 @@ public:
 private:
 	UCompanionCharacter* CompanionCharacter = nullptr;
 	FVector TargetLocation = FVector::ZeroVector;
-	float MinDistance = 200.0f;
+	float MinDistance = 50.0f;
 	
 	bool bMoveCompleted = false;
 	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);

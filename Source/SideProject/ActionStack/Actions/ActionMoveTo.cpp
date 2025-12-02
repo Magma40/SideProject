@@ -60,11 +60,20 @@ void UActionMoveTo::OnUpdate_Implementation()
 
 bool UActionMoveTo::IsDone_Implementation() const
 {
-	if (!CompanionCharacter) return true;
+	if (!CompanionCharacter)
+	{
+		return true;
+	}
 	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
-	if (!Pawn) return true;
+	if (!Pawn)
+	{
+		return true;
+	}
 	float Distance = FVector::Dist( Pawn->GetActorLocation(), TargetLocation);
-	if (Distance <= MinDistance) return true;
+	if (Distance <= MinDistance)
+	{
+		return true;
+	}
 
 	return bMoveCompleted;
 	// AAIController* AIController = Pawn->GetController<AAIController>();

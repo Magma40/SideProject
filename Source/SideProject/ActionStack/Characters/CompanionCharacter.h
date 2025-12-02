@@ -16,6 +16,10 @@ public:
 	APawn* GetOwnerCharacter() const { return ActorOwner; }
 	void OnBegin_Implementation(bool bFirstTime) override;
 
+	//Actions
+	void OnAddActionMoveTo();
+	void OnAddActionPickUp();
+
 private:
 	UPROPERTY() APawn* ActorOwner = nullptr;
 };

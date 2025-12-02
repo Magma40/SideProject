@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "CompanionCharacter.h"  
+#include "Player/BaseInteractableCharacter.h"
 #include "CompanionPawn.generated.h"
 
 UCLASS()
-class SIDEPROJECT_API ACompanionPawn : public APawn
+class SIDEPROJECT_API ACompanionPawn : public ABaseInteractableCharacter
 {
 	GENERATED_BODY()
 
@@ -19,6 +20,7 @@ public:
 	UFUNCTION(BlueprintCallable) FVector GetMoveToLocation(){ return Location; }
 
 	UFUNCTION(BlueprintCallable) void AddNewMoveTo(FVector InLocation);
+	UFUNCTION(BlueprintCallable) void AddPickUpItem();
 
 protected:
 	virtual void BeginPlay() override;

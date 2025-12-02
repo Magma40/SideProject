@@ -18,19 +18,15 @@ void ACompanionPawn::BeginPlay()
 void ACompanionPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// if (DefaultMovement)
-	// {
-	// 	AMainCharacter* MainCharacter = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
-	// 	if (!IsValid(MainCharacter)) return;
-	//
-	// 	SetMoveToLocation(MainCharacter->GetActorLocation());
-	// 	CompanionData->OnBegin_Implementation(true);	
-	// }
 }
 
 void ACompanionPawn::AddNewMoveTo(FVector InLocation)
 {
-	DefaultMovement = false;
 	SetMoveToLocation(InLocation);
-	CompanionData->OnBegin_Implementation(true);
+	CompanionData->OnAddActionMoveTo();
+}
+
+void ACompanionPawn::AddPickUpItem()
+{
+	CompanionData->OnAddActionPickUp();
 }

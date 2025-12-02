@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BaseInteractableCharacter.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
 
-class AMovingModel;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 UCLASS(abstract)
-class AMainCharacter : public ACharacter
+class AMainCharacter : public ABaseInteractableCharacter
 {
 	GENERATED_BODY()
 	
@@ -27,23 +27,6 @@ protected: //Functions
 	//Movement
 	void Move(const FInputActionValue& Value);
 	void ContinuousFalling(float Right, float Forward);
-
-	//PickUpAndDrop
-	UFUNCTION(BlueprintCallable) bool AbleToPickUpItem(); 						//Should be able to pick up item/ press E?
-	UFUNCTION(BlueprintCallable) bool TryToPickUpItem(); 						//Should Drop item
-	UFUNCTION(BlueprintCallable) bool TryToInsertItemIntoSocket(); 		//Should Pick up item
-	UFUNCTION(BlueprintCallable) void DropItemInHand();							//Should Place down item into Socket
-	UFUNCTION(BlueprintCallable) void PickUpItemToHand();
-	UFUNCTION(BlueprintCallable) void InsertItemIntoSocket();
-	UFUNCTION(BlueprintCallable) AActor* GetClosestActorItem(AActor* InActor); 	//Should Place down item into Socket
-	UFUNCTION(BlueprintCallable) USceneComponent* GetClosestComponentItem(USceneComponent* InComponent); 	//Should Place down item into Socket
-	static UPrimitiveComponent* GetPrimitiveFromActor(AActor* Actor);
-	static void DisablePhysicsRecursively(USceneComponent* Comp);
-	static void EnablePhysicsRecursively(USceneComponent* Comp);
-
-public:
-	FVector GetActionLocation() const { return NewActionLocation; }
-	void SetActionLocation(const FVector& InNewActionLocation) { NewActionLocation = InNewActionLocation; }
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoMove(float Right, float Forward);
@@ -67,30 +50,7 @@ protected: //Variables
 	float LastOldRightValue = 0.0f;
 	float DefaultMaxSprintSpeed = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") TSubclassOf<UObject> ItemInHand;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
-	AMovingModel* MovingModel = nullptr;
-	float LastKnownClosestDistance = 0.0f;
-	AActor* ClosestActor = nullptr;
-	USceneComponent* ClosestComponent = nullptr;
-
-	FVector NewActionLocation = FVector::ZeroVector;
-
 public:
 	UPROPERTY() UActionStack* ActionStack;
 };
-
-
-static void GetAllComponentsWithTag( UWorld* World, FName Tag, TArray<USceneComponent*>& OutComponents)
-{
-	for (TObjectIterator<USceneComponent> It; It; ++It)
-	{
-		USceneComponent* Comp = *It;
-
-		if (Comp->GetWorld() == World && Comp->ComponentTags.Contains(Tag))
-		{
-			OutComponents.Add(Comp);
-		}
-	}
-}
 

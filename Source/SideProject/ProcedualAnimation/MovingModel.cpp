@@ -94,12 +94,12 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 
-	if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
-	//Apply New Hip Rotation
-	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
-	LookAtRot.Pitch = 0.0;
-	LookAtRot.Yaw -= 90.f;
-	Hips->SetRelativeRotation(LookAtRot);
+	// if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
+	// //Apply New Hip Rotation
+	// FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
+	// LookAtRot.Pitch = 0.0;
+	// LookAtRot.Yaw -= 90.f;
+	// Hips->SetRelativeRotation(LookAtRot);
 }
 
 void AMovingModel::UpdateMovement(float DeltaTime)
