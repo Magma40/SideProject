@@ -44,17 +44,13 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	MoveTarget  = UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass());
+	SetLegsIdleAnim();
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//UpdateMovement(DeltaTime);
-	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  > 200.f || MoveTarget == GetRootComponent()->GetAttachmentRootActor())
-	{
-		UpdateHips(DeltaTime);
-	}
+	UpdateHips(DeltaTime);
 	//DrawDebugJoints();
 	//DrawDebugLimbs();
 }
@@ -62,30 +58,9 @@ void AMovingModel::Tick(float DeltaTime)
 void AMovingModel::UpdateHips(float DeltaTime)
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
-	float HipSway = 0.0f;
-
-	//Arm Logic
-	for (FLimbChain& Arm: Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		if (!IsValid(UpperArm)) continue;
-		UpperArm->UpdateArm();
-	}
 	
-	//Leg Logic
-	for (FLimbChain& Leg : Legs)
-	{
-		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-		if (!IsValid(UpperLeg)) continue;
-		AMainCharacter* MainCharacter= Cast<AMainCharacter>(MoveTarget);
-
-		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
-		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
-		
-		UpperLeg->UpdateLeg(MainCharacter->GetCharacterMovement()->IsFalling(), DeltaTime);   // This could be updated in the latter for better smoothness
-		
-		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
-	}
+	float HipSway =  UpdateLegs(DeltaTime);
+	UpdateArms();
 	
 	//Apply New Hip Location
 	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
@@ -93,42 +68,65 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
 	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
-
-	// if (MoveTarget == GetRootComponent()->GetAttachmentRootActor()) return;
-	// //Apply New Hip Rotation
-	// FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(Hips->GetComponentLocation(), MoveTarget->GetActorLocation());
-	// LookAtRot.Pitch = 0.0;
-	// LookAtRot.Yaw -= 90.f;
-	// Hips->SetRelativeRotation(LookAtRot);
 }
 
-void AMovingModel::UpdateMovement(float DeltaTime)
+float AMovingModel::UpdateLegs(float DeltaTime)
 {
-	if (!IsValid(MoveTarget)) return;
-	if (UE::Geometry::Distance(MoveTarget->GetActorLocation(), GetActorLocation())  < 200.f) return;
-	
-	//Raycast to find MoveTarget ground position
-	FVector TargetPos = MoveTarget->GetActorLocation();
-	FVector Start = TargetPos + FVector::UpVector * 100.f;
-	FVector End = TargetPos + FVector::DownVector * 200.f;
-
-	FHitResult Hit;
-	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	float HipSway = 0.0f;
+	//Leg Logic
+	for (FLimbChain& Leg : Legs)
 	{
-		TargetPos = Hit.ImpactPoint + Hit.ImpactNormal * 2.f; 
+		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+		if (!IsValid(UpperLeg)) continue;
+
+		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
+		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
+
+		UpperLeg->UpdateLeg();   // This could be updated in the latter for better smoothness
+		
+		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
 	}
-
-	//Update Movement
-	FVector CurrentPos = GetActorLocation();
-	FVector NewPos = FMath::VInterpConstantTo(CurrentPos, TargetPos, DeltaTime, MoveSpeed * 100.f);
-	SetActorLocation(NewPos);
-
-	//Update Rotation
-	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), MoveTarget->GetActorLocation());
-	LookAtRot.Pitch = 0.0;
-	LookAtRot.Yaw -= 90.f;
-	SetActorRotation(LookAtRot);
+	return HipSway;
 }
+
+void AMovingModel::UpdateArms()
+{
+	//Arm Logic
+	for (FLimbChain& Arm: Arms)
+	{
+		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
+		if (!IsValid(UpperArm)) continue;
+		UpperArm->UpdateArm();
+	}
+}
+
+void AMovingModel::SetLegsIdleAnim()
+{
+	for (FLimbChain& Leg : Legs)
+	{
+		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+		UpperLeg->SetIdleAnim();
+	}
+}
+void AMovingModel::SetLegsMovingAnim()
+{
+	for (FLimbChain& Leg : Legs)
+	{
+		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+		UpperLeg->SetMovingAnim();
+	}
+}
+void AMovingModel::SetLegsJumpingAnim()
+{
+	for (FLimbChain& Leg : Legs)
+	{
+		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
+		UpperLeg->SetJumpingAnim(InteractableCharacter->GetMovementComponent()->IsFalling(), GetWorld()->GetTimeSeconds());
+	}
+}
+
+
 
 void AMovingModel::DrawDebugJoints()
 {

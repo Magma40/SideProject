@@ -21,7 +21,7 @@ class UMoveArm;
 class ULimb;
 
 UCLASS()
-class SIDEPROJECT_API AMovingModel : public APawn
+class SIDEPROJECT_API AMovingModel : public AActor
 {
 	GENERATED_BODY()
 
@@ -31,13 +31,18 @@ protected: // Functions
 	virtual void Tick(float DeltaTime) override;
 
 	void InitSceneComponents();
-	void UpdateHips(float DeltaTime);
-	void UpdateMovement(float DeltaTime);
-	
 	void DrawDebugJoints();
 	void DrawDebugLimbs();
 
 public:
+	void UpdateHips(float DeltaTime);
+	float UpdateLegs(float DeltaTime);
+	void UpdateArms();
+
+	void SetLegsIdleAnim();
+	void SetLegsMovingAnim();
+	void SetLegsJumpingAnim();
+	
 	static USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target);
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
 	template<typename TUpperClass>
@@ -54,7 +59,6 @@ public:
 protected: // Variables
 	float BaseHipHeight = 0.0f;
 	
-	UPROPERTY()  AActor* MoveTarget = nullptr;
 	USceneComponent* Hips = nullptr;
 	USceneComponent* Chest = nullptr;
 	

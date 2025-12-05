@@ -58,16 +58,21 @@ void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UMoveLeg::UpdateLeg(bool IsJumping, float DeltaTime)
+void UMoveLeg::SetIdleAnim()
 {
-	if (LegParts.Num() != 3) return;
-	if (!IsValid(LegParts[0]) || !IsValid(LegParts[1]) || !IsValid(LegParts[2])) return;
 	USceneComponent* UpperLeg = LegParts[0];
-	USceneComponent* Knee = LegParts[1];
-	USceneComponent* Foot = LegParts[2];
-
+	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
+	TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position);
+}
+void UMoveLeg::SetMovingAnim()
+{
+  TargetLocal = TargetPose.Position; 
+}
+void UMoveLeg::SetJumpingAnim(bool IsJumping, float DeltaTime)
+{
 	bool WasJumping = bIsJumping;
 	bIsJumping = IsJumping;
+	USceneComponent* UpperLeg = LegParts[0];
 
 	if (!bIsJumping && WasJumping)
 	{
@@ -76,27 +81,7 @@ void UMoveLeg::UpdateLeg(bool IsJumping, float DeltaTime)
 		LastLandTime = GetWorld()->GetTimeSeconds();
 	}
 
-	if (UpperLeg->GetName().EndsWith(TEXT("_R")))
-	{
-		UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
-	}
-	else
-	{
-		UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
-	}
-	
-	Knee->SetRelativeLocation(FVector(0, 0, -50)); 
-	Foot->SetRelativeLocation(FVector(0, 0, -50)); 
-	
-	//Get each leg parts position relative to the UpperLeg
-	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
-	FVector UpperLegPos = FVector::ZeroVector;
-	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
-	FVector FootPos     = UpperLegXform.InverseTransformPosition(Foot->GetComponentLocation());
-	FVector TargetLocal = FVector::ZeroVector;
-	
-	if (bIsStepping && !IsJumping) { TargetLocal = TargetPose.Position; }
-	else if (IsJumping)
+	if (IsJumping)
 	{
 		MaxAirRise = 60.0f;
 		AirRiseSpeed = 100.0f;
@@ -108,7 +93,27 @@ void UMoveLeg::UpdateLeg(bool IsJumping, float DeltaTime)
 		float RiseAmount = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
 		TargetLocal = TargetPose.Position +  FVector(0, 0, RiseAmount);
 	}
-	else { TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position); }
+}
+
+void UMoveLeg::UpdateLeg()
+{
+	if (LegParts.Num() != 3) return;
+	if (!IsValid(LegParts[0]) || !IsValid(LegParts[1]) || !IsValid(LegParts[2])) return;
+	USceneComponent* UpperLeg = LegParts[0];
+	USceneComponent* Knee = LegParts[1];
+	USceneComponent* Foot = LegParts[2];
+
+	if (UpperLeg->GetName().EndsWith(TEXT("_R"))) UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
+	else UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
+	
+	Knee->SetRelativeLocation(FVector(0, 0, -50)); 
+	Foot->SetRelativeLocation(FVector(0, 0, -50)); 
+	
+	//Get each leg parts position relative to the UpperLeg
+	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
+	FVector UpperLegPos = FVector::ZeroVector;
+	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
+	FVector FootPos     = UpperLegXform.InverseTransformPosition(Foot->GetComponentLocation());
 	
 	// --- TWO BONE IK ---
 	FVector RootToEff = TargetLocal - UpperLegPos;

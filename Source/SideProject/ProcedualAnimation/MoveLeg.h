@@ -30,6 +30,9 @@ protected: // Functions
 	void Init();
 
 public:
+	void SetIdleAnim();
+	void SetMovingAnim();
+	void SetJumpingAnim(bool IsJumping, float DeltaTime);
 	bool IsStepping() const { return bIsStepping; }
 	float GetLiftAmount() const { return LiftAmount; }
 	const FLegsPose& GetTargetPose() const { return TargetPose; }
@@ -38,7 +41,7 @@ public:
 	bool ShouldStep() const;
 	void StartStep();
 	void UpdateStep(float DeltaTime);
-	void UpdateLeg(bool IsJumping, float DeltaTime);
+	void UpdateLeg();
 
 protected: // Variables
 	bool bIsStepping = false;
@@ -59,6 +62,7 @@ protected: // Variables
 	FLegsPose StepTargetPose  = FLegsPose();
 	FLegsPose LockedFootPosition = FLegsPose();
 	FVector LockedJumpFootLocal = FVector::ZeroVector;
+	FVector TargetLocal = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite) TArray<USceneComponent*> LegParts;
 	UPROPERTY()TArray<UMoveLeg*> OtherLegs;

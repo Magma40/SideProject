@@ -25,7 +25,7 @@ void UCompanionCharacter::OnAddActionMoveTo()
 	if (IsValid(CompanionPawn))
 	{
 		UActionMoveTo* MoveAction = NewObject<UActionMoveTo>(this);
-		MoveAction->Init(this, CompanionPawn->GetMoveToLocation());
+		MoveAction->Init(this, CompanionPawn->GetMoveToLocation(), CompanionPawn->MovingModel);
 		UActionStack* Stack = UActionStack::GetMain(this);
 		if (Stack)
 		{
@@ -49,7 +49,7 @@ void UCompanionCharacter::OnAddActionPickUp()
 		
 		CompanionPawn->SetMoveToLocation(FVector(360, -1240, 120));
 		UActionMoveTo* MoveAction = NewObject<UActionMoveTo>(this);
-		MoveAction->Init(this, CompanionPawn->GetMoveToLocation());
+		MoveAction->Init(this, CompanionPawn->GetMoveToLocation(),  CompanionPawn->MovingModel);
 		if (Stack)
 		{
 			Stack->PushAction(MoveAction);

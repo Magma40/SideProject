@@ -5,6 +5,8 @@
 #include "ActionStack/ActionStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/MainCharacter.h"
+#include "ProcedualAnimation/MovingModel.h"
+
 
 ACompanionPawn::ACompanionPawn() { PrimaryActorTick.bCanEverTick = true; }
 

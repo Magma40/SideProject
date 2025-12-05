@@ -16,10 +16,10 @@ void ABaseInteractableCharacter::BeginPlay()
 
 	TArray<AActor*> ChildrenActors;
 	GetAllChildActors(ChildrenActors, true);
-	for (AActor* Comp : ChildrenActors)
+	for (AActor* FoundChild : ChildrenActors)
 	{
-		if (!Comp) continue;
-		MovingModel = Cast<AMovingModel>(Comp);
+		if (!FoundChild) continue;
+		MovingModel = Cast<AMovingModel>(FoundChild);
 	}
 }
 

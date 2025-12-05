@@ -7,13 +7,15 @@
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "GameFramework/Pawn.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 UActionMoveTo::UActionMoveTo(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionMoveTo::Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation)
+void UActionMoveTo::Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation, AMovingModel* InMovingModel)
 {
 	CompanionCharacter = InCompanionCharacter;
 	TargetLocation = InTargetLocation;
+	MovingModel = InMovingModel;
 }
 
 void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
@@ -56,6 +58,7 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 void UActionMoveTo::OnUpdate_Implementation() 
 {
 	Super::OnUpdate_Implementation();
+	MovingModel->SetLegsMovingAnim();
 }
 
 bool UActionMoveTo::IsDone_Implementation() const
@@ -69,17 +72,15 @@ bool UActionMoveTo::IsDone_Implementation() const
 	{
 		return true;
 	}
-	float Distance = FVector::Dist( Pawn->GetActorLocation(), TargetLocation);
-	if (Distance <= MinDistance)
-	{
-		return true;
-	}
+	// float Distance = FVector::Dist( Pawn->GetActorLocation(), TargetLocation);
+	// if (Distance <= MinDistance)
+	// {
+	// 	MovingModel->SetLegsMovingAnim();
+	// 	return true;
+	// }
 
+	if (bMoveCompleted) MovingModel->SetLegsIdleAnim();
 	return bMoveCompleted;
-	// AAIController* AIController = Pawn->GetController<AAIController>();
-	// if (AIController && AIController->GetMoveStatus() == EPathFollowingStatus::Idle) return true;
-	//
-	// return false;
 }
 
 void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)

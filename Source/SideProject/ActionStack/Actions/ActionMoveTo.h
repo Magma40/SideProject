@@ -9,6 +9,7 @@
 #include "ActionMoveTo.generated.h"
 
 class UCompanionCharacter;
+class AMovingModel;
 
 /**
  * Moves a CompanionCharacter to a target location using AIController, I had no idea this is how you write a summary in unreal
@@ -20,7 +21,7 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 
 public:
 	UActionMoveTo(const FObjectInitializer& ObjectInitializer);
-	void Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation);
+	void Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation,  AMovingModel* InMovingModel);
 	void OnUpdate_Implementation() override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
@@ -29,6 +30,7 @@ private:
 	UCompanionCharacter* CompanionCharacter = nullptr;
 	FVector TargetLocation = FVector::ZeroVector;
 	float MinDistance = 50.0f;
+	AMovingModel* MovingModel = nullptr;
 	
 	bool bMoveCompleted = false;
 	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
