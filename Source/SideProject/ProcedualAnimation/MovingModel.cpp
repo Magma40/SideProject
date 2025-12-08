@@ -44,7 +44,7 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	SetLegsIdleAnim();
+	SetLegsMovingAnim();
 }
 
 void AMovingModel::Tick(float DeltaTime)

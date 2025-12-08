@@ -50,7 +50,7 @@ void UMoveLeg::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
-	LockedFootPosition.Position = TargetPose.Position;
+	LockedFootPosition = GetGroundPose();
 }
 
 void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -58,15 +58,21 @@ void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UMoveLeg::SetIdleAnim()
+void UMoveLeg::SetIdleAnim() // This might be redundant?
 {
 	USceneComponent* UpperLeg = LegParts[0];
 	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
-	TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position);
+	//TargetLocal  = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position);
+	TargetLocal  = UpperLegXform.InverseTransformPosition(SourcePose.Position); 
+	//TargetLocal  = 	SourcePose.Position;
+
 }
 void UMoveLeg::SetMovingAnim()
 {
-  TargetLocal = TargetPose.Position; 
+	USceneComponent* UpperLeg = LegParts[0];
+	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
+	if (bIsStepping)   TargetLocal = TargetPose.Position; 
+	else { TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position); }
 }
 void UMoveLeg::SetJumpingAnim(bool IsJumping, float DeltaTime)
 {

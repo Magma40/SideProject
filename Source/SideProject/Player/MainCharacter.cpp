@@ -14,6 +14,7 @@
 #include "ActionStack/ActionStack.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -39,7 +40,6 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	ActionStack = CreateDefaultSubobject<UActionStack>(TEXT("ActionStack"));
-
 }
 
 void AMainCharacter::BeginPlay()
@@ -59,12 +59,14 @@ void AMainCharacter::Tick(float DeltaTime)
 			// Slow rotation while in air
 			GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
 			MaxSprintSpeed = DefaultMaxSprintSpeed  + JumpSpeedForceChange;
+			//MovingModel->SetLegsJumpingAnim();
 	}
 	else
 	{
 		// Normal rotation rate on ground
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 		MaxSprintSpeed = DefaultMaxSprintSpeed;
+		MovingModel->SetLegsMovingAnim();
 	}
 }
 
@@ -109,7 +111,6 @@ void AMainCharacter::DoMove(float Right, float Forward)
 		// get forward and right vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
 	}
