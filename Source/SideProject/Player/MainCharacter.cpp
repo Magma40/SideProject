@@ -59,7 +59,7 @@ void AMainCharacter::Tick(float DeltaTime)
 			// Slow rotation while in air
 			GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
 			MaxSprintSpeed = DefaultMaxSprintSpeed  + JumpSpeedForceChange;
-			//MovingModel->SetLegsJumpingAnim();
+			MovingModel->SetLegsJumpingAnim();
 	}
 	else
 	{

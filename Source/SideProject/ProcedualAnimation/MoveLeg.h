@@ -32,7 +32,7 @@ protected: // Functions
 public:
 	void SetIdleAnim();
 	void SetMovingAnim();
-	void SetJumpingAnim(bool IsJumping, float DeltaTime);
+	void SetJumpingAnim();
 	bool IsStepping() const { return bIsStepping; }
 	float GetLiftAmount() const { return LiftAmount; }
 	const FLegsPose& GetTargetPose() const { return TargetPose; }
@@ -50,12 +50,12 @@ protected: // Variables
 	bool bFootPlanted = true;
 	
 	float AirElapsedTime = 0.0f;
-	float AirRiseSpeed = 20.0f;
+	float AirRiseSpeed = 1.0f;
 	float MaxAirRise = 60.0f;
 	
 	bool bIsJumping = false;
 	bool bJustLanded = false;
-	float LastLandTime = 0.f;
+	float LastLandTime = 0.0f;
 
 	FLegsPose TargetPose = FLegsPose();
 	FLegsPose SourcePose = FLegsPose();
@@ -73,4 +73,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepHeight = 40.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float GroundOffset = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float FootRangeStepForward = 20.0f;
+	UPROPERTY() bool ActionEnabled = false;
+
 };

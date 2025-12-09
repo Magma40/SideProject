@@ -39,9 +39,13 @@ public:
 	float UpdateLegs(float DeltaTime);
 	void UpdateArms();
 
-	void SetLegsIdleAnim();
-	void SetLegsMovingAnim();
-	void SetLegsJumpingAnim();
+	UFUNCTION(BlueprintCallable) void SetLegsIdleAnim();
+	UFUNCTION(BlueprintCallable) void SetLegsMovingAnim();
+	UFUNCTION(BlueprintCallable) void SetLegsJumpingAnim();
+
+	UFUNCTION(BlueprintCallable) void SetArmsIdleAnim();
+	UFUNCTION(BlueprintCallable) void SetArmsMovingAnim();
+	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
 	
 	static USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target);
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);

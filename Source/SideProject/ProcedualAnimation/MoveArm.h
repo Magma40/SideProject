@@ -30,12 +30,16 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Init();
-	FArmsPose ShouldHoldUpHands() const;
+	bool ShouldHoldUpHands();
 
 public:
 	void UpdateArm();
+	void SetWaveAnim();
+	void SetIdleAnim();
 
 private:
+	FArmsPose TargetPose = FArmsPose();
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
+	bool ActionEnabled = false;
 };

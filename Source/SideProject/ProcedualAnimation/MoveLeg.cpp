@@ -50,7 +50,7 @@ void UMoveLeg::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
-	LockedFootPosition = GetGroundPose();
+	LockedFootPosition.Position = TargetPose.Position;
 }
 
 void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -60,51 +60,46 @@ void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 void UMoveLeg::SetIdleAnim() // This might be redundant?
 {
-	USceneComponent* UpperLeg = LegParts[0];
-	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
-	//TargetLocal  = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position);
-	TargetLocal  = UpperLegXform.InverseTransformPosition(SourcePose.Position); 
-	//TargetLocal  = 	SourcePose.Position;
-
-}
-void UMoveLeg::SetMovingAnim()
-{
+	ActionEnabled = false;
+	AirElapsedTime = 0.0f;
+	bIsJumping = false;
+	bJustLanded = true;
 	USceneComponent* UpperLeg = LegParts[0];
 	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
 	if (bIsStepping)   TargetLocal = TargetPose.Position; 
 	else { TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position); }
 }
-void UMoveLeg::SetJumpingAnim(bool IsJumping, float DeltaTime)
+void UMoveLeg::SetMovingAnim()
 {
-	bool WasJumping = bIsJumping;
-	bIsJumping = IsJumping;
+	ActionEnabled = true;
+	AirElapsedTime = 0.0f;
+	bIsJumping = false;
+	bJustLanded = true;
 	USceneComponent* UpperLeg = LegParts[0];
-
-	if (!bIsJumping && WasJumping)
-	{
-		LockedFootPosition.Position = UpperLeg->GetComponentTransform().TransformPosition(TargetPose.Position);
-		bJustLanded  = true;
-		LastLandTime = GetWorld()->GetTimeSeconds();
-	}
-
-	if (IsJumping)
-	{
-		MaxAirRise = 60.0f;
-		AirRiseSpeed = 100.0f;
-		if (!WasJumping)
-		{
-			AirElapsedTime = 0.0f;
-		}
-		AirElapsedTime += DeltaTime;
-		float RiseAmount = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
-		TargetLocal = TargetPose.Position +  FVector(0, 0, RiseAmount);
-	}
+	const FTransform  UpperLegXform = UpperLeg->GetComponentTransform();
+	if (bIsStepping)   TargetLocal = TargetPose.Position; 
+	else { TargetLocal = UpperLegXform.InverseTransformPosition(LockedFootPosition.Position); }
+}
+void UMoveLeg::SetJumpingAnim()
+{
+	ActionEnabled = true;
+	bIsJumping = true;
+	bJustLanded = false;
+	USceneComponent* UpperLeg = LegParts[0];
+	
+	AirElapsedTime += GetWorld()->GetTimeSeconds();
+	float RiseAmount = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
+	if (!OtherLegs[0]->bIsJumping) return;
+	TargetLocal = TargetPose.Position +  FVector(0, 0, RiseAmount);
+	LockedFootPosition.Position = UpperLeg->GetComponentTransform().TransformPosition(TargetPose.Position);
 }
 
 void UMoveLeg::UpdateLeg()
 {
 	if (LegParts.Num() != 3) return;
 	if (!IsValid(LegParts[0]) || !IsValid(LegParts[1]) || !IsValid(LegParts[2])) return;
+	if (!ActionEnabled) SetIdleAnim(); // This aint right
+	
 	USceneComponent* UpperLeg = LegParts[0];
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
@@ -120,9 +115,10 @@ void UMoveLeg::UpdateLeg()
 	FVector UpperLegPos = FVector::ZeroVector;
 	FVector KneePos     = UpperLegXform.InverseTransformPosition(Knee->GetComponentLocation());
 	FVector FootPos     = UpperLegXform.InverseTransformPosition(Foot->GetComponentLocation());
+	FVector TargetPos = TargetLocal;
 	
 	// --- TWO BONE IK ---
-	FVector RootToEff = TargetLocal - UpperLegPos;
+	FVector RootToEff = TargetPos - UpperLegPos;
 	float UpperLen = (KneePos - UpperLegPos).Size();
 	float LowerLen = (FootPos - KneePos).Size();
 	float TargetLen = RootToEff.Size();
@@ -154,7 +150,7 @@ void UMoveLeg::UpdateLeg()
 	FVector FixedKneePos = UpperLegPos + UpperLegToKnee;
 
 	//Make sure LowerLegLimb stays the same length
-	FVector KneeToFoot = (TargetLocal - FixedKneePos).GetSafeNormal() * LowerLen;
+	FVector KneeToFoot = (TargetPos - FixedKneePos).GetSafeNormal() * LowerLen;
 	FVector FixedFootPos = FixedKneePos + KneeToFoot;
 	
 	Knee->SetRelativeLocation(FixedKneePos);
@@ -166,7 +162,7 @@ void UMoveLeg::UpdateLeg()
 bool UMoveLeg::ShouldStep() const
 {
 	if (bIsJumping) return false;
-    if (bJustLanded && (GetWorld()->TimeSeconds - LastLandTime < 0.20f))   return false;
+    if (bJustLanded && (GetWorld()->TimeSeconds  < 0.20f))   return false;
 	
 	FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition.Position);
     float Dist = FVector::Dist(GetGroundPose().Position, LocalLockedFootPos);
@@ -209,7 +205,7 @@ FLegsPose UMoveLeg::GetGroundPose() const
 {
 	FLegsPose Pose;
     FTransform UpperLegWorld = this->GetComponentTransform();
-	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
+	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f);
 	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
 
 	FHitResult Hit;

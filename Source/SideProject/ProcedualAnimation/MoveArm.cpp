@@ -52,6 +52,22 @@ void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+void UMoveArm::SetWaveAnim()
+{
+		ActionEnabled = true;
+		TargetPose.Position = FVector(20,0,  50);
+		TargetPose.Rotation = FQuat::Identity;	
+}
+
+void UMoveArm::SetIdleAnim()
+{
+	ActionEnabled = false;
+	if (ShouldHoldUpHands()) return;
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FQuat::Identity;
+}
+
+
 void UMoveArm::UpdateArm()
 {
 	if (ArmParts.Num() != 3) return;
@@ -64,8 +80,9 @@ void UMoveArm::UpdateArm()
 	FVector UpperArmPos = Xform.InverseTransformPosition(UpperArm->GetComponentLocation());
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
-	FVector Target = ShouldHoldUpHands().Position;
-	
+	FVector Target = TargetPose.Position;
+	if (!ActionEnabled) 	SetIdleAnim();
+
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperArmPos;
 	float UpperLen = (ElbowPos - UpperArmPos).Size();
@@ -101,35 +118,31 @@ void UMoveArm::UpdateArm()
 	Hand->SetRelativeLocation(HandLocalToElbow);
 }
 
-FArmsPose  UMoveArm::ShouldHoldUpHands() const
+bool UMoveArm::ShouldHoldUpHands()
 {
-	FArmsPose Pose;
 	FTransform UpperArmWorld = this->GetComponentTransform();
 	FVector StartWorld = UpperArmWorld.GetLocation();
 	FVector EndWorld   = UpperArmWorld.GetLocation()  + GetRightVector() * 75;
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner()->GetParentActor());
 	Params.AddIgnoredActor(GetOwner());
-
+	
 	if (GetWorld()->LineTraceSingleByChannel(Hit, StartWorld, EndWorld, ECC_Visibility, Params))
 	{
 		FVector LocalPoint = UpperArmWorld.InverseTransformPosition(Hit.ImpactPoint);
-		Pose.Position = LocalPoint;
+		TargetPose.Position = LocalPoint;
 
 		FVector UpLocal = UpperArmWorld.InverseTransformVector(FVector::UpVector);
 		FVector NormalLocal = UpperArmWorld.InverseTransformVector(Hit.ImpactNormal);
 
-		Pose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
+		TargetPose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
+		return true;
 	}
-	else
-	{
-		Pose.Position = FVector(0,25,  -50);
-		Pose.Rotation = FQuat::Identity;
-	}
-	FVector WorldPos = UpperArmWorld.TransformPosition(Pose.Position);
+	FVector WorldPos = UpperArmWorld.TransformPosition(TargetPose.Position);
 	//DrawDebugLine(GetWorld(), StartWorld, EndWorld, FColor::Red);
 	//DrawDebugSphere(GetWorld(), WorldPos, 	8.f, 12, FColor::Red);
-	return Pose;
+	return false;
 }
 

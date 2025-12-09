@@ -31,12 +31,18 @@ public:
 	static void DisablePhysicsRecursively(USceneComponent* Comp);
 	static void EnablePhysicsRecursively(USceneComponent* Comp);
 
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") TSubclassOf<UObject> ItemInHand;
+	UFUNCTION(BlueprintCallable) void AttachToBackHolster();
+	UFUNCTION(BlueprintCallable) void DeattachToBackHolster();
+
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
 	AMovingModel* MovingModel = nullptr;
 	float LastKnownClosestDistance = 0.0f;
 	AActor* ClosestActor = nullptr;
 	USceneComponent* ClosestComponent = nullptr;
+	FTransform BackItemHolsterTransform = FTransform();
+	
 };
 
 static void GetAllComponentsWithTag( UWorld* World, FName Tag, TArray<USceneComponent*>& OutComponents)

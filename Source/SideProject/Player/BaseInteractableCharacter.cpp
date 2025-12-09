@@ -198,6 +198,50 @@ void ABaseInteractableCharacter::PickUpItemToHand()
 	}
 }
 
+void ABaseInteractableCharacter::AttachToBackHolster()
+{
+	if (IsValid(BackItemHolster)) return;
+
+	if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
+	{
+		USceneComponent* RootComp = ClosestActor->GetRootComponent();
+		if (!IsValid(RootComp)) return;
+		
+		//DisablePhysicsRecursively(RootComp);
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+		{
+			Prim->SetMobility(EComponentMobility::Movable);
+			Prim->SetSimulatePhysics(false);
+			Prim->SetEnableGravity(false);
+			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		ClosestActor->AttachToComponent(Cast<USceneComponent>(BackItemHolster), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		BackItemHolster = ClosestActor;
+	}
+	else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
+	{
+		AActor*ComponentOwner = ClosestComponent->GetOwner();
+		USceneComponent* RootComp = ComponentOwner->GetRootComponent();
+		if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
+		
+		//DisablePhysicsRecursively(RootComp);
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+		{
+			Prim->SetMobility(EComponentMobility::Movable);
+			Prim->SetSimulatePhysics(false);
+			Prim->SetEnableGravity(false);
+			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+		ComponentOwner->AttachToComponent(Cast<USceneComponent>(BackItemHolster), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		BackItemHolster = ComponentOwner;
+	}
+}
+void ABaseInteractableCharacter::DeattachToBackHolster()
+{
+	if (!IsValid(BackItemHolster)) return;
+	PickUpItemToHand();
+}
+
 AActor* ABaseInteractableCharacter::GetClosestActorItem(AActor* InActor)
 {
 	if (IsValid(InActor) && !InActor->IsHidden())

@@ -26,7 +26,14 @@ void AMovingModel::InitSceneComponents()
 	Legs = BuildLimbChains<UMoveLeg>(Hips,TEXT("UpperLeg_"),TEXT("Knee_"),TEXT("Foot_"));
 
 	// Get Chest
-	Chest = FindChildByExactName(Hips, TEXT("Chest"));
+	TArray<USceneComponent*> AllComponents;
+	this->GetComponents<USceneComponent>(AllComponents);
+	for (USceneComponent* Comp : AllComponents)
+	{
+		if (!Comp) continue;
+		if (Comp->GetName() == TEXT("Chest")) Chest = Comp;
+	}
+	
 	if (!Chest)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Chest not found"));
@@ -44,7 +51,8 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	SetLegsMovingAnim();
+	SetLegsIdleAnim();
+	SetArmsIdleAnim();
 }
 
 void AMovingModel::Tick(float DeltaTime)
@@ -122,11 +130,37 @@ void AMovingModel::SetLegsJumpingAnim()
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
-		UpperLeg->SetJumpingAnim(InteractableCharacter->GetMovementComponent()->IsFalling(), GetWorld()->GetTimeSeconds());
+		UpperLeg->SetJumpingAnim();
 	}
 }
 
-
+void AMovingModel::SetArmsIdleAnim()
+{
+	for (FLimbChain& Arm : Arms)
+	{
+		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
+		UpperArm->SetIdleAnim();
+	}
+}
+void AMovingModel::SetArmsMovingAnim()
+{
+	for (FLimbChain& Arm : Arms)
+	{
+		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
+		//UpperArm->Set();
+	}
+}
+void AMovingModel::SetArmsWaveAnim()
+{
+	for (FLimbChain& Arm : Arms)
+	{
+		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
+		if (UpperArm->GetName().EndsWith(TEXT("_R")))
+		{
+			UpperArm->SetWaveAnim();
+		}
+	}
+}
 
 void AMovingModel::DrawDebugJoints()
 {

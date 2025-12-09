@@ -72,13 +72,6 @@ bool UActionMoveTo::IsDone_Implementation() const
 	{
 		return true;
 	}
-	// float Distance = FVector::Dist( Pawn->GetActorLocation(), TargetLocation);
-	// if (Distance <= MinDistance)
-	// {
-	// 	MovingModel->SetLegsMovingAnim();
-	// 	return true;
-	// }
-
 	if (bMoveCompleted) MovingModel->SetLegsIdleAnim();
 	return bMoveCompleted;
 }
