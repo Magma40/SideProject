@@ -67,6 +67,14 @@ void UMoveArm::SetIdleAnim()
 	TargetPose.Rotation = FQuat::Identity;
 }
 
+void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
+{
+	ActionEnabled = true;
+	const FTransform Xform = ArmParts[0]->GetComponentTransform();
+	FVector HolsterLocationPos = Xform.InverseTransformPosition(HolsterLocation);
+	TargetPose.Position = HolsterLocationPos;
+	TargetPose.Rotation = FQuat::Identity;	
+}
 
 void UMoveArm::UpdateArm()
 {

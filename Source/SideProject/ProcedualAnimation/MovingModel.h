@@ -46,6 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable) void SetArmsIdleAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsMovingAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
+	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim();
 	
 	static USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target);
 	static TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix);
@@ -56,6 +57,15 @@ public:
 		for(FLimbChain Arm : Arms)
 		{
 			if (Arm.End->GetName().EndsWith(TEXT("_R"))) return Arm.End;
+		}
+		return nullptr;
+	}
+
+	USceneComponent* GetLeftHand() const
+	{
+		for(FLimbChain Arm : Arms)
+		{
+			if (Arm.End->GetName().EndsWith(TEXT("_L"))) return Arm.End;
 		}
 		return nullptr;
 	}

@@ -31,6 +31,7 @@ public:
 	static void DisablePhysicsRecursively(USceneComponent* Comp);
 	static void EnablePhysicsRecursively(USceneComponent* Comp);
 
+	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster();
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster();
 	UFUNCTION(BlueprintCallable) void DeattachToBackHolster();
 
@@ -41,8 +42,7 @@ public:
 	float LastKnownClosestDistance = 0.0f;
 	AActor* ClosestActor = nullptr;
 	USceneComponent* ClosestComponent = nullptr;
-	FTransform BackItemHolsterTransform = FTransform();
-	
+	USceneComponent* BackHolster = nullptr;
 };
 
 static void GetAllComponentsWithTag( UWorld* World, FName Tag, TArray<USceneComponent*>& OutComponents)

@@ -36,6 +36,7 @@ public:
 	void UpdateArm();
 	void SetWaveAnim();
 	void SetIdleAnim();
+	void SetBackHolsterAnim(FVector HolsterLocation);
 
 private:
 	FArmsPose TargetPose = FArmsPose();

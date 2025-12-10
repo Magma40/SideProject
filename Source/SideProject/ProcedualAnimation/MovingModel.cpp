@@ -161,6 +161,19 @@ void AMovingModel::SetArmsWaveAnim()
 		}
 	}
 }
+void AMovingModel::SetArmsBackHolsterAnim()
+{
+	for (FLimbChain& Arm : Arms)
+	{
+		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
+		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
+		if (UpperArm->GetName().EndsWith(TEXT("_L")))
+		{
+			UpperArm->SetBackHolsterAnim(InteractableCharacter->BackHolster->GetComponentLocation());
+		}
+	}
+}
+
 
 void AMovingModel::DrawDebugJoints()
 {

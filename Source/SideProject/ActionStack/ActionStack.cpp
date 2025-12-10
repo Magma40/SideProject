@@ -47,7 +47,7 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 	if (CurrentAction != nullptr)
 	{
-		CurrentAction->Execute_OnUpdate(CurrentAction.GetObject());
+		CurrentAction->Execute_OnUpdate(CurrentAction.GetObject()); // Changing this while being updated causes "Exception 0x80000003"
 		if (ActionStack.Num() > 0 && CurrentAction == ActionStack[0])
 		{
 			if (CurrentAction->Execute_IsDone(CurrentAction.GetObject()))
