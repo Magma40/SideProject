@@ -16,6 +16,16 @@ struct FLimbChain
 	UPROPERTY()  USceneComponent* End = nullptr;		 // Foot or Hand
 };
 
+UENUM(BlueprintType)
+enum class EAnimState : uint8
+{
+	Idle,
+	Moving,
+	Stepping,
+	Jumping,
+	Landing
+};
+
 class UMoveLeg;
 class UMoveArm;
 class ULimb;

@@ -51,7 +51,7 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	SetLegsIdleAnim();
+	SetLegsMovingAnim();
 	SetArmsIdleAnim();
 }
 
@@ -86,13 +86,12 @@ float AMovingModel::UpdateLegs(float DeltaTime)
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		if (!IsValid(UpperLeg)) continue;
-
-		if (!UpperLeg->IsStepping() && UpperLeg->ShouldStep()) { UpperLeg->StartStep(); }
-		if (UpperLeg->IsStepping()) { UpperLeg->UpdateStep(DeltaTime); }
-
-		UpperLeg->UpdateLeg();   // This could be updated in the latter for better smoothness
-		
-		if (UpperLeg->IsStepping()) HipSway = UpperLeg->GetLiftAmount() * (UpperLeg->GetName().EndsWith(TEXT("_R")) ? 1.f : -1.f);
+		if (UpperLeg->IsStepping())
+		{
+			float Lift = UpperLeg->GetLiftAmount();
+			bool IsRight = UpperLeg->GetName().EndsWith(TEXT("_R"));
+			HipSway = Lift * (IsRight ? 1.f : -1.f);
+		}
 	}
 	return HipSway;
 }

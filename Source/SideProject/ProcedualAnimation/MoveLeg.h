@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "MoveLeg.generated.h"
 
 USTRUCT(BlueprintType)
@@ -29,39 +30,58 @@ protected: // Functions
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Init();
 
+	void SwitchState(EAnimState NewState);
+	void UpdateState(float DeltaTime);
+
+	void EnterIdle();
+	void EnterMoving();
+	void EnterJumping();
+	void EnterStepping();
+	void EnterLanding();
+	
+	void UpdateIdle(float DeltaTime);
+	void UpdateMoving(float DeltaTime);
+	void UpdateJumping(float DeltaTime);
+	void UpdateStepping(float DeltaTime);
+	void UpdateLanding(float DeltaTime);
+	
 public:
 	void SetIdleAnim();
 	void SetMovingAnim();
 	void SetJumpingAnim();
+
+	void UpdateIK(float DeltaTime);
+
+	FLegsPose GetGroundPose() const;
+	const FLegsPose& GetTargetPose() const { return TargetPose; }
 	bool IsStepping() const { return bIsStepping; }
 	float GetLiftAmount() const { return LiftAmount; }
-	const FLegsPose& GetTargetPose() const { return TargetPose; }
-	FLegsPose GetGroundPose() const;
 	
 	bool ShouldStep() const;
 	void StartStep();
-	void UpdateStep(float DeltaTime);
-	void UpdateLeg();
+	//void UpdateStep(float DeltaTime);
+	//void UpdateLeg();
 
 protected: // Variables
+	EAnimState State = EAnimState::Idle;
+	
 	bool bIsStepping = false;
+	bool bFootPlanted = true;
+
+	bool bIsJumping = false;
+	bool bHasLeftGround = false;
+	
 	float StepElapsed = 0.0f;
 	float LiftAmount  = 0.0f;
-	bool bFootPlanted = true;
-	
 	float AirElapsedTime = 0.0f;
-	float AirRiseSpeed = 1.0f;
-	float MaxAirRise = 60.0f;
-	
-	bool bIsJumping = false;
-	bool bJustLanded = false;
-	float LastLandTime = 0.0f;
 
+	float LastStepEndTime = 0.f;
+
+	
 	FLegsPose TargetPose = FLegsPose();
 	FLegsPose SourcePose = FLegsPose();
 	FLegsPose StepTargetPose  = FLegsPose();
 	FLegsPose LockedFootPosition = FLegsPose();
-	FVector LockedJumpFootLocal = FVector::ZeroVector;
 	FVector TargetLocal = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite) TArray<USceneComponent*> LegParts;
@@ -73,6 +93,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepHeight = 40.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float GroundOffset = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float FootRangeStepForward = 20.0f;
-	UPROPERTY() bool ActionEnabled = false;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg IK") float AirRiseSpeed = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg IK") float MaxAirRise = 60.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepCooldown = 0.25f;
 };
