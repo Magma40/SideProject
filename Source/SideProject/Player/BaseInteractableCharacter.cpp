@@ -42,7 +42,7 @@ bool ABaseInteractableCharacter::ActionPickUpItem()
 	{
 		if (TryToPickUpItem())
 		{
-			PickUpItemToHand();
+			PickUpItemToHand(nullptr);
 			return true;
 		}
 	}
@@ -52,172 +52,130 @@ bool ABaseInteractableCharacter::ActionPickUpItem()
 
 bool ABaseInteractableCharacter::AbleToPickUpItem()
 {
-		if (IsValid(ClosestActor) || IsValid(ClosestComponent)) return false;
+		if (IsValid(ItemInHand)) return false;
 		return true;
 }
 
-bool ABaseInteractableCharacter::TryToPickUpItem() // Is this even needed?
+bool ABaseInteractableCharacter::TryToPickUpItem()
 {
-	LastKnownClosestDistance = FLT_MAX;
-	ClosestActor = nullptr;
-	ClosestComponent = nullptr;
+	FVector HandLocation = MovingModel->GetLeftHand()->GetComponentLocation();
+	FPickupCandidate Best;
 	
-	TArray<AActor*> ActorsAround;
+	TArray<AActor*> ActorsAround; //  Gather actors
 	UGameplayStatics::GetAllActorsWithTag (GetWorld(), "HandHeldItem", ActorsAround);
-	if (ActorsAround.Num() > 0)
+	for (AActor* Actor : ActorsAround)
 	{
-		for(AActor* FoundActor : ActorsAround)
+		if (Actor == BackItemHolster) continue;
+		float Dist = FVector::Dist(HandLocation, Actor->GetActorLocation());
+		if (Dist < Best.Distance)
 		{
-			AActor*  NewClosestActor = GetClosestActorItem(FoundActor);
-			if (NewClosestActor != nullptr) ClosestActor =NewClosestActor;
+			Best.Object = Actor;
+			Best.Distance = Dist;
 		}
 	}
 
-	TArray<USceneComponent*> ComponentsAround;
+	TArray<USceneComponent*> ComponentsAround;  //  Gather components 
 	GetAllComponentsWithTag(GetWorld(), "HandHeldItem", ComponentsAround);
-	if (ComponentsAround.Num() > 0)
+	for (USceneComponent* Comp : ComponentsAround)
 	{
-		for(USceneComponent* FoundComponent : ComponentsAround)
+		if (Comp == BackItemHolster) continue;
+		float Dist = FVector::Dist(HandLocation, Comp->GetComponentLocation());
+		if (Dist < Best.Distance)
 		{
-			USceneComponent*  NewClosestComponent = GetClosestComponentItem(FoundComponent);
-			if (NewClosestComponent != nullptr) ClosestComponent = NewClosestComponent;
+			Best.Object = Comp;
+			Best.Distance = Dist;
 		}
 	}
 	
-	if (IsValid(ClosestActor) && IsValid(ClosestComponent)) // This is getting too bloated
+	if (Best.Object && Best.Distance <= MinDistanceToPickUpItem)
 	{
-		float ActorDistance =		 UE::Geometry::Distance(MovingModel->GetLeftHand()->GetComponentLocation(), ClosestActor->GetActorLocation());
-		float ComponentDistance = UE::Geometry::Distance(MovingModel->GetLeftHand()->GetComponentLocation(), ClosestComponent->GetComponentLocation());
-		if (ActorDistance < ComponentDistance)
-		{
-			ClosestComponent = nullptr;
-			if (ActorDistance <= MinDistanceToPickUpItem) return true;
-		}
-		else if (ComponentDistance < ActorDistance)
-		{
-			ClosestActor = nullptr;
-			if (ComponentDistance <= MinDistanceToPickUpItem) return true;
-		}	
+		ClosestObject = Best.Object;
+		return true;
 	}
-	else if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
-	{
-		float ActorDistance = UE::Geometry::Distance(MovingModel->GetLeftHand()->GetComponentLocation(), ClosestActor->GetActorLocation());
-		if (ActorDistance <= MinDistanceToPickUpItem) return true;
-	}
-	else if (IsValid(ClosestComponent) && !IsValid(ClosestActor))
-	{
-		float ComponentDistance = UE::Geometry::Distance(MovingModel->GetLeftHand()->GetComponentLocation(), ClosestComponent->GetComponentLocation());
-		if (ComponentDistance <= MinDistanceToPickUpItem) return true;
-	}
-	
 	return false;
 }
 
 void ABaseInteractableCharacter::DropItemInHand()
 {
-	if (!GetCharacterMovement()->IsFalling() && (IsValid(ItemInHand)))
-	{
-		FVector Start = GetActorLocation() + FVector(0, 0, 50); 
-		FVector End = Start + (GetActorForwardVector() * 100.0f);
+	if (!IsValid(ItemInHand)) return;
+	if (GetCharacterMovement()->IsFalling()) return;
 
-		USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
-		AActor* ActorItem = Cast<AActor>(ItemInHand);
-		
-		FHitResult HitResult(ForceInit);
-		FCollisionQueryParams CollisionParams;
-		CollisionParams.AddIgnoredActor(this);
-		if (IsValid(ComponentItem))
+	FVector Start = GetActorLocation() + FVector(0, 0, 50); 
+	FVector End = Start + (GetActorForwardVector() * 100.0f);
+
+	USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
+	AActor* ActorItem = Cast<AActor>(ItemInHand);
+	AActor* OwnerActor = nullptr;
+	USceneComponent* RootComp = nullptr;
+
+	if (IsValid(ActorItem))
+	{
+		OwnerActor = ActorItem;
+		RootComp = ActorItem->GetRootComponent();
+	}
+	else if (IsValid(ComponentItem))
+	{
+		OwnerActor = ComponentItem->GetOwner();
+		RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
+	}
+
+	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
+
+	FHitResult HitResult(ForceInit);
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	CollisionParams.AddIgnoredActor(OwnerActor);
+	CollisionParams.bTraceComplex = true;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
+	if (!bHit) // Only drop if nothing was hit
+	{
+		OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		OwnerActor->SetActorLocation(End);
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
 		{
-			CollisionParams.AddIgnoredComponent(Cast<UPrimitiveComponent>(ItemInHand));
+			Prim->SetMobility(EComponentMobility::Movable);
+			Prim->SetSimulatePhysics(true);
+			Prim->SetEnableGravity(true);
+			Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		}
-		else if (IsValid(ActorItem))
-		{
-			CollisionParams.AddIgnoredActor(ActorItem);
-		}
-		CollisionParams.bTraceComplex = true;
-		
-		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
-		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
-		if (!bHit) // Only drop if nothing was hit
-		{
-			if (IsValid(ActorItem) && !IsValid(ComponentItem))
-			{
-				USceneComponent* RootComp = ActorItem->GetRootComponent();
-				if (!IsValid(RootComp)) return;
-				
-				ActorItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-				ActorItem->SetActorLocation(End);
-				if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-				{
-					Prim->SetMobility(EComponentMobility::Movable);
-					Prim->SetSimulatePhysics(true);
-					Prim->SetEnableGravity(true);
-					Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				}
-				//EnablePhysicsRecursively(RootComp);
-				ItemInHand = nullptr;
-				ClosestActor = nullptr;
-				ClosestComponent = nullptr;
-			}
-			else if (IsValid(ComponentItem) &&  !IsValid(ActorItem))
-			{
-				AActor* ComponentOwner = ComponentItem->GetOwner();
-				USceneComponent* RootComp = ComponentOwner->GetRootComponent();
-				if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
-				
-				ComponentOwner->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-				ComponentOwner->SetActorLocation(End);
-				if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-				{
-					Prim->SetMobility(EComponentMobility::Movable);
-					Prim->SetSimulatePhysics(true);
-					Prim->SetEnableGravity(true);
-					Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				}
-				//EnablePhysicsRecursively(RootComp);
-				ItemInHand = nullptr;
-				ClosestActor = nullptr;
-				ClosestComponent = nullptr;
-			}
-		}
+		ItemInHand = nullptr;
 	}
 }
 	
-void ABaseInteractableCharacter::PickUpItemToHand()
+void ABaseInteractableCharacter::PickUpItemToHand(UObject* inSpecificPickUpItem)
 {
-	if (IsValid(ClosestActor) && !IsValid(ClosestComponent))
+	if (IsValid(inSpecificPickUpItem)) ClosestObject = inSpecificPickUpItem;
+	if (!IsValid(ClosestObject)) return;
+	
+	USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
+	AActor* ActorItem = Cast<AActor>(ClosestObject);
+	AActor* OwnerActor = nullptr;
+	USceneComponent* RootComp = nullptr;
+
+	if (IsValid(ActorItem))
 	{
-		ItemInHand = ClosestActor;
-		USceneComponent* RootComp = ClosestActor->GetRootComponent();
-		if (!IsValid(RootComp)) return;
-		
-	    //DisablePhysicsRecursively(RootComp);
-		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-		{
-			Prim->SetMobility(EComponentMobility::Movable);
-			Prim->SetSimulatePhysics(false);
-			Prim->SetEnableGravity(false);
-			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		ClosestActor->AttachToComponent(MovingModel->GetLeftHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		OwnerActor = ActorItem;
+		RootComp = ActorItem->GetRootComponent();
 	}
-	else if (IsValid(ClosestComponent) &&  !IsValid(ClosestActor))
+	else if (IsValid(ComponentItem))
 	{
-		ItemInHand = ClosestComponent;
-		AActor*ComponentOwner = ClosestComponent->GetOwner();
-		USceneComponent* RootComp = ComponentOwner->GetRootComponent();
-		if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
-		
-		//DisablePhysicsRecursively(RootComp);
-		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-		{
-			Prim->SetMobility(EComponentMobility::Movable);
-			Prim->SetSimulatePhysics(false);
-			Prim->SetEnableGravity(false);
-			Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-		ComponentOwner->AttachToComponent(MovingModel->GetLeftHand(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		OwnerActor = ComponentItem->GetOwner();
+		RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
 	}
+
+	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
+
+	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+	{
+		Prim->SetMobility(EComponentMobility::Movable);
+		Prim->SetSimulatePhysics(false);
+		Prim->SetEnableGravity(false);
+		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	OwnerActor->AttachToComponent(MovingModel->GetLeftHand(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	ItemInHand = ClosestObject;
 }
 
 void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this too fast will break it, resulting mostly with BackItemHolster being valid
@@ -226,7 +184,7 @@ void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this to
 	if (Distance > 100) return;
 	if (IsValid(BackItemHolster) && !IsValid(ItemInHand))
 	{
-		DeattachToBackHolster();
+		DeattachFromBackHolster();
 	}
 	else if (!IsValid(BackItemHolster) && IsValid(ItemInHand))
 	{
@@ -236,155 +194,22 @@ void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this to
 
 void ABaseInteractableCharacter::AttachToBackHolster()
 {
-	if (ItemInHand)
-	{
-		USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
-		AActor* ActorItem = Cast<AActor>(ItemInHand);
-		if (IsValid(ComponentItem))
-		{
-			AActor*ComponentOwner = ComponentItem->GetOwner();
-			USceneComponent* RootComp = ComponentOwner->GetRootComponent();
-			if (!IsValid(ComponentOwner) || !IsValid(RootComp)) return;
-		
-			//DisablePhysicsRecursively(RootComp);
-			if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-			{
-				Prim->SetMobility(EComponentMobility::Movable);
-				Prim->SetSimulatePhysics(false);
-				Prim->SetEnableGravity(false);
-				Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			}
-			ComponentOwner->AttachToComponent(BackHolster, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-			BackItemHolster = ComponentOwner;
-			ItemInHand = nullptr;
-			ClosestActor = nullptr;
-			ClosestComponent = nullptr;
-		}
-		else if (IsValid(ActorItem))
-		{
-			USceneComponent* RootComp = ActorItem->GetRootComponent();
-			if (!IsValid(RootComp)) return;
-		
-			//DisablePhysicsRecursively(RootComp);
-			if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
-			{
-				Prim->SetMobility(EComponentMobility::Movable);
-				Prim->SetSimulatePhysics(false);
-				Prim->SetEnableGravity(false);
-				Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			}
-			ActorItem->AttachToComponent(BackHolster, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-			BackItemHolster = ActorItem;
-			ItemInHand = nullptr;
-			ClosestActor = nullptr;
-			ClosestComponent = nullptr;
-		}
-	}
+	if (!IsValid(ItemInHand)) return;
+
+	USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
+	AActor* ActorItem = Cast<AActor>(ItemInHand);
+	AActor* OwnerActor = nullptr;
+
+	if (IsValid(ActorItem)) OwnerActor = ActorItem;
+	else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
+
+	OwnerActor->AttachToComponent(BackHolster, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	BackItemHolster = OwnerActor;
+	ItemInHand = nullptr;
 }
-void ABaseInteractableCharacter::DeattachToBackHolster()
+void ABaseInteractableCharacter::DeattachFromBackHolster()
 {
-	USceneComponent* ComponentItem = Cast<USceneComponent>(BackItemHolster);
-	AActor* ActorItem = Cast<AActor>(BackItemHolster);
-	if (IsValid(ActorItem)) ClosestActor = ActorItem;
-	else if (IsValid(ComponentItem)) ClosestComponent = ComponentItem;
+	PickUpItemToHand(BackItemHolster);
 	BackItemHolster = nullptr;
-	PickUpItemToHand();
-}
-
-AActor* ABaseInteractableCharacter::GetClosestActorItem(AActor* InActor)
-{
-	if (IsValid(InActor) && !InActor->IsHidden())
-	{
-		float DistanceToItem = GetDistanceTo(InActor);
-		if (DistanceToItem < LastKnownClosestDistance)
-		{
-			LastKnownClosestDistance = DistanceToItem;
-			return InActor;
-		}
-	}
-	return nullptr;
-}
-
-USceneComponent* ABaseInteractableCharacter::GetClosestComponentItem(USceneComponent* InComponent)
-{
-	if (IsValid(InComponent))
-	{
-		float DistanceToItem =UE::Geometry::Distance(this->GetActorLocation(), InComponent->GetComponentLocation());
-		if (DistanceToItem < LastKnownClosestDistance)
-		{
-			LastKnownClosestDistance = DistanceToItem;
-			return InComponent;
-		}
-	}
-	return nullptr;
-}
-
-UPrimitiveComponent* ABaseInteractableCharacter::GetPrimitiveFromActor(AActor* Actor)
-{
-	if (!Actor) return nullptr;
-
-	TArray<USceneComponent*> Components;
-	Actor->GetComponents<USceneComponent>(Components);
-
-	for (USceneComponent* Comp : Components)
-	{
-		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
-		{
-			return Prim; // first found
-		}
-
-		// check children recursively
-		TArray<USceneComponent*> Children;
-		Comp->GetChildrenComponents(true, Children);
-		for (USceneComponent* ChildComp : Children)
-		{
-			if (UPrimitiveComponent* PrimChild = Cast<UPrimitiveComponent>(ChildComp))
-			{
-				return PrimChild;
-			}
-		}
-	}
-
-	return nullptr;
-}
-
-void ABaseInteractableCharacter::DisablePhysicsRecursively(USceneComponent* Comp)
-{
-	if (!Comp) return;
-
-	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
-	{
-		Prim->SetMobility(EComponentMobility::Movable);
-		Prim->SetSimulatePhysics(false);
-		Prim->SetEnableGravity(false);
-		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	TArray<USceneComponent*> Children;
-	Comp->GetChildrenComponents(true, Children);
-	for (USceneComponent* Child : Children)
-	{
-		DisablePhysicsRecursively(Child);
-	}
-}
-
-void ABaseInteractableCharacter::EnablePhysicsRecursively(USceneComponent* Comp)
-{
-	if (!Comp) return;
-
-	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
-	{
-		Prim->SetMobility(EComponentMobility::Movable);
-		Prim->SetSimulatePhysics(true);
-		Prim->SetEnableGravity(true);
-		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}
-
-	TArray<USceneComponent*> Children;
-	Comp->GetChildrenComponents(true, Children);
-	for (USceneComponent* Child : Children)
-	{
-		EnablePhysicsRecursively(Child);
-	}
 }
 
