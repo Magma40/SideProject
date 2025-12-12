@@ -19,6 +19,7 @@ struct FLimbChain
 UENUM(BlueprintType)
 enum class EAnimState : uint8
 {
+	None,
 	Idle,
 	Moving,
 	Stepping,

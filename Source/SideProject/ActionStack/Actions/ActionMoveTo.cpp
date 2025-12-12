@@ -52,13 +52,13 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 		
 		bMoveCompleted = true;
 	}
+	MovingModel->SetLegsMovingAnim();
 }
 
 
 void UActionMoveTo::OnUpdate_Implementation() 
 {
 	Super::OnUpdate_Implementation();
-	MovingModel->SetLegsMovingAnim();
 }
 
 bool UActionMoveTo::IsDone_Implementation() const

@@ -1,8 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 #include "MainCharacter.h"
-
-#include <ios>
-
 #include "Engine/LocalPlayer.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -54,19 +51,19 @@ void AMainCharacter::BeginPlay()
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (TheMainCameraInScene != nullptr && !EnabledInput && GetCharacterMovement()->IsFalling())
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,FString::Printf(TEXT("bWasJumping = %d"), bWasJumping));	uint8 bIsFallingNow = GetCharacterMovement()->IsFalling();
+	
+	if (GetCharacterMovement()->IsFalling())
 	{
-			// Slow rotation while in air
-			GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
-			MaxSprintSpeed = DefaultMaxSprintSpeed  + JumpSpeedForceChange;
-			//MovingModel->SetLegsJumpingAnim();
+		// Slow rotation while in air
+		GetCharacterMovement()->RotationRate = FRotator(0.f, 100.0f, 0.f);
+		MaxSprintSpeed = DefaultMaxSprintSpeed  + JumpSpeedForceChange;
 	}
 	else
 	{
 		// Normal rotation rate on ground
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 		MaxSprintSpeed = DefaultMaxSprintSpeed;
-		//MovingModel->SetLegsMovingAnim();
 	}
 }
 
@@ -131,4 +128,18 @@ void AMainCharacter::ContinuousFalling(float Right, float Forward)
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
 }
+
+
+void AMainCharacter::Jump() 
+{
+	Super::Jump();
+	MovingModel->SetLegsJumpingAnim();
+}
+void AMainCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	MovingModel->SetLegsMovingAnim();
+}
+
+
 

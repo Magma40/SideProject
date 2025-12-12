@@ -46,6 +46,9 @@ protected: //Variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool EnabledInput = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float JumpSpeedForceChange = 100.0f;
+
+	virtual void Jump() override;
+	virtual void Landed(const FHitResult& Hit) override;
 	
 	float LastOldForwardValue = 0.0f;
 	float LastOldRightValue = 0.0f;

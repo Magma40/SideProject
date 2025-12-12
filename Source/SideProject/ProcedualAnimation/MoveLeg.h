@@ -63,7 +63,7 @@ public:
 	//void UpdateLeg();
 
 protected: // Variables
-	EAnimState State = EAnimState::Idle;
+	EAnimState State = EAnimState::None;
 	
 	bool bIsStepping = false;
 	bool bFootPlanted = true;
@@ -94,6 +94,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float GroundOffset = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float FootRangeStepForward = 20.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg IK") float AirRiseSpeed = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg IK") float MaxAirRise = 60.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg IK") float MaxAirRise = 120.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Leg") float StepCooldown = 0.25f;
 };

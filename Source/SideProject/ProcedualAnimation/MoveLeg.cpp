@@ -53,7 +53,10 @@ void UMoveLeg::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
+	TargetPose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
+	TargetPose.Rotation = LegParts[2]->GetComponentQuat();
 	LockedFootPosition.Position = TargetPose.Position;
+	LockedFootPosition.Rotation = TargetPose.Rotation;
 }
 
 void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -74,6 +77,12 @@ void UMoveLeg::SwitchState(EAnimState NewState)
 	case EAnimState::Jumping:	EnterJumping(); break;
 	case EAnimState::Stepping:	EnterStepping(); break;
 	case EAnimState::Landing:	EnterLanding(); break;
+	case EAnimState::None :
+		{
+			UE_LOG(LogTemp, Error, TEXT("State Is None"));
+			SwitchState(EAnimState::Idle);
+			break;
+		}
 	}
 }
 
@@ -86,12 +95,18 @@ void UMoveLeg::UpdateState(float DeltaTime)
 	case EAnimState::Jumping:	UpdateJumping(DeltaTime); break;
 	case EAnimState::Stepping:	UpdateStepping(DeltaTime); break;
 	case EAnimState::Landing:	UpdateLanding(DeltaTime); break;
+	case EAnimState::None :
+		{
+			UE_LOG(LogTemp, Error, TEXT("State Is None"));
+			SwitchState(EAnimState::Idle);
+			break;
+		}
 	}
 }
 
 void UMoveLeg::SetIdleAnim() { SwitchState(EAnimState::Idle); }
 
-void UMoveLeg::SetMovingAnim() { SwitchState(EAnimState::Moving); }
+void UMoveLeg::SetMovingAnim() {SwitchState(EAnimState::Moving);}
 
 void UMoveLeg::SetJumpingAnim() { SwitchState(EAnimState::Jumping);}
 
@@ -102,20 +117,16 @@ void UMoveLeg::EnterIdle()
 	TargetLocal = TargetPose.Position;
 }
 
-void UMoveLeg::EnterMoving()
-{
-	// bIsJumping = false;
-	// bFootPlanted = true;
-	// TargetLocal = TargetPose.Position;
-}
+void UMoveLeg::EnterMoving() { bIsJumping = false; }
 
 void UMoveLeg::EnterJumping()
 {
 	bIsJumping = true;
 	bFootPlanted = false;
+	bIsStepping = false;
 	AirElapsedTime = 0;
 	// Freeze the current foot
-	LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);
+	LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);;
 }
 
 void UMoveLeg::EnterStepping() { }
@@ -144,13 +155,14 @@ void UMoveLeg::UpdateMoving(float DeltaTime)
 	}
 }
 
-void UMoveLeg::UpdateJumping(float DeltaTime)
+void UMoveLeg::UpdateJumping(float DeltaTime) // Why am I such a good programmer?
 {
 	AirElapsedTime += DeltaTime;
 	float Rise = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
-	FVector Goal = TargetPose.Position + FVector(0, 0, Rise);
+	FVector Goal = StepTargetPose.Position + FVector(0, 0, Rise);
 	// Smooth blend
 	TargetLocal = FMath::VInterpTo(TargetLocal, Goal, DeltaTime, 10.f);
+	LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);;
 }
 
 void UMoveLeg::UpdateStepping(float DeltaTime)

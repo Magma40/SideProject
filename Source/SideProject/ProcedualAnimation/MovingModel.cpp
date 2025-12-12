@@ -51,7 +51,7 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	SetLegsMovingAnim();
+	SetLegsIdleAnim();
 	SetArmsIdleAnim();
 }
 
@@ -73,7 +73,7 @@ void AMovingModel::UpdateHips(float DeltaTime)
 	//Apply New Hip Location
 	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
 	float DesiredHipHeight = BaseHipHeight;
-	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 2.0f;
+	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
 	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 }
