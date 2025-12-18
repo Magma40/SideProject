@@ -59,8 +59,6 @@ public:
 	
 	bool ShouldStep() const;
 	void StartStep();
-	//void UpdateStep(float DeltaTime);
-	//void UpdateLeg();
 
 protected: // Variables
 	EAnimState State = EAnimState::None;

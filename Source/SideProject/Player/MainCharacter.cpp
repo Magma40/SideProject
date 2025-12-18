@@ -133,11 +133,20 @@ void AMainCharacter::ContinuousFalling(float Right, float Forward)
 void AMainCharacter::Jump() 
 {
 	Super::Jump();
+	//MovingModel->SetLegsJumpingAnim();
+}
+
+void AMainCharacter::Falling() 
+{
+	Super::Falling();
+	if (MovingModel == nullptr) return;
 	MovingModel->SetLegsJumpingAnim();
 }
+
 void AMainCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+	if (MovingModel == nullptr) return;
 	MovingModel->SetLegsMovingAnim();
 }
 

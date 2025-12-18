@@ -3,8 +3,6 @@
 
 #include "ProcedualAnimation/MoveArm.h"
 
-#include "SkeletalMeshAttributes.h"
-
 UMoveArm::UMoveArm() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UMoveArm::Init()
@@ -45,11 +43,92 @@ void UMoveArm::BeginPlay()
 	Init();
 }
 
-
 // Called every frame
 void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UMoveArm::SwitchState(EAnimState NewState)
+{
+	if (State == NewState) return;
+	State = NewState;
+	switch (State)
+	{
+	case EAnimState::Idle:		EnterIdle(); break;
+	case EAnimState::Moving:	EnterMoving(); break;
+	case EAnimState::Jumping:	EnterJumping(); break;
+	case EAnimState::Landing:	EnterLanding(); break;
+	case EAnimState::None :
+		{
+			UE_LOG(LogTemp, Error, TEXT("State Is None"));
+			SwitchState(EAnimState::Idle);
+			break;
+		}
+	}
+}
+
+void UMoveArm::UpdateState(float DeltaTime)
+{
+	switch (State)
+	{
+	case EAnimState::Idle:		UpdateIdle(DeltaTime); break;
+	case EAnimState::Moving:	UpdateMoving(DeltaTime); break;
+	case EAnimState::Jumping:	UpdateJumping(DeltaTime); break;
+	case EAnimState::Landing:	UpdateLanding(DeltaTime); break;
+	case EAnimState::None :
+		{
+			UE_LOG(LogTemp, Error, TEXT("State Is None"));
+			SwitchState(EAnimState::Idle);
+			break;
+		}
+	}
+}
+
+void UMoveArm::SetIdleAnim() { SwitchState(EAnimState::Idle); }
+
+void UMoveArm::SetMovingAnim() {SwitchState(EAnimState::Moving);}
+
+void UMoveArm::SetJumpingAnim() { SwitchState(EAnimState::Jumping);}
+
+void UMoveArm::EnterIdle()
+{
+	ActionEnabled = false;
+	if (ShouldHoldUpHands()) return;
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FQuat::Identity;
+}
+
+void UMoveArm::EnterMoving()
+{
+
+}
+
+void UMoveArm::EnterJumping()
+{
+}
+
+void UMoveArm::EnterLanding()
+{
+}
+
+void UMoveArm::UpdateIdle(float DeltaTime)
+{
+	// Nothing special here (foot locked)
+}
+
+void UMoveArm::UpdateMoving(float DeltaTime)
+{
+}
+
+void UMoveArm::UpdateJumping(float DeltaTime)
+{
+
+}
+
+void UMoveArm::UpdateLanding(float DeltaTime)
+{
+	// Optional landing smoothing
 }
 
 void UMoveArm::SetWaveAnim()
@@ -57,14 +136,6 @@ void UMoveArm::SetWaveAnim()
 		ActionEnabled = true;
 		TargetPose.Position = FVector(20,0,  50);
 		TargetPose.Rotation = FQuat::Identity;	
-}
-
-void UMoveArm::SetIdleAnim()
-{
-	ActionEnabled = false;
-	if (ShouldHoldUpHands()) return;
-	TargetPose.Position = FVector(0,25,  -50);
-	TargetPose.Rotation = FQuat::Identity;
 }
 
 void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
@@ -131,6 +202,8 @@ bool UMoveArm::ShouldHoldUpHands()
 	FTransform UpperArmWorld = this->GetComponentTransform();
 	FVector StartWorld = UpperArmWorld.GetLocation();
 	FVector EndWorld   = UpperArmWorld.GetLocation()  + GetRightVector() * 75;
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FQuat::Identity;
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;

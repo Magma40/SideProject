@@ -117,7 +117,12 @@ void UMoveLeg::EnterIdle()
 	TargetLocal = TargetPose.Position;
 }
 
-void UMoveLeg::EnterMoving() { bIsJumping = false; }
+void UMoveLeg::EnterMoving()
+{
+	bIsJumping = false;
+	bFootPlanted = true;
+	bIsStepping = false;
+}
 
 void UMoveLeg::EnterJumping()
 {
@@ -287,8 +292,8 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 
 FLegsPose UMoveLeg::GetGroundPose() const
 {
-	FLegsPose Pose;
-    FTransform UpperLegWorld = GetComponentTransform();
+	FTransform UpperLegWorld = GetComponentTransform();
+	FLegsPose Pose = TargetPose;
 	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f);
 	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
 

@@ -49,6 +49,7 @@ protected: //Variables
 
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void Falling() override;
 	
 	float LastOldForwardValue = 0.0f;
 	float LastOldRightValue = 0.0f;

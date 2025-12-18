@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "MoveArm.generated.h"
-
 
 USTRUCT(BlueprintType)
 struct FArmsPose
@@ -32,13 +32,33 @@ protected:
 	void Init();
 	bool ShouldHoldUpHands();
 
+	void SwitchState(EAnimState NewState);
+	void UpdateState(float DeltaTime);
+
+	void EnterIdle();
+	void EnterMoving();
+	void EnterJumping();
+	void EnterLanding();
+	
+	void UpdateIdle(float DeltaTime);
+	void UpdateMoving(float DeltaTime);
+	void UpdateJumping(float DeltaTime);
+	void UpdateLanding(float DeltaTime);
+
 public:
 	void UpdateArm();
-	void SetWaveAnim();
+
 	void SetIdleAnim();
+	void SetMovingAnim();
+	void SetJumpingAnim();
+	
+	void SetWaveAnim();
 	void SetBackHolsterAnim(FVector HolsterLocation);
+	
 
 private:
+	EAnimState State = EAnimState::None;
+	
 	FArmsPose TargetPose = FArmsPose();
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
