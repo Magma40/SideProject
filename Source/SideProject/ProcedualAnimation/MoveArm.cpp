@@ -47,6 +47,8 @@ void UMoveArm::BeginPlay()
 void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	UpdateState(DeltaTime);
+	UpdateIK();
 }
 
 void UMoveArm::SwitchState(EAnimState NewState)
@@ -93,7 +95,6 @@ void UMoveArm::SetJumpingAnim() { SwitchState(EAnimState::Jumping);}
 
 void UMoveArm::EnterIdle()
 {
-	ActionEnabled = false;
 	if (ShouldHoldUpHands()) return;
 	TargetPose.Position = FVector(0,25,  -50);
 	TargetPose.Rotation = FQuat::Identity;
@@ -114,11 +115,23 @@ void UMoveArm::EnterLanding()
 
 void UMoveArm::UpdateIdle(float DeltaTime)
 {
-	// Nothing special here (foot locked)
+	if (ShouldHoldUpHands()) return;
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FQuat::Identity;
 }
 
 void UMoveArm::UpdateMoving(float DeltaTime)
 {
+	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();;
+	if (!AnimSubsystem)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UMoveArm - SetWaveAnim - AnimSubsystem was nullptr"));
+		return;
+	}
+	AnimSubsystem->PlayCurveAnim(WaveAnimCurve, 2.0f, [&](float CurrValue)
+	{
+		TargetPose.Position = FVector(CurrValue * 25, 0, CurrValue * 50);
+	});
 }
 
 void UMoveArm::UpdateJumping(float DeltaTime)
@@ -133,9 +146,11 @@ void UMoveArm::UpdateLanding(float DeltaTime)
 
 void UMoveArm::SetWaveAnim()
 {
-		ActionEnabled = true;
-		TargetPose.Position = FVector(20,0,  50);
-		TargetPose.Rotation = FQuat::Identity;	
+	SetMovingAnim();
+
+		// ActionEnabled = true;
+		// TargetPose.Position = FVector(20,0,  50);
+		// TargetPose.Rotation = FQuat::Identity;	
 }
 
 void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
@@ -147,7 +162,7 @@ void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
 	TargetPose.Rotation = FQuat::Identity;	
 }
 
-void UMoveArm::UpdateArm()
+void UMoveArm::UpdateIK()
 {
 	if (ArmParts.Num() != 3) return;
 	if (!IsValid(ArmParts[0]) || !IsValid(ArmParts[1]) || !IsValid(ArmParts[2])) return;
@@ -160,7 +175,6 @@ void UMoveArm::UpdateArm()
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
 	FVector Target = TargetPose.Position;
-	if (!ActionEnabled) 	SetIdleAnim();
 
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperArmPos;

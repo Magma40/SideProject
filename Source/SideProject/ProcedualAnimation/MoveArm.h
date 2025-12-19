@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "MoveArm.generated.h"
 
@@ -46,7 +47,7 @@ protected:
 	void UpdateLanding(float DeltaTime);
 
 public:
-	void UpdateArm();
+	void UpdateIK();
 
 	void SetIdleAnim();
 	void SetMovingAnim();
@@ -63,4 +64,7 @@ private:
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
 	bool ActionEnabled = false;
+
+	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* WaveAnimCurve;
+	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* HolsterAnimCurve;
 };

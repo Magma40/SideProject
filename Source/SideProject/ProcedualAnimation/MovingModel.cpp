@@ -2,18 +2,17 @@
 
 
 #include "ProcedualAnimation/MovingModel.h"
-#include "VectorTypes.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Player/MainCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
 #include "ProcedualAnimation/MoveArm.h"
+#include "ActionStack/ActionStack.h"
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
 void AMovingModel::InitSceneComponents()
 {
+	AnimModelActionStack = Cast<UActionStack>(FindChildByExactName(GetRootComponent(), TEXT("AnimModelActionStack")));
+	
 	// Get Hips
 	Hips = FindChildByExactName(GetRootComponent(), TEXT("Hips"));
 	if (!Hips)
@@ -103,7 +102,6 @@ void AMovingModel::UpdateArms()
 	{
 		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
 		if (!IsValid(UpperArm)) continue;
-		UpperArm->UpdateArm();
 	}
 }
 

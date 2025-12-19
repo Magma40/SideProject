@@ -6,14 +6,16 @@
 #include "GameFramework/Actor.h"
 #include "MovingModel.generated.h"
 
+class UActionStack;
+
 USTRUCT()
 struct FLimbChain
 {
 	GENERATED_BODY()
 
 	UPROPERTY()  USceneComponent* Upper = nullptr;     // UpperLeg or UpperArm
-	UPROPERTY()  USceneComponent* Middle = nullptr;   // Knee or Elbow
-	UPROPERTY()  USceneComponent* End = nullptr;		 // Foot or Hand
+	UPROPERTY()  USceneComponent* Middle = nullptr;    // Knee or Elbow
+	UPROPERTY()  USceneComponent* End = nullptr;		   // Foot or Hand
 };
 
 UENUM(BlueprintType)
@@ -94,4 +96,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float HipSwayAmount = 0.1f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float MoveSpeed = 1.0f; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") float RotationSpeed = 100.0f;
+
+	UActionStack* AnimModelActionStack = nullptr;
 };
