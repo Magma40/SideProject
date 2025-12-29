@@ -56,9 +56,9 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 }
 
 
-void UActionMoveTo::OnUpdate_Implementation() 
+void UActionMoveTo::OnUpdate_Implementation(float DeltaTime) 
 {
-	Super::OnUpdate_Implementation();
+	Super::OnUpdate_Implementation(DeltaTime);
 }
 
 bool UActionMoveTo::IsDone_Implementation() const

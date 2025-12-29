@@ -16,7 +16,7 @@ class SIDEPROJECT_API UActionAnimModelJumpingMovement : public UAction
 	
 public:
 	UActionAnimModelJumpingMovement(const FObjectInitializer& ObjectInitializer);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 };

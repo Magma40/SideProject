@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
-#include "ProcedualAnimation/MovingModel.h" // This hurts to add
+//#include "ProcedualAnimation/MovingModel.h" // This hurts to add
+#include "Tools/GenericCalls.h"
 #include "MoveArm.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,41 +26,19 @@ class SIDEPROJECT_API UMoveArm : public USceneComponent
 {
 	GENERATED_BODY()
 
-protected:	
+protected: //Functions
 	UMoveArm();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Init();
-	bool ShouldHoldUpHands();
-
-	void SwitchState(EAnimState NewState);
-	void UpdateState(float DeltaTime);
-
-	void EnterIdle();
-	void EnterMoving();
-	void EnterJumping();
-	void EnterLanding();
-	
-	void UpdateIdle(float DeltaTime);
-	void UpdateMoving(float DeltaTime);
-	void UpdateJumping(float DeltaTime);
-	void UpdateLanding(float DeltaTime);
 
 public:
 	void UpdateIK();
-
-	void SetIdleAnim();
-	void SetMovingAnim();
-	void SetJumpingAnim();
-	
-	void SetWaveAnim();
 	void SetBackHolsterAnim(FVector HolsterLocation);
-	
+	bool ShouldHoldUpHands();
 
-private:
-	EAnimState State = EAnimState::None;
-	
+public: // Variables
 	FArmsPose TargetPose = FArmsPose();
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;

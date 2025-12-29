@@ -3,8 +3,6 @@
 
 #include "ProcedualAnimation/MoveLeg.h"
 
-#include "ComponentUtils.h"
-
 UMoveLeg::UMoveLeg() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UMoveLeg::Init()
@@ -62,113 +60,15 @@ void UMoveLeg::BeginPlay()
 void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateState(DeltaTime);
 	UpdateIK(DeltaTime);
 }
 
-void UMoveLeg::SwitchState(EAnimState NewState)
-{
-	if (State == NewState) return;
-	State = NewState;
-	switch (State)
-	{
-	case EAnimState::Idle:		EnterIdle(); break;
-	case EAnimState::Moving:	EnterMoving(); break;
-	case EAnimState::Jumping:	EnterJumping(); break;
-	case EAnimState::Stepping:	EnterStepping(); break;
-	case EAnimState::Landing:	EnterLanding(); break;
-	case EAnimState::None :
-		{
-			UE_LOG(LogTemp, Error, TEXT("State Is None"));
-			SwitchState(EAnimState::Idle);
-			break;
-		}
-	}
-}
-
-void UMoveLeg::UpdateState(float DeltaTime)
-{
-	switch (State)
-	{
-	case EAnimState::Idle:		UpdateIdle(DeltaTime); break;
-	case EAnimState::Moving:	UpdateMoving(DeltaTime); break;
-	case EAnimState::Jumping:	UpdateJumping(DeltaTime); break;
-	case EAnimState::Stepping:	UpdateStepping(DeltaTime); break;
-	case EAnimState::Landing:	UpdateLanding(DeltaTime); break;
-	case EAnimState::None :
-		{
-			UE_LOG(LogTemp, Error, TEXT("State Is None"));
-			SwitchState(EAnimState::Idle);
-			break;
-		}
-	}
-}
-
-void UMoveLeg::SetIdleAnim() { SwitchState(EAnimState::Idle); }
-
-void UMoveLeg::SetMovingAnim() {SwitchState(EAnimState::Moving);}
-
-void UMoveLeg::SetJumpingAnim() { SwitchState(EAnimState::Jumping);}
-
-void UMoveLeg::EnterIdle()
-{
-	bIsJumping = false;
-	bFootPlanted = true;
-	TargetLocal = TargetPose.Position;
-}
-
-void UMoveLeg::EnterMoving()
-{
-	bIsJumping = false;
-	bFootPlanted = true;
-	bIsStepping = false;
-}
-
-void UMoveLeg::EnterJumping()
-{
-	bIsJumping = true;
-	bFootPlanted = false;
-	bIsStepping = false;
-	AirElapsedTime = 0;
-	// Freeze the current foot
-	LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);;
-}
-
-void UMoveLeg::EnterStepping() { }
-
-void UMoveLeg::EnterLanding()
-{
-	bIsJumping = false;
-	bFootPlanted = true;
-}
-
-void UMoveLeg::UpdateIdle(float DeltaTime)
-{
-	// Nothing special here (foot locked)
-}
-
-void UMoveLeg::UpdateMoving(float DeltaTime)
-{
-	if (ShouldStep())
-	{
-		StartStep();
-	}
-	else
-	{
-		const FTransform UpperLegXForm = LegParts[0]->GetComponentTransform();
-		TargetLocal = UpperLegXForm.InverseTransformPosition(LockedFootPosition.Position);
-	}
-}
-
-void UMoveLeg::UpdateJumping(float DeltaTime) // Why am I such a good programmer?
-{
-	AirElapsedTime += DeltaTime;
-	float Rise = FMath::Min(AirElapsedTime * AirRiseSpeed, MaxAirRise);
-	FVector Goal = StepTargetPose.Position + FVector(0, 0, Rise);
-	// Smooth blend
-	TargetLocal = FMath::VInterpTo(TargetLocal, Goal, DeltaTime, 10.f);
-	LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);;
-}
+// void UMoveLeg::EnterIdle()
+// {
+// 	bIsJumping = false;
+// 	bFootPlanted = true;
+// 	TargetLocal = TargetPose.Position;
+// }
 
 void UMoveLeg::UpdateStepping(float DeltaTime)
 {
@@ -188,18 +88,12 @@ void UMoveLeg::UpdateStepping(float DeltaTime)
 
 		LockedFootPosition.Position = LegParts[0]->GetComponentTransform().TransformPosition(TargetPose.Position);
 		LiftAmount = 0.f;
-		SwitchState(EAnimState::Moving);
 	}
-}
-
-void UMoveLeg::UpdateLanding(float DeltaTime)
-{
-	// Optional landing smoothing
 }
 
 bool UMoveLeg::ShouldStep() const
 {
-	if (State == EAnimState::Jumping || bIsStepping) return false;
+	if (bIsJumping || bIsStepping) return false;
 	if (GetWorld()->TimeSeconds - LastStepEndTime < StepCooldown) return false;
 	
 	FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition.Position);
@@ -223,13 +117,13 @@ void UMoveLeg::StartStep() //Reset Step variables
 	SourcePose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
 	SourcePose.Rotation = LegParts[2]->GetComponentQuat();
 	StepTargetPose = GetGroundPose();// where it SHOULD move
-	SwitchState(EAnimState::Stepping);
 }
 
 void UMoveLeg::UpdateIK(float DeltaTime)
 {
 	if (LegParts.Num() != 3) return;
 	if (!IsValid(LegParts[0]) || !IsValid(LegParts[1]) || !IsValid(LegParts[2])) return;
+	if (bIsStepping) UpdateStepping(DeltaTime);
 	
 	USceneComponent* UpperLeg = LegParts[0];
 	USceneComponent* Knee = LegParts[1];

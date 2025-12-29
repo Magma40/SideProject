@@ -6,12 +6,17 @@
 #include "ActionStack/ActionStack.h"
 #include "ArmActionStack.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class SIDEPROJECT_API UArmActionStack : public UActionBehaviour
+class UMoveArm;
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class SIDEPROJECT_API UArmActionStack : public UActionStack
 {
 	GENERATED_BODY()
 	
+protected:
+	UArmActionStack();
+	virtual void BeginPlay() override;
+	
+	TArray<UMoveArm*> ArmsRef;
+
 };

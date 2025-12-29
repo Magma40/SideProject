@@ -6,12 +6,23 @@
 #include "ActionStack/ActionStack.h"
 #include "AnimModelActionStack.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class SIDEPROJECT_API UAnimModelActionStack : public UActionBehaviour
+class UArmActionStack;
+class ULegActionStack;
+class AMovingModel;
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
 {
 	GENERATED_BODY()
+
+protected:
+	UAnimModelActionStack();
+	virtual void BeginPlay() override;
 	
+	AMovingModel* MovingModelRef = nullptr;
+	ULegActionStack* LegActionStackRef = nullptr;
+	UArmActionStack* ArmActionStackRef = nullptr;
+
+public:
+	void PushDefaultActionMovement();
 };

@@ -2,21 +2,20 @@
 
 
 #include "ProcedualAnimation/Limb.h"
-
-#include "MovingModel.h"
+#include "Tools/GenericCalls.h"
 
 ULimb::ULimb() { PrimaryComponentTick.bCanEverTick = true; }
 
 void ULimb::BeginPlay()
 {
 	Super::BeginPlay();
-    TArray<USceneComponent*> AllComponents;
-    GetOwner()->GetComponents<USceneComponent>(AllComponents);
-    for (USceneComponent* Comp : AllComponents)
+	TArray<USceneComponent*> AllComponents;
+	GetOwner()->GetComponents<USceneComponent>(AllComponents);
+	for (USceneComponent* Comp : AllComponents)
 	{
 		if (!Comp) continue;
 		if (Comp->GetName() == AttachedParentName) AttachedParent = Comp;
-		if (Comp->GetName() == AttachedChildName) AttachedChild = Comp;
+		if (Comp->GetName() == AttachedChildName) AttachedChild =  Comp;
 	}
 }
 

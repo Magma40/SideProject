@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "ProcedualAnimation/MovingModel.h" // This hurts to add
+//#include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "MoveLeg.generated.h"
 
 USTRUCT(BlueprintType)
@@ -29,27 +29,8 @@ protected: // Functions
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Init();
-
-	void SwitchState(EAnimState NewState);
-	void UpdateState(float DeltaTime);
-
-	void EnterIdle();
-	void EnterMoving();
-	void EnterJumping();
-	void EnterStepping();
-	void EnterLanding();
-	
-	void UpdateIdle(float DeltaTime);
-	void UpdateMoving(float DeltaTime);
-	void UpdateJumping(float DeltaTime);
-	void UpdateStepping(float DeltaTime);
-	void UpdateLanding(float DeltaTime);
 	
 public:
-	void SetIdleAnim();
-	void SetMovingAnim();
-	void SetJumpingAnim();
-
 	void UpdateIK(float DeltaTime);
 
 	FLegsPose GetGroundPose() const;
@@ -59,9 +40,9 @@ public:
 	
 	bool ShouldStep() const;
 	void StartStep();
+	void UpdateStepping(float DeltaTime);
 
-protected: // Variables
-	EAnimState State = EAnimState::None;
+public: // Variables
 	
 	bool bIsStepping = false;
 	bool bFootPlanted = true;
@@ -83,6 +64,9 @@ protected: // Variables
 	FVector TargetLocal = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite) TArray<USceneComponent*> LegParts;
+
+protected: // Variables
+	
 	UPROPERTY()TArray<UMoveLeg*> OtherLegs;
 
 public:

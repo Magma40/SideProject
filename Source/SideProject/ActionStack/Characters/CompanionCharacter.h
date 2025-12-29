@@ -19,8 +19,5 @@ public:
 	//Actions
 	void OnAddActionMoveTo();
 	void OnAddActionPickUp();
-
-private:
-	UPROPERTY() APawn* ActorOwner = nullptr;
 };
 

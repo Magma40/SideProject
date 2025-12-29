@@ -16,7 +16,7 @@ class SIDEPROJECT_API UActionArmJumpingMovement : public UAction
 	
 public:
 	UActionArmJumpingMovement(const FObjectInitializer& ObjectInitializer);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 };

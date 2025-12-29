@@ -5,6 +5,7 @@
     <projectFile profileName="EpicGames.AspNet">../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/Shared/EpicGames.AspNet/EpicGames.AspNet.csproj</projectFile>
     <projectFile kind="Docker">../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile>../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/UnrealBuildTool/UnrealBuildTool.csproj</projectFile>
+    <projectFile kind="Docker">C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile kind="Docker">$PROJECT_DIR$/../../../../../../SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile>Intermediate/ProjectFiles/SideProject.vcxproj</projectFile>
     <projectFile>Intermediate/ProjectFiles/UE5.vcxproj</projectFile>
@@ -14,12 +15,50 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="972e900e-ca4c-4eff-a37a-b1c31a22aafb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/SideProject/Tools/GenericCalls.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_PlayerModel.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/5/7D/DG7MZ7BOOWA4YP1YVB0M04.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" afterDir="false" />
@@ -37,26 +76,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Editor/VREditor/Public/UI/VREditorUISystem.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/AIModule/Private/AIController.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/BitArray.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Math/MathFwd.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Math/TransformVectorized.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectPtr.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/Curves/CurveFloat.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Character.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Pawn.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Private/Character.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Public/EngineUtils.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -104,6 +130,7 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/Tools/GenericCalls.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
@@ -188,10 +215,10 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/AutomationTool/AutomationTool.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
@@ -211,10 +238,10 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/UnrealBuildTool/UnrealBuildTool.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
@@ -236,6 +263,7 @@
       <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
       <option name="SEND_DEBUG_REQUEST" value="1" />
       <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <option name="AUTO_ATTACH_CHILDREN" value="0" />
       <method v="2">
         <option name="Build" />
       </method>
@@ -312,6 +340,17 @@
           <option name="containerName" value="epicgames.perforce.fixture" />
           <option name="contextFolderPath" value="D:\Unity2023\Repository\SideProject" />
           <option name="sourceFilePath" value="$PROJECT_DIR$/../../../../../../SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/Dockerfile" />
+        </settings>
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
+      <method v="2" />
+    </configuration>
+    <configuration name="EpicGames.Perforce.Fixture/Dockerfile (8)" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="containerName" value="epicgames.perforce.fixture" />
+          <option name="contextFolderPath" value="D:\Unity2023\Repository\SideProject" />
+          <option name="sourceFilePath" value="C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/Dockerfile" />
         </settings>
       </deployment>
       <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
@@ -408,6 +447,13 @@
       <workItem from="1766134943718" duration="13213000" />
       <workItem from="1766156706000" duration="684000" />
       <workItem from="1766157499888" duration="344000" />
+      <workItem from="1766538351374" duration="1077000" />
+      <workItem from="1766606625886" duration="4539000" />
+      <workItem from="1766867109319" duration="10696000" />
+      <workItem from="1766878688477" duration="5326000" />
+      <workItem from="1766959876336" duration="14796000" />
+      <workItem from="1767024548965" duration="3986000" />
+      <workItem from="1767029894693" duration="5510000" />
     </task>
     <servers />
   </component>

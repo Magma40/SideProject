@@ -5,16 +5,16 @@
 #include "Player/MainCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
 #include "ProcedualAnimation/MoveArm.h"
-#include "ActionStack/ActionStack.h"
+#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
 void AMovingModel::InitSceneComponents()
 {
-	AnimModelActionStack = Cast<UActionStack>(FindChildByExactName(GetRootComponent(), TEXT("AnimModelActionStack")));
+	AnimModelActionStack = Cast<UAnimModelActionStack>(GenericCalls::FindChildByExactName(GetRootComponent(), TEXT("AnimModelActionStack")));
 	
 	// Get Hips
-	Hips = FindChildByExactName(GetRootComponent(), TEXT("Hips"));
+	Hips = GenericCalls::FindChildByExactName(GetRootComponent(), TEXT("Hips"));
 	if (!Hips)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Hips not found"));
@@ -45,32 +45,32 @@ void AMovingModel::InitSceneComponents()
 void AMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
-	InitSceneComponents();
+	//InitSceneComponents();
 	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	SetLegsIdleAnim();
-	SetArmsIdleAnim();
+	//SetLegsIdleAnim();
+	//SetArmsIdleAnim();
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UpdateHips(DeltaTime);
+	//UpdateHips(DeltaTime);
 	//DrawDebugJoints();
 	//DrawDebugLimbs();
 }
 
-void AMovingModel::UpdateHips(float DeltaTime)
+void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
 	
-	float HipSway =  UpdateLegs(DeltaTime);
-	UpdateArms();
+	//float HipSway =  UpdateLegs(DeltaTime);
+	//UpdateArms();
 	
 	//Apply New Hip Location
-	FVector HipSwayOffset = GetActorForwardVector() * HipSway * HipSwayAmount;
+	FVector HipSwayOffset = GetActorForwardVector() * HipSwayAmount;
 	float DesiredHipHeight = BaseHipHeight;
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
 	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
@@ -110,7 +110,6 @@ void AMovingModel::SetLegsIdleAnim()
 	for (FLimbChain& Leg : Legs)
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-		UpperLeg->SetIdleAnim();
 	}
 }
 void AMovingModel::SetLegsMovingAnim()
@@ -118,7 +117,6 @@ void AMovingModel::SetLegsMovingAnim()
 	for (FLimbChain& Leg : Legs)
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-		UpperLeg->SetMovingAnim();
 	}
 }
 void AMovingModel::SetLegsJumpingAnim()
@@ -127,7 +125,6 @@ void AMovingModel::SetLegsJumpingAnim()
 	{
 		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
-		UpperLeg->SetJumpingAnim();
 	}
 }
 
@@ -136,7 +133,6 @@ void AMovingModel::SetArmsIdleAnim()
 	for (FLimbChain& Arm : Arms)
 	{
 		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		UpperArm->SetIdleAnim();
 	}
 }
 void AMovingModel::SetArmsMovingAnim()
@@ -154,7 +150,6 @@ void AMovingModel::SetArmsWaveAnim()
 		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
 		if (UpperArm->GetName().EndsWith(TEXT("_R")))
 		{
-			UpperArm->SetWaveAnim();
 		}
 	}
 }
@@ -302,36 +297,12 @@ void AMovingModel::DrawDebugLimbs()
 	DrawDebugLine(GetWorld(), Pos_Elbow_L, Pos_Hand_L, FColor::Red);
 }
 
-USceneComponent* AMovingModel::FindChildByExactName(const USceneComponent* Parent, const FString& Target)
-{
-	TArray<USceneComponent*> FindChildren;
-	Parent->GetChildrenComponents(false, FindChildren);
-
-	for (USceneComponent* Child : FindChildren)
-		if (Child->GetName() == Target)return Child;
-
-	return nullptr;
-}
-
- TArray<USceneComponent*> AMovingModel::FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix)
-{
-	TArray<USceneComponent*> Matches;
-	TArray<USceneComponent*> FindChildren;
-	Parent->GetChildrenComponents(false, FindChildren);
-
-	for (USceneComponent* Child : FindChildren)
-		if (Child->GetName().StartsWith(Prefix))
-			Matches.Add(Child);
-
-	return Matches;
-}
-
 template<typename TUpperClass>
 TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const
 {
 	TArray<FLimbChain> OutChains;
 
-	TArray<USceneComponent*> UpperList = FindChildrenByPrefix(Root, UpperPrefix);
+	TArray<USceneComponent*> UpperList = GenericCalls::FindChildrenByPrefix(Root, UpperPrefix);
 
 	for (USceneComponent* UpperComp : UpperList)
 	{
@@ -341,11 +312,11 @@ TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const F
 		FLimbChain Chain;
 		Chain.Upper = Upper;
 
-		TArray<USceneComponent*> Middles = FindChildrenByPrefix(UpperComp, MiddlePrefix);
+		TArray<USceneComponent*> Middles = GenericCalls::FindChildrenByPrefix(UpperComp, MiddlePrefix);
 		if (Middles.Num() == 0) continue;
 		Chain.Middle = Middles[0];
 
-		TArray<USceneComponent*> Ends = FindChildrenByPrefix(Chain.Middle, EndPrefix);
+		TArray<USceneComponent*> Ends = GenericCalls::FindChildrenByPrefix(Chain.Middle, EndPrefix);
 		if (Ends.Num() == 0) continue;
 		Chain.End = Ends[0];
 

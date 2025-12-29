@@ -9,9 +9,9 @@ void UActionAnimModelIdleMovement::OnBegin_Implementation(bool bFirstTime)
 	Super::OnBegin_Implementation(bFirstTime);
 }
 
-void UActionAnimModelIdleMovement::OnUpdate_Implementation() 
+void UActionAnimModelIdleMovement::OnUpdate_Implementation(float DeltaTime) 
 {
-	Super::OnUpdate_Implementation();
+	Super::OnUpdate_Implementation(DeltaTime);
 }
 
 bool UActionAnimModelIdleMovement::IsDone_Implementation() const

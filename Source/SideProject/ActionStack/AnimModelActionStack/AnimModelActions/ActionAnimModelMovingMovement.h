@@ -6,9 +6,9 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionAnimModelMovingMovement.generated.h"
 
-/**
-* Picks up item from ground into hand
- */
+class AMovingModel;
+
+
 UCLASS()
 class SIDEPROJECT_API UActionAnimModelMovingMovement : public UAction
 {
@@ -16,7 +16,11 @@ class SIDEPROJECT_API UActionAnimModelMovingMovement : public UAction
 	
 public:
 	UActionAnimModelMovingMovement(const FObjectInitializer& ObjectInitializer);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+	void Init(AMovingModel* InMovingModel);
+
+private:
+	AMovingModel* MovingModelRef;
 };

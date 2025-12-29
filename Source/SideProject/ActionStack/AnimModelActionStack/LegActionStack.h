@@ -6,12 +6,16 @@
 #include "ActionStack/ActionStack.h"
 #include "LegActionStack.generated.h"
 
-/**
- * 
- */
-UCLASS()
-class SIDEPROJECT_API ULegActionStack : public UActionBehaviour
+class UMoveLeg;
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class SIDEPROJECT_API ULegActionStack : public UActionStack
 {
 	GENERATED_BODY()
+
+protected:
+	ULegActionStack();
+	virtual void BeginPlay() override;
 	
+	TArray<UMoveLeg*> LegsRef;
 };

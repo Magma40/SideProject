@@ -2,7 +2,7 @@
 
 
 #include "ActionStack/Actions/ActionPickUpItem.h"
-
+#include "ActionStack/Characters/CompanionCharacter.h"
 #include "Player/BaseInteractableCharacter.h"
 
 UActionPickUpItem::UActionPickUpItem(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
@@ -28,9 +28,9 @@ void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)
 }
 
 
-void UActionPickUpItem::OnUpdate_Implementation() 
+void UActionPickUpItem::OnUpdate_Implementation(float DeltaTime) 
 {
-	Super::OnUpdate_Implementation();
+	Super::OnUpdate_Implementation(DeltaTime);
 }
 
 bool UActionPickUpItem::IsDone_Implementation() const

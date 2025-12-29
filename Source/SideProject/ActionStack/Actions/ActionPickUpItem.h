@@ -19,7 +19,7 @@ class SIDEPROJECT_API UActionPickUpItem : public UAction
 public:
 	UActionPickUpItem(const FObjectInitializer& ObjectInitializer);
 	void Init(UCompanionCharacter* InCompanionCharacter);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 

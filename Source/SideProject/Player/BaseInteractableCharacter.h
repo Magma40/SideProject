@@ -45,16 +45,3 @@ public:
 private:
 	UObject* ClosestObject = nullptr;
 };
-
-static void GetAllComponentsWithTag( UWorld* World, FName Tag, TArray<USceneComponent*>& OutComponents)
-{
-	for (TObjectIterator<USceneComponent> It; It; ++It)
-	{
-		USceneComponent* Comp = *It;
-
-		if (Comp->GetWorld() == World && Comp->ComponentTags.Contains(Tag))
-		{
-			OutComponents.Add(Comp);
-		}
-	}
-}

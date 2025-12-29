@@ -3,9 +3,7 @@
 
 #include "ActionStack/ActionStack.h"
 #include "Core/MainGameMode.h"
-#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/MainCharacter.h"
 
 UActionStack* UActionStack::Main = nullptr;
 
@@ -20,58 +18,68 @@ void UActionStack::BeginPlay()
 void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateActions();
+	UpdateActions(DeltaTime);
+	ApplyPendingChanges();
 }
 
- void UActionStack::UpdateActions()
+ void UActionStack::UpdateActions(float DeltaTime)
 {
 	if (IsEmpty()) return;
+	bIsUpdating = true;
 
-	while (CurrentAction == nullptr && ActionStack.Num() > 0)
+	// Acquire next action if needed
+	if (!CurrentAction && ActionStack.Num() > 0)
 	{
 		CurrentAction = ActionStack[0];
-
-		bool bFirstTime = !FirstTimeActions.Contains(CurrentAction);
-		FirstTimeActions.Add(CurrentAction);
-		CurrentAction->Execute_OnBegin(CurrentAction.GetObject(), bFirstTime);
-		if (CurrentAction != nullptr)
+		if (CurrentAction && IsValid(CurrentAction.GetObject()))
 		{
-			if (ActionStack.Num() > 0 && CurrentAction != ActionStack[0])
-			{
-				CurrentAction = nullptr;
-				UpdateActions();
-				return;
-			}
+			const bool bFirstTime = !FirstTimeActions.Contains(CurrentAction);
+			FirstTimeActions.Add(CurrentAction);
+			CurrentAction->Execute_OnBegin(CurrentAction.GetObject(), bFirstTime);
 		}
+		else CurrentAction = nullptr;
 	}
 
-	if (CurrentAction != nullptr)
+	// Update current action
+	if (CurrentAction && IsValid(CurrentAction.GetObject()))
 	{
-		CurrentAction->Execute_OnUpdate(CurrentAction.GetObject()); // Changing this while being updated causes "Exception 0x80000003"
-		if (ActionStack.Num() > 0 && CurrentAction == ActionStack[0])
+		TScriptInterface<IActionInterface> SafeAction = CurrentAction;
+		SafeAction->Execute_OnUpdate(SafeAction.GetObject(), DeltaTime); // Changing this while being updated causes "Exception 0x80000003"
+
+		// Action may have ended or been destroyed during update
+		if (SafeAction && IsValid(SafeAction.GetObject()))
 		{
-			if (CurrentAction->Execute_IsDone(CurrentAction.GetObject()))
+			if (ActionStack.Num() > 0 && SafeAction == ActionStack[0])
 			{
-				RemoveAction(CurrentAction);
+				if (SafeAction->Execute_IsDone(SafeAction.GetObject()))
+				{
+					PendingRemovals.Add(SafeAction);
+				}
 			}
 		}
-		else
-		{
-			CurrentAction = nullptr;
-		}
+		else CurrentAction = nullptr;
 	}
-	
+
+	bIsUpdating = false;
 }
 
-bool UActionStack::IsEmpty() const
+bool UActionStack::IsEmpty() const { return !CurrentAction && ActionStack.Num() == 0; }
+
+void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 {
-	if (CurrentAction == nullptr && ActionStack.Num() == 0) return true;
-	return false;
+	if (!Action || !IsValid(Action.GetObject())) return;
+	PendingPushes.Add(Action);
+}
+
+void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
+{
+	if (!Action) return;
+	PendingRemovals.Add(Action);
 }
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)
 {
-    if (IsValid(Main)) return Main; 
+	if (IsValid(Main)) return Main; 
 	UWorld* World = nullptr;
 	if (WorldContext)
 	{
@@ -83,7 +91,7 @@ UActionStack* UActionStack::GetMain(UObject* WorldContext)
 	}
 
 	if (!World) return nullptr;
-    AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
+	AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
 	if (!GM || !GM->ActionStack)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
@@ -93,32 +101,34 @@ UActionStack* UActionStack::GetMain(UObject* WorldContext)
 	return Main;
 }
 
-void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
+void UActionStack::ApplyPendingChanges()
 {
-	if (!Action) return;
-	ActionStack.RemoveAll([&](const TScriptInterface<IActionInterface>& A)
+	// Removals
+	for (const auto& Action : PendingRemovals)
 	{
-		  return A.GetObject() == Action.GetObject();
-	});
-	ActionStack.Insert(Action, 0);
-	if (CurrentAction && CurrentAction.GetObject() != Action.GetObject())
-	{
-		CurrentAction = nullptr;
+		if (!Action) continue;
+
+		if (CurrentAction == Action)
+		{
+			if (IsValid(Action.GetObject()))
+			{
+				Action->Execute_OnEnd(Action.GetObject());
+			}
+			CurrentAction = nullptr;
+		}
+		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+		ActionStack.Remove(Action);
 	}
-	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The Stack"),*Action.GetObject()->GetFName().ToString());
-}
 
-
-void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
-{
-	if (!Contains(Action)) return; // This might be wrong?
-	ActionStack.RemoveAt(0);
-	if (CurrentAction == Action)
+	//Pushes
+	for (const auto& Action : PendingPushes)
 	{
-		Action->Execute_OnEnd(CurrentAction.GetObject());
-		CurrentAction = nullptr;
+		if (!Action || !IsValid(Action.GetObject())) continue;
+		ActionStack.Remove(Action);
+		ActionStack.Insert(Action, 0);
+		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
 	}
-	ActionStack.Remove(Action);
-	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The Stack"),*Action.GetObject()->GetFName().ToString());
-}
 
+	PendingRemovals.Empty();
+	PendingPushes.Empty();
+}

@@ -41,117 +41,29 @@ void UMoveArm::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FQuat::Identity;
 }
 
-// Called every frame
 void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateState(DeltaTime);
 	UpdateIK();
 }
 
-void UMoveArm::SwitchState(EAnimState NewState)
-{
-	if (State == NewState) return;
-	State = NewState;
-	switch (State)
-	{
-	case EAnimState::Idle:		EnterIdle(); break;
-	case EAnimState::Moving:	EnterMoving(); break;
-	case EAnimState::Jumping:	EnterJumping(); break;
-	case EAnimState::Landing:	EnterLanding(); break;
-	case EAnimState::None :
-		{
-			UE_LOG(LogTemp, Error, TEXT("State Is None"));
-			SwitchState(EAnimState::Idle);
-			break;
-		}
-	}
-}
-
-void UMoveArm::UpdateState(float DeltaTime)
-{
-	switch (State)
-	{
-	case EAnimState::Idle:		UpdateIdle(DeltaTime); break;
-	case EAnimState::Moving:	UpdateMoving(DeltaTime); break;
-	case EAnimState::Jumping:	UpdateJumping(DeltaTime); break;
-	case EAnimState::Landing:	UpdateLanding(DeltaTime); break;
-	case EAnimState::None :
-		{
-			UE_LOG(LogTemp, Error, TEXT("State Is None"));
-			SwitchState(EAnimState::Idle);
-			break;
-		}
-	}
-}
-
-void UMoveArm::SetIdleAnim() { SwitchState(EAnimState::Idle); }
-
-void UMoveArm::SetMovingAnim() {SwitchState(EAnimState::Moving);}
-
-void UMoveArm::SetJumpingAnim() { SwitchState(EAnimState::Jumping);}
-
-void UMoveArm::EnterIdle()
-{
-	if (ShouldHoldUpHands()) return;
-	TargetPose.Position = FVector(0,25,  -50);
-	TargetPose.Rotation = FQuat::Identity;
-}
-
-void UMoveArm::EnterMoving()
-{
-
-}
-
-void UMoveArm::EnterJumping()
-{
-}
-
-void UMoveArm::EnterLanding()
-{
-}
-
-void UMoveArm::UpdateIdle(float DeltaTime)
-{
-	if (ShouldHoldUpHands()) return;
-	TargetPose.Position = FVector(0,25,  -50);
-	TargetPose.Rotation = FQuat::Identity;
-}
-
-void UMoveArm::UpdateMoving(float DeltaTime)
-{
-	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();;
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, Error, TEXT("UMoveArm - SetWaveAnim - AnimSubsystem was nullptr"));
-		return;
-	}
-	AnimSubsystem->PlayCurveAnim(WaveAnimCurve, 2.0f, [&](float CurrValue)
-	{
-		TargetPose.Position = FVector(CurrValue * 25, 0, CurrValue * 50);
-	});
-}
-
-void UMoveArm::UpdateJumping(float DeltaTime)
-{
-
-}
-
-void UMoveArm::UpdateLanding(float DeltaTime)
-{
-	// Optional landing smoothing
-}
-
-void UMoveArm::SetWaveAnim()
-{
-	SetMovingAnim();
-
-		// ActionEnabled = true;
-		// TargetPose.Position = FVector(20,0,  50);
-		// TargetPose.Rotation = FQuat::Identity;	
-}
+// void UMoveArm::UpdateMoving(float DeltaTime)
+// {
+// 	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();;
+// 	if (!AnimSubsystem)
+// 	{
+// 		UE_LOG(LogTemp, Error, TEXT("UMoveArm - SetWaveAnim - AnimSubsystem was nullptr"));
+// 		return;
+// 	}
+// 	AnimSubsystem->PlayCurveAnim(WaveAnimCurve, 2.0f, [&](float CurrValue)
+// 	{
+// 		TargetPose.Position = FVector(CurrValue * 25, 0, CurrValue * 50);
+// 	});
+// }
 
 void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
 {
@@ -175,6 +87,7 @@ void UMoveArm::UpdateIK()
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
 	FVector Target = TargetPose.Position;
+	if (Target == FVector::ZeroVector) return;
 
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperArmPos;

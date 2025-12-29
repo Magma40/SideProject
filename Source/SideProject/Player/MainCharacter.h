@@ -10,6 +10,7 @@
 
 class UCameraComponent;
 class UInputAction;
+class UActionStack;
 struct FInputActionValue;
 class AMovingModel;
 

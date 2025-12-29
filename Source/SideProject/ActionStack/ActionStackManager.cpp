@@ -2,6 +2,7 @@
 
 
 #include "ActionStack/ActionStackManager.h"
+#include "ActionStack.h"
 
 AActionStackManager::AActionStackManager()
 {

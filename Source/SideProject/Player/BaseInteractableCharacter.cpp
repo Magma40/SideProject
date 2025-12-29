@@ -7,6 +7,7 @@
 #include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
+#include "Tools/GenericCalls.h"
 
 ABaseInteractableCharacter::ABaseInteractableCharacter() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -75,7 +76,7 @@ bool ABaseInteractableCharacter::TryToPickUpItem()
 	}
 
 	TArray<USceneComponent*> ComponentsAround;  //  Gather components 
-	GetAllComponentsWithTag(GetWorld(), "HandHeldItem", ComponentsAround);
+	GenericCalls::GetAllComponentsWithTag(GetWorld(), "HandHeldItem", ComponentsAround);
 	for (USceneComponent* Comp : ComponentsAround)
 	{
 		if (Comp == BackItemHolster) continue;

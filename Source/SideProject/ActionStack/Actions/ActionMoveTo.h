@@ -22,7 +22,7 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 public:
 	UActionMoveTo(const FObjectInitializer& ObjectInitializer);
 	void Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation,  AMovingModel* InMovingModel);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 

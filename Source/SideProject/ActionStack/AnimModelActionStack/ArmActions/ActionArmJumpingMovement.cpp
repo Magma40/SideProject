@@ -9,9 +9,9 @@ void UActionArmJumpingMovement::OnBegin_Implementation(bool bFirstTime)
 	Super::OnBegin_Implementation(bFirstTime);
 }
 
-void UActionArmJumpingMovement::OnUpdate_Implementation() 
+void UActionArmJumpingMovement::OnUpdate_Implementation(float DeltaTime) 
 {
-	Super::OnUpdate_Implementation();
+	Super::OnUpdate_Implementation(DeltaTime);
 }
 
 bool UActionArmJumpingMovement::IsDone_Implementation() const

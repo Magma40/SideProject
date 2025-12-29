@@ -6,9 +6,8 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionLegJumpingMovement.generated.h"
 
-/**
-* Picks up item from ground into hand
- */
+class UMoveLeg;
+
 UCLASS()
 class SIDEPROJECT_API UActionLegJumpingMovement : public UAction
 {
@@ -16,7 +15,12 @@ class SIDEPROJECT_API UActionLegJumpingMovement : public UAction
 	
 public:
 	UActionLegJumpingMovement(const FObjectInitializer& ObjectInitializer);
-	void OnUpdate_Implementation() override;
+	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+
+	void Init(TArray<UMoveLeg*> InMoveLegs);
+
+private:
+	TArray<UMoveLeg*> MoveLegsRef;
 };

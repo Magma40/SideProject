@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ActionStackManager.generated.h"
 
+class UActionStack;
 UCLASS()
 class SIDEPROJECT_API AActionStackManager : public AActor
 {
