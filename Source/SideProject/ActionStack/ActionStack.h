@@ -34,17 +34,13 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void UpdateActions(float DeltaTime);
-	void ApplyPendingChanges();
 	bool IsEmpty() const;
 
 
 private:
-	TArray<TScriptInterface<IActionInterface>> ActionStack = TArray<TScriptInterface<IActionInterface>>();
+	UPROPERTY() TArray<TScriptInterface<IActionInterface>> ActionStack = TArray<TScriptInterface<IActionInterface>>();
 	TSet<TScriptInterface<IActionInterface>> FirstTimeActions = TSet<TScriptInterface<IActionInterface>>();
-	TArray<TScriptInterface<IActionInterface>> PendingPushes = TArray<TScriptInterface<IActionInterface>>();
-	TArray<TScriptInterface<IActionInterface>> PendingRemovals = TArray<TScriptInterface<IActionInterface>>();
-	TScriptInterface<IActionInterface> CurrentAction = nullptr;
-	bool bIsUpdating = false;
+	UPROPERTY() TScriptInterface<IActionInterface> CurrentAction = nullptr;
 	
 public:
 	static UActionStack* Main;
@@ -53,12 +49,11 @@ public:
 	
 	static UActionStack* GetMain(UObject* WorldContext = nullptr);
 	void PushAction(const TScriptInterface<IActionInterface>& Action);
-	void RemoveAction(const TScriptInterface<IActionInterface> Action);	
-
+	void RemoveAction(const TScriptInterface<IActionInterface>& Action);	
 	
 	 template<typename T>
 	 T* GetAction();
-	 bool Contains(TScriptInterface<IActionInterface> Action) const
+	 bool Contains(const TScriptInterface<IActionInterface>& Action) const
 	 {
 		 return Action  != nullptr && ActionStack.Contains(Action);
 	 }

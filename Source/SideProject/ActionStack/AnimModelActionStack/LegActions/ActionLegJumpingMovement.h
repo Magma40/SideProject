@@ -6,6 +6,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionLegJumpingMovement.generated.h"
 
+class ABaseInteractableCharacter;
 class UMoveLeg;
 
 UCLASS()
@@ -18,9 +19,11 @@ public:
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+	void OnEnd_Implementation() override;
 
-	void Init(TArray<UMoveLeg*> InMoveLegs);
+	void Init(const TArray<UMoveLeg*>& InMoveLegs, ABaseInteractableCharacter* InOwnerCharacter);
 
 private:
 	TArray<UMoveLeg*> MoveLegsRef;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 };

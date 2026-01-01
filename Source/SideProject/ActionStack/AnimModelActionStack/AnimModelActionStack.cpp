@@ -4,11 +4,10 @@
 #include "ProcedualAnimation/MovingModel.h" // <- the header that declares UMovingModel
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h"
 #include "Tools/GenericCalls.h"
+#include "Player/BaseInteractableCharacter.h"
 
 #include "ActionStack/AnimModelActionStack/LegActionStack.h"
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
-#include "ArmActions/ActionArmMovingMovement.h"
-#include "LegActions/ActionLegMovingMovement.h"
 
 UAnimModelActionStack::UAnimModelActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -34,21 +33,35 @@ void UAnimModelActionStack::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - ArmActionStackRef not found or wrong type"), *GetOwner()->GetName());
 		return;
 	}
-	MovingModelRef->InitSceneComponents();
+	Init();
 	PushDefaultActionMovement();
+}
+
+void UAnimModelActionStack::Init()
+{
+	MovingModelRef->InitSceneComponents();
+	OwnerCharacter = Cast<ABaseInteractableCharacter>(MovingModelRef->GetParentActor());
+	LegActionStackRef->Init(MovingModelRef->GetLegs(), OwnerCharacter);
+	ArmActionStackRef->Init(MovingModelRef->GetArms(), OwnerCharacter);
+	MovingModelRef->AnimModelActionStack = this;
 }
 
 void UAnimModelActionStack::PushDefaultActionMovement()
 {
-	UActionAnimModelMovingMovement* DefaultMovement = NewObject<UActionAnimModelMovingMovement>(this);
+	DefaultMovement = NewObject<UActionAnimModelMovingMovement>(this);
 	DefaultMovement->Init(MovingModelRef);
 	PushAction(DefaultMovement);
 
-	UActionLegMovingMovement* LegDefaultMovement = NewObject<UActionLegMovingMovement>(LegActionStackRef);
-	LegDefaultMovement->Init(MovingModelRef->GetLegs());
-	LegActionStackRef->PushAction(LegDefaultMovement);
+	LegActionStackRef->AddMovingAction();
+	ArmActionStackRef->AddMovingAction();
+}
 
-	UActionArmMovingMovement* ArmDefaultMovement = NewObject<UActionArmMovingMovement>(ArmActionStackRef);
-	ArmDefaultMovement->Init(MovingModelRef->GetArms());
-	ArmActionStackRef->PushAction(ArmDefaultMovement);
+void UAnimModelActionStack::PushJumpingActionMovement() const
+{
+	LegActionStackRef->AddJumpingAction();
+}
+
+void UAnimModelActionStack::PushHolsteActionMovement() const
+{
+	ArmActionStackRef->AddHolsterAction();
 }

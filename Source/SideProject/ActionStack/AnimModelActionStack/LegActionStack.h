@@ -7,15 +7,28 @@
 #include "LegActionStack.generated.h"
 
 class UMoveLeg;
+class ABaseInteractableCharacter;
+class UActionLegMovingMovement;
+class UActionLegJumpingMovement;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API ULegActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
-protected:
+protected: // Functions
 	ULegActionStack();
 	virtual void BeginPlay() override;
+
+public:
+	void Init(const TArray<UMoveLeg*>& InLegsRef, ABaseInteractableCharacter* InOwnerCharacter);
+	void AddMovingAction();
+	void AddJumpingAction();
 	
+
+private: //Variables
 	TArray<UMoveLeg*> LegsRef;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	UPROPERTY() UActionLegMovingMovement* LegDefaultMovement = nullptr;
+	UPROPERTY() UActionLegJumpingMovement* LegJumpingMovement = nullptr;
 };

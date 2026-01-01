@@ -7,6 +7,11 @@
 #include "ArmActionStack.generated.h"
 
 class UMoveArm;
+class ABaseInteractableCharacter;
+class UActionArmMovingMovement;
+class UActionArmJumpingMovement;
+class UActionArmToHolster;
+class UActionArmFromHolster;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UArmActionStack : public UActionStack
@@ -16,7 +21,18 @@ class SIDEPROJECT_API UArmActionStack : public UActionStack
 protected:
 	UArmActionStack();
 	virtual void BeginPlay() override;
-	
-	TArray<UMoveArm*> ArmsRef;
 
+public:
+	void Init(const TArray<UMoveArm*>& InArmsRef, ABaseInteractableCharacter* InOwnerCharacter);
+	void AddMovingAction();
+	void AddJumpingAction();
+	void AddHolsterAction();
+
+private:
+	TArray<UMoveArm*> ArmsRef;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	UPROPERTY() UActionArmMovingMovement* ArmsDefaultMovement = nullptr;
+	UPROPERTY() UActionArmJumpingMovement* ArmsJumpingMovement = nullptr;
+	UPROPERTY() UActionArmToHolster* ArmsToHolster = nullptr;
+	UPROPERTY() UActionArmFromHolster* ArmsFromHolster = nullptr;
 };

@@ -6,9 +6,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmJumpingMovement.generated.h"
 
-/**
-* Picks up item from ground into hand
- */
+class UMoveArm;
 UCLASS()
 class SIDEPROJECT_API UActionArmJumpingMovement : public UAction
 {
@@ -19,4 +17,9 @@ public:
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+
+	void Init(const TArray<UMoveArm*>& InMoveArms);
+
+private:
+	TArray<UMoveArm*> MoveArmsRef;
 };

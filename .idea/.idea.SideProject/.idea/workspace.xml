@@ -15,54 +15,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="972e900e-ca4c-4eff-a37a-b1c31a22aafb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/SideProject/Tools/GenericCalls.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStackManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +56,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/ObjectHandle.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/CharacterMovementComponent.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -89,24 +71,19 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelIdleMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmIdleMovement.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmFromHolster.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegIdleMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -454,6 +431,12 @@
       <workItem from="1766959876336" duration="14796000" />
       <workItem from="1767024548965" duration="3986000" />
       <workItem from="1767029894693" duration="5510000" />
+      <workItem from="1767123607271" duration="18569000" />
+      <workItem from="1767189556343" duration="14978000" />
+      <workItem from="1767218206025" duration="5572000" />
+      <workItem from="1767226788575" duration="463000" />
+      <workItem from="1767227370601" duration="206000" />
+      <workItem from="1767227657862" duration="2860000" />
     </task>
     <servers />
   </component>

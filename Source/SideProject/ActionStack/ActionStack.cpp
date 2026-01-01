@@ -19,13 +19,11 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateActions(DeltaTime);
-	ApplyPendingChanges();
 }
 
  void UActionStack::UpdateActions(float DeltaTime)
 {
 	if (IsEmpty()) return;
-	bIsUpdating = true;
 
 	// Acquire next action if needed
 	if (!CurrentAction && ActionStack.Num() > 0)
@@ -53,14 +51,13 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 			{
 				if (SafeAction->Execute_IsDone(SafeAction.GetObject()))
 				{
-					PendingRemovals.Add(SafeAction);
+					RemoveAction(SafeAction);
 				}
 			}
 		}
 		else CurrentAction = nullptr;
 	}
 
-	bIsUpdating = false;
 }
 
 bool UActionStack::IsEmpty() const { return !CurrentAction && ActionStack.Num() == 0; }
@@ -68,13 +65,21 @@ bool UActionStack::IsEmpty() const { return !CurrentAction && ActionStack.Num() 
 void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 {
 	if (!Action || !IsValid(Action.GetObject())) return;
-	PendingPushes.Add(Action);
+	CurrentAction = nullptr;
+	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+	ActionStack.Insert(Action, 0);
 }
 
-void UActionStack::RemoveAction(TScriptInterface<IActionInterface> Action)
+void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
 {
 	if (!Action) return;
-	PendingRemovals.Add(Action);
+	if (IsValid(Action.GetObject()))
+	{
+		Action->Execute_OnEnd(Action.GetObject());
+	}
+	CurrentAction = nullptr;
+	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+	ActionStack.RemoveAt(0);
 }
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)
@@ -99,36 +104,4 @@ UActionStack* UActionStack::GetMain(UObject* WorldContext)
 	}
 	Main = GM->ActionStack;
 	return Main;
-}
-
-void UActionStack::ApplyPendingChanges()
-{
-	// Removals
-	for (const auto& Action : PendingRemovals)
-	{
-		if (!Action) continue;
-
-		if (CurrentAction == Action)
-		{
-			if (IsValid(Action.GetObject()))
-			{
-				Action->Execute_OnEnd(Action.GetObject());
-			}
-			CurrentAction = nullptr;
-		}
-		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-		ActionStack.Remove(Action);
-	}
-
-	//Pushes
-	for (const auto& Action : PendingPushes)
-	{
-		if (!Action || !IsValid(Action.GetObject())) continue;
-		ActionStack.Remove(Action);
-		ActionStack.Insert(Action, 0);
-		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-	}
-
-	PendingRemovals.Empty();
-	PendingPushes.Empty();
 }

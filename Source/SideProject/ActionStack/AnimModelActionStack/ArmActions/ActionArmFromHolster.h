@@ -4,19 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "ActionStack/ActionStack.h"
-#include "ActionAnimModelIdleMovement.generated.h"
+#include "ActionArmFromHolster.generated.h"
 
-/**
-* Picks up item from ground into hand
- */
+class UMoveArm;
 UCLASS()
-class SIDEPROJECT_API UActionAnimModelIdleMovement : public UAction
+class SIDEPROJECT_API UActionArmFromHolster : public UAction
 {
 	GENERATED_BODY()
 	
 public:
-	UActionAnimModelIdleMovement(const FObjectInitializer& ObjectInitializer);
+	UActionArmFromHolster(const FObjectInitializer& ObjectInitializer);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+
+	void Init(UMoveArm* InMoveArm);
+
+private:
+	UMoveArm* MoveArmRef;
 };

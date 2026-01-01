@@ -1,13 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h"
+
+#include "GameFramework/PawnMovementComponent.h"
+#include "Player/BaseInteractableCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 UActionLegJumpingMovement::UActionLegJumpingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionLegJumpingMovement::Init(TArray<UMoveLeg*> InMoveLegs)
+void UActionLegJumpingMovement::Init(const TArray<UMoveLeg*>& InMoveLegs,  ABaseInteractableCharacter* InOwnerCharacter)
 {
 	MoveLegsRef = InMoveLegs;
+	OwnerCharacter = InOwnerCharacter;
 }
 
 void UActionLegJumpingMovement::OnBegin_Implementation(bool bFirstTime)
@@ -38,12 +44,17 @@ void UActionLegJumpingMovement::OnUpdate_Implementation(float DeltaTime)
 	}
 }
 
-bool UActionLegJumpingMovement::IsDone_Implementation() const
+void UActionLegJumpingMovement::OnEnd_Implementation()
 {
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
 		Leg->bIsJumping = false;
 		Leg->bFootPlanted = true;
 	}
-	return Super::IsDone_Implementation();
+}
+
+bool UActionLegJumpingMovement::IsDone_Implementation() const
+{
+	if (OwnerCharacter->GetMovementComponent()->IsFalling()) return false;
+	return true;
 }

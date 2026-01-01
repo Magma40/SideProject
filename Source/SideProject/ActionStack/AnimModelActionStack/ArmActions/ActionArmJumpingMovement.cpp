@@ -1,8 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h"
+#include "ProcedualAnimation/MoveArm.h"
 
 UActionArmJumpingMovement::UActionArmJumpingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
+
+void UActionArmJumpingMovement::Init(const TArray<UMoveArm*>& InMoveArms)
+{
+	MoveArmsRef = InMoveArms;
+}
 
 void UActionArmJumpingMovement::OnBegin_Implementation(bool bFirstTime)
 {

@@ -11,7 +11,7 @@ AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
 void AMovingModel::InitSceneComponents()
 {
-	AnimModelActionStack = Cast<UAnimModelActionStack>(GenericCalls::FindChildByExactName(GetRootComponent(), TEXT("AnimModelActionStack")));
+	//AnimModelActionStack = Cast<UAnimModelActionStack>(GenericCalls::FindChildByExactName(GetRootComponent(), TEXT("AnimModelActionStack")));
 	
 	// Get Hips
 	Hips = GenericCalls::FindChildByExactName(GetRootComponent(), TEXT("Hips"));
@@ -121,11 +121,13 @@ void AMovingModel::SetLegsMovingAnim()
 }
 void AMovingModel::SetLegsJumpingAnim()
 {
-	for (FLimbChain& Leg : Legs)
-	{
-		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
-	}
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->PushJumpingActionMovement();
+	// for (FLimbChain& Leg : Legs)
+	// {
+	// 	UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+	// 	ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
+	// }
 }
 
 void AMovingModel::SetArmsIdleAnim()

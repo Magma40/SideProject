@@ -133,14 +133,15 @@ void AMainCharacter::ContinuousFalling(float Right, float Forward)
 void AMainCharacter::Jump() 
 {
 	Super::Jump();
-	//MovingModel->SetLegsJumpingAnim();
+	if (MovingModel == nullptr || GetMovementComponent()->IsFalling()) return;
+	MovingModel->SetLegsJumpingAnim();
 }
 
 void AMainCharacter::Falling() 
 {
 	Super::Falling();
 	if (MovingModel == nullptr) return;
-	MovingModel->SetLegsJumpingAnim();
+	//MovingModel->SetLegsJumpingAnim();
 }
 
 void AMainCharacter::Landed(const FHitResult& Hit)

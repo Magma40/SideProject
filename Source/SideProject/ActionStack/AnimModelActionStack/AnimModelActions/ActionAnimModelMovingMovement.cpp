@@ -19,7 +19,6 @@ void UActionAnimModelMovingMovement::OnUpdate_Implementation(float DeltaTime)
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	MovingModelRef->UpdateHips();
-
 }
 
 bool UActionAnimModelMovingMovement::IsDone_Implementation() const

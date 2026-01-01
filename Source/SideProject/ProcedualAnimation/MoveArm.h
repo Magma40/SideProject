@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "Core/Subsystems/AnimationCurveSubsystem.h"
 //#include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "Tools/GenericCalls.h"
 #include "MoveArm.generated.h"
@@ -45,5 +44,4 @@ public: // Variables
 	bool ActionEnabled = false;
 
 	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* WaveAnimCurve;
-	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* HolsterAnimCurve;
 };
