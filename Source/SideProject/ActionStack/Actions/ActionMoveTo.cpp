@@ -52,7 +52,6 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 		
 		bMoveCompleted = true;
 	}
-	MovingModel->SetLegsMovingAnim();
 }
 
 
@@ -72,7 +71,6 @@ bool UActionMoveTo::IsDone_Implementation() const
 	{
 		return true;
 	}
-	if (bMoveCompleted) MovingModel->SetLegsIdleAnim();
 	return bMoveCompleted;
 }
 

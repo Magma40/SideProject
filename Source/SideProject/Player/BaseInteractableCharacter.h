@@ -42,6 +42,8 @@ public:
 	AMovingModel* MovingModel = nullptr;
 	USceneComponent* BackHolster = nullptr;
 
+	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
+
 private:
 	UObject* ClosestObject = nullptr;
 };

@@ -34,7 +34,6 @@ protected: //Functions
 
 public:
 	void UpdateIK();
-	void SetBackHolsterAnim(FVector HolsterLocation);
 	bool ShouldHoldUpHands();
 
 public: // Variables

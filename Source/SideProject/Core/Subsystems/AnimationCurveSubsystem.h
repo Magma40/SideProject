@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Curves/CurveVector.h"
 #include "AnimationCurveSubsystem.generated.h"
 
 USTRUCT()
@@ -42,6 +43,58 @@ struct FActiveCurveAnim
 		{
 			// Mark as "Finished", will be cleaned up by subsystem
 			Curve = nullptr;
+		}
+	}
+
+	bool IsFinished() const
+	{
+		return Curve == nullptr;
+	}
+};
+
+USTRUCT()
+struct FActiveVectorCurveAnim
+{
+	GENERATED_BODY()
+
+	FActiveVectorCurveAnim() {}
+
+	FActiveVectorCurveAnim(UCurveVector* InCurve,TFunction<void(const FVector&)> InCallback, float InRate = 1.0f)
+	{
+		Curve = InCurve;
+		Callback = InCallback;
+		PlayRate = InRate;
+
+		// Cache time range
+		if (Curve)
+		{
+			Curve->GetTimeRange(CurrentTime, MaxTime);
+		}
+	}
+
+	UPROPERTY() UCurveVector* Curve = nullptr;
+
+	float PlayRate = 1.0f;
+	float CurrentTime = 0.0f;
+	float MaxTime = 0.0f;
+
+	TFunction<void(const FVector&)> Callback;
+
+	void Tick(float DeltaTime)
+	{
+		if (!Curve)
+		{
+			return;
+		}
+
+		CurrentTime += DeltaTime * PlayRate;
+
+		const FVector CurrentValue = Curve->GetVectorValue(CurrentTime);
+		Callback(CurrentValue);
+
+		if (CurrentTime >= MaxTime)
+		{
+			Curve = nullptr; // Mark finished
 		}
 	}
 
@@ -95,7 +148,8 @@ class SIDEPROJECT_API UAnimationCurveSubsystem : public UTickableWorldSubsystem
 
 	// This could be a FInstancedStruct array if we want a variety of struct options with different sets of data
 	TArray<FActiveCurveAnim> ActiveAnims;
-
+	TArray<FActiveVectorCurveAnim> ActiveVectorAnims;
+	
 	TArray<FActiveEasingFunc> ActiveEasingFuncs;
 
 	virtual void Tick(float DeltaTime) override;
@@ -107,6 +161,11 @@ public:
 	/* Start animation based on curve */
 	void PlayCurveAnim(UCurveFloat* InCurveAsset, float InPlayRate, const TFunction<void(float)>& Func);
 
+	void PlayCurveAnim(UCurveVector* InCurveAsset, float InPlayRate, const TFunction<void(const FVector&)>& Func);
+
 	/* Play easing function with output between 0.0 - 1.0 */
 	void PlayEasingFunc(EEasingFunc::Type EasingType, float EasingExp, float InPlayRate, const TFunction<void(float)>& Func);
+
+	static TTuple<TTuple<TArray<FVector>, float>,FVector> CustomAnim( float DeltaTime, TArray<FVector> TheLocations, float ElapsedTime, float PlayRate);
+	static TArray<FVector> GenerateInBetweenAnimPositions(TArray<FVector> TheLocations, int HowManyIndexes);
 };

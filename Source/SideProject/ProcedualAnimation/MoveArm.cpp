@@ -3,6 +3,8 @@
 
 #include "ProcedualAnimation/MoveArm.h"
 
+#include "Kismet/GameplayStatics.h"
+
 UMoveArm::UMoveArm() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UMoveArm::Init()
@@ -64,15 +66,6 @@ void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 // 		TargetPose.Position = FVector(CurrValue * 25, 0, CurrValue * 50);
 // 	});
 // }
-
-void UMoveArm::SetBackHolsterAnim(FVector HolsterLocation)
-{
-	ActionEnabled = true;
-	const FTransform Xform = ArmParts[0]->GetComponentTransform();
-	FVector HolsterLocationPos = Xform.InverseTransformPosition(HolsterLocation);
-	TargetPose.Position = HolsterLocationPos;
-	TargetPose.Rotation = FQuat::Identity;	
-}
 
 void UMoveArm::UpdateIK()
 {
@@ -136,6 +129,12 @@ bool UMoveArm::ShouldHoldUpHands()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner()->GetParentActor());
 	Params.AddIgnoredActor(GetOwner());
+	TArray<AActor*> ActorsAround; //  Gather actors
+	UGameplayStatics::GetAllActorsWithTag (GetWorld(), "HandHeldItem", ActorsAround);
+	for (AActor* Actor : ActorsAround)
+	{
+		Params.AddIgnoredActor(Actor);
+	}
 	
 	if (GetWorld()->LineTraceSingleByChannel(Hit, StartWorld, EndWorld, ECC_Visibility, Params))
 	{

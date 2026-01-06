@@ -59,7 +59,7 @@ bool ABaseInteractableCharacter::AbleToPickUpItem()
 
 bool ABaseInteractableCharacter::TryToPickUpItem()
 {
-	FVector HandLocation = MovingModel->GetLeftHand()->GetComponentLocation();
+	FVector HandLocation = MovingModel->GetRightHand()->GetComponentLocation();
 	FPickupCandidate Best;
 	
 	TArray<AActor*> ActorsAround; //  Gather actors
@@ -134,11 +134,13 @@ void ABaseInteractableCharacter::DropItemInHand()
 	{
 		OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		OwnerActor->SetActorLocation(End);
-		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+		TArray<UPrimitiveComponent*> Primitives;
+		OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
+		for (UPrimitiveComponent* Prim : Primitives)
 		{
-			Prim->SetMobility(EComponentMobility::Movable);
-			Prim->SetSimulatePhysics(true);
-			Prim->SetEnableGravity(true);
+			if (!IsValid(Prim)) continue;
+			//Prim->SetSimulatePhysics(true);
+			//Prim->SetEnableGravity(true);
 			Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		}
 		ItemInHand = nullptr;
@@ -168,21 +170,23 @@ void ABaseInteractableCharacter::PickUpItemToHand(UObject* inSpecificPickUpItem)
 
 	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
 
-	if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(RootComp))
+	TArray<UPrimitiveComponent*> Primitives;
+	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
+	for (UPrimitiveComponent* Prim : Primitives)
 	{
-		Prim->SetMobility(EComponentMobility::Movable);
+		if (!IsValid(Prim)) continue;
 		Prim->SetSimulatePhysics(false);
-		Prim->SetEnableGravity(false);
+		//Prim->SetEnableGravity(false);
 		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-	OwnerActor->AttachToComponent(MovingModel->GetLeftHand(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	OwnerActor->GetRootComponent()->AttachToComponent(MovingModel->GetRightHand(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	ItemInHand = ClosestObject;
 }
 
 void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this too fast will break it, resulting mostly with BackItemHolster being valid
 {
-	float Distance =	UE::Geometry::Distance(MovingModel->GetLeftHand()->GetComponentLocation(), BackHolster->GetComponentLocation());
-	if (Distance > 100) return;
+	float Distance =	UE::Geometry::Distance(MovingModel->GetRightHand()->GetComponentLocation(), BackHolster->GetComponentLocation());
+	if (Distance > 50) return;
 	if (IsValid(BackItemHolster) && !IsValid(ItemInHand))
 	{
 		DeattachFromBackHolster();

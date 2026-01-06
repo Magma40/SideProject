@@ -8,10 +8,13 @@
 
 class UMoveArm;
 class ABaseInteractableCharacter;
+class ACompanionPawn;
+
 class UActionArmMovingMovement;
 class UActionArmJumpingMovement;
 class UActionArmToHolster;
-class UActionArmFromHolster;
+class UActionArmWave;
+class UActionArmPoint;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UArmActionStack : public UActionStack
@@ -23,16 +26,22 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void Init(const TArray<UMoveArm*>& InArmsRef, ABaseInteractableCharacter* InOwnerCharacter);
+	void Init(const TArray<UMoveArm*>& InArmsRef, ABaseInteractableCharacter* InOwnerCharacter, USceneComponent* InBackHolster, ACompanionPawn* InAICompanion);
 	void AddMovingAction();
 	void AddJumpingAction();
 	void AddHolsterAction();
+	void AddWaveAction();
+	void AddPointingAction();
 
 private:
 	TArray<UMoveArm*> ArmsRef;
+	UPROPERTY() USceneComponent* BackHolsterRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	ACompanionPawn* AICompanion = nullptr;
+	
 	UPROPERTY() UActionArmMovingMovement* ArmsDefaultMovement = nullptr;
 	UPROPERTY() UActionArmJumpingMovement* ArmsJumpingMovement = nullptr;
 	UPROPERTY() UActionArmToHolster* ArmsToHolster = nullptr;
-	UPROPERTY() UActionArmFromHolster* ArmsFromHolster = nullptr;
+	UPROPERTY() UActionArmWave* ArmsWave = nullptr;
+	UPROPERTY() UActionArmPoint* ArmsPoint = nullptr;
 };

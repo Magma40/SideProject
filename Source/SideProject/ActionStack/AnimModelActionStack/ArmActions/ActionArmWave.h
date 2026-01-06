@@ -4,22 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "ActionStack/ActionStack.h"
-#include "ActionArmFromHolster.generated.h"
+#include "ActionArmWave.generated.h"
 
 class UMoveArm;
+class ABaseInteractableCharacter;
+
 UCLASS()
-class SIDEPROJECT_API UActionArmFromHolster : public UAction
+class SIDEPROJECT_API UActionArmWave : public UAction
 {
 	GENERATED_BODY()
 	
 public:
-	UActionArmFromHolster(const FObjectInitializer& ObjectInitializer);
+	UActionArmWave(const FObjectInitializer& ObjectInitializer);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArm);
+	void Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
 
 private:
 	UMoveArm* MoveArmRef;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	TArray<FVector> AnimLocations;
+	float ElapsedTime = 0.0f;
+	float PlayRate = 1.0f;
 };

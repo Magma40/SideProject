@@ -41,7 +41,6 @@ protected: //Variables
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* MouseLookAction;
 
-	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;

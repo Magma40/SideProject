@@ -7,6 +7,7 @@
 #include "ActionArmToHolster.generated.h"
 
 class UMoveArm;
+class ABaseInteractableCharacter;
 
 UCLASS()
 class SIDEPROJECT_API UActionArmToHolster : public UAction // Because that's what happens on the ....Polar..... Express!!!!!!
@@ -19,10 +20,13 @@ public:
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArm);
+	void Init(UMoveArm* InMoveArm, USceneComponent* InBackHolster, ABaseInteractableCharacter* InCharacter);
 
 private:
 	UMoveArm* MoveArmRef;
-	UPROPERTY() UActionArmFromHolster* ArmsFromHolster = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* HolsterAnimCurve;
+	USceneComponent* BackHolsterRef = nullptr;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	TArray<FVector> AnimLocations;
+	float ElapsedTime = 0.0f;
+	float PlayRate = 1.0f;
 };

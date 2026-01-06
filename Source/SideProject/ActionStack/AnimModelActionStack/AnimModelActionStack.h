@@ -10,8 +10,8 @@ class ABaseInteractableCharacter;
 class UArmActionStack;
 class ULegActionStack;
 class AMovingModel;
+class ACompanionPawn;
 
-class UActionAnimModelMovingMovement;
 class UActionAnimModelMovingMovement;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -32,8 +32,12 @@ protected:
 	UPROPERTY() UActionAnimModelMovingMovement* DefaultMovement = nullptr;
 	UPROPERTY() UActionAnimModelMovingMovement* AnimModelJumpingMovement = nullptr;
 
+	ACompanionPawn* AICompanion = nullptr;
+
 public:
 	void PushDefaultActionMovement();
 	void PushJumpingActionMovement() const;
-	void PushHolsteActionMovement() const;
+	void PushHolsterActionMovement() const;
+	void PushWaveActionMovement() const;
+	void PushPointingActionMovement() const;
 };

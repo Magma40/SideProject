@@ -6,6 +6,9 @@
 #include "ActionStack/Characters/ActionCharacter.h"
 #include "CompanionCharacter.generated.h"
 
+class UActionMoveTo;
+class UActionPickUpItem;
+
 UCLASS()
 class SIDEPROJECT_API UCompanionCharacter : public UActionCharacter
 {
@@ -19,5 +22,10 @@ public:
 	//Actions
 	void OnAddActionMoveTo();
 	void OnAddActionPickUp();
+
+private:
+
+	UPROPERTY() UActionMoveTo* ActionMoveToRef;
+	UPROPERTY() UActionPickUpItem* ActionPickUpItemRef;
 };
 

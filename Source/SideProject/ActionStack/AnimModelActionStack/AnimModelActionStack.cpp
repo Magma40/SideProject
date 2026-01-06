@@ -8,6 +8,8 @@
 
 #include "ActionStack/AnimModelActionStack/LegActionStack.h"
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
+#include "ActionStack/Characters/CompanionPawn.h"
+#include "Kismet/GameplayStatics.h"
 
 UAnimModelActionStack::UAnimModelActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -42,7 +44,17 @@ void UAnimModelActionStack::Init()
 	MovingModelRef->InitSceneComponents();
 	OwnerCharacter = Cast<ABaseInteractableCharacter>(MovingModelRef->GetParentActor());
 	LegActionStackRef->Init(MovingModelRef->GetLegs(), OwnerCharacter);
-	ArmActionStackRef->Init(MovingModelRef->GetArms(), OwnerCharacter);
+	USceneComponent* BackHolsterRef = GenericCalls::FindChildByExactName(GetOwner(), "BackItemHolster");
+	if (!BackHolsterRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - BackHolsterRef not found or wrong type"), *GetOwner()->GetName());
+		return;
+	}
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACompanionPawn::StaticClass(),  Actors);
+	AICompanion = Cast<ACompanionPawn>(Actors[0]);
+	
+	ArmActionStackRef->Init(MovingModelRef->GetArms(), OwnerCharacter, BackHolsterRef, AICompanion);
 	MovingModelRef->AnimModelActionStack = this;
 }
 
@@ -61,7 +73,17 @@ void UAnimModelActionStack::PushJumpingActionMovement() const
 	LegActionStackRef->AddJumpingAction();
 }
 
-void UAnimModelActionStack::PushHolsteActionMovement() const
+void UAnimModelActionStack::PushHolsterActionMovement() const
 {
 	ArmActionStackRef->AddHolsterAction();
+}
+
+void UAnimModelActionStack::PushWaveActionMovement() const
+{
+	ArmActionStackRef->AddWaveAction();
+}
+
+void UAnimModelActionStack::PushPointingActionMovement() const
+{
+	ArmActionStackRef->AddPointingAction();
 }

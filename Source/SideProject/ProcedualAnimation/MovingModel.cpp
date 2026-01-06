@@ -50,14 +50,11 @@ void AMovingModel::BeginPlay()
 	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
-	//SetLegsIdleAnim();
-	//SetArmsIdleAnim();
 }
 
 void AMovingModel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//UpdateHips(DeltaTime);
 	//DrawDebugJoints();
 	//DrawDebugLimbs();
 }
@@ -65,19 +62,17 @@ void AMovingModel::Tick(float DeltaTime)
 void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
-	
-	//float HipSway =  UpdateLegs(DeltaTime);
-	//UpdateArms();
+	float HipSway =  GetHipSway();
 	
 	//Apply New Hip Location
-	FVector HipSwayOffset = GetActorForwardVector() * HipSwayAmount;
+	//FVector HipSwayOffset = GetActorForwardVector() * HipSwayAmount;
 	float DesiredHipHeight = BaseHipHeight;
 	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
-	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSwayOffset;
+	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSway;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 }
 
-float AMovingModel::UpdateLegs(float DeltaTime)
+float AMovingModel::GetHipSway()
 {
 	float HipSway = 0.0f;
 	//Leg Logic
@@ -92,82 +87,32 @@ float AMovingModel::UpdateLegs(float DeltaTime)
 			HipSway = Lift * (IsRight ? 1.f : -1.f);
 		}
 	}
+	HipSway = HipSway * 0.1f;
 	return HipSway;
 }
 
-void AMovingModel::UpdateArms()
-{
-	//Arm Logic
-	for (FLimbChain& Arm: Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		if (!IsValid(UpperArm)) continue;
-	}
-}
-
-void AMovingModel::SetLegsIdleAnim()
-{
-	for (FLimbChain& Leg : Legs)
-	{
-		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-	}
-}
-void AMovingModel::SetLegsMovingAnim()
-{
-	for (FLimbChain& Leg : Legs)
-	{
-		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-	}
-}
 void AMovingModel::SetLegsJumpingAnim()
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushJumpingActionMovement();
-	// for (FLimbChain& Leg : Legs)
-	// {
-	// 	UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-	// 	ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
-	// }
 }
 
-void AMovingModel::SetArmsIdleAnim()
-{
-	for (FLimbChain& Arm : Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-	}
-}
-void AMovingModel::SetArmsMovingAnim()
-{
-	for (FLimbChain& Arm : Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		//UpperArm->Set();
-	}
-}
 void AMovingModel::SetArmsWaveAnim()
 {
-	for (FLimbChain& Arm : Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		if (UpperArm->GetName().EndsWith(TEXT("_R")))
-		{
-		}
-	}
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->PushWaveActionMovement();
 }
 void AMovingModel::SetArmsBackHolsterAnim()
 {
-	for (FLimbChain& Arm : Arms)
-	{
-		UMoveArm* UpperArm = Cast<UMoveArm>(Arm.Upper);
-		ABaseInteractableCharacter* InteractableCharacter= Cast<ABaseInteractableCharacter>( GetParentActor());
-		if (UpperArm->GetName().EndsWith(TEXT("_L")))
-		{
-			UpperArm->SetBackHolsterAnim(InteractableCharacter->BackHolster->GetComponentLocation());
-		}
-	}
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->PushHolsterActionMovement();
 }
 
+void AMovingModel::SetArmsPointingAnim()
+{
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->PushPointingActionMovement();
+}
 
 void AMovingModel::DrawDebugJoints()
 {

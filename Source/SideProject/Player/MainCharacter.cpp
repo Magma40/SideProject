@@ -148,7 +148,6 @@ void AMainCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	if (MovingModel == nullptr) return;
-	MovingModel->SetLegsMovingAnim();
 }
 
 

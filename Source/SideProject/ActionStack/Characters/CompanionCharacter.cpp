@@ -24,12 +24,12 @@ void UCompanionCharacter::OnAddActionMoveTo()
 	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(ActorOwner);
 	if (IsValid(CompanionPawn))
 	{
-		UActionMoveTo* MoveAction = NewObject<UActionMoveTo>(this);
-		MoveAction->Init(this, CompanionPawn->GetMoveToLocation(), CompanionPawn->MovingModel);
+		ActionMoveToRef = NewObject<UActionMoveTo>(this);
+		ActionMoveToRef->Init(this, CompanionPawn->GetMoveToLocation(), CompanionPawn->MovingModel);
 		UActionStack* Stack = UActionStack::GetMain(this);
 		if (Stack)
 		{
-			Stack->PushAction(MoveAction);
+			Stack->PushAction(ActionMoveToRef);
 		}
 	}
 }
@@ -39,20 +39,20 @@ void UCompanionCharacter::OnAddActionPickUp()
 	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(ActorOwner);
 	if (IsValid(CompanionPawn))
 	{
-		UActionPickUpItem* PickUpAction = NewObject<UActionPickUpItem>(this);
+		ActionPickUpItemRef = NewObject<UActionPickUpItem>(this);
 		UActionStack* Stack = UActionStack::GetMain(this);
-		PickUpAction->Init(this);
+		ActionPickUpItemRef->Init(this);
 		if (Stack)
 		{
-			Stack->PushAction(PickUpAction);
+			Stack->PushAction(ActionPickUpItemRef);
 		}
 		
 		CompanionPawn->SetMoveToLocation(FVector(360, -1240, 120));
-		UActionMoveTo* MoveAction = NewObject<UActionMoveTo>(this);
-		MoveAction->Init(this, CompanionPawn->GetMoveToLocation(),  CompanionPawn->MovingModel);
+		ActionMoveToRef = NewObject<UActionMoveTo>(this);
+		ActionMoveToRef->Init(this, CompanionPawn->GetMoveToLocation(),  CompanionPawn->MovingModel);
 		if (Stack)
 		{
-			Stack->PushAction(MoveAction);
+			Stack->PushAction(ActionMoveToRef);
 		}
 	}
 }

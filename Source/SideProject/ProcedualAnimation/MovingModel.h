@@ -40,17 +40,12 @@ protected: // Functions
 public:
 	void InitSceneComponents();
 	void UpdateHips();
-	float UpdateLegs(float DeltaTime);
-	void UpdateArms();
+	float GetHipSway();
 
-	UFUNCTION(BlueprintCallable) void SetLegsIdleAnim();
-	UFUNCTION(BlueprintCallable) void SetLegsMovingAnim();
 	UFUNCTION(BlueprintCallable) void SetLegsJumpingAnim();
-
-	UFUNCTION(BlueprintCallable) void SetArmsIdleAnim();
-	UFUNCTION(BlueprintCallable) void SetArmsMovingAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim();
+	UFUNCTION(BlueprintCallable) void SetArmsPointingAnim();
 	
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
