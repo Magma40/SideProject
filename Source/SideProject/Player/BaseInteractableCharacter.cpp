@@ -218,3 +218,10 @@ void ABaseInteractableCharacter::DeattachFromBackHolster()
 	BackItemHolster = nullptr;
 }
 
+void ABaseInteractableCharacter::Jump() 
+{
+	Super::Jump();
+	if (MovingModel == nullptr || GetMovementComponent()->IsFalling()) return;
+	MovingModel->SetLegsJumpingAnim();
+}
+

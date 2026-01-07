@@ -10,6 +10,8 @@
 #include "ArmActions/ActionArmToHolster.h"
 #include "ArmActions/ActionArmWave.h"
 #include "ArmActions/ActionArmPoint.h"
+#include "ArmActions/ActionArmHandHolding.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 
 UArmActionStack::UArmActionStack() { PrimaryComponentTick.bCanEverTick = true; }
@@ -20,41 +22,33 @@ void UArmActionStack::BeginPlay()
 	Main = this;
 }
 
-void UArmActionStack::Init(const TArray<UMoveArm*>& InArmsRef, ABaseInteractableCharacter* InOwnerCharacter, USceneComponent* InBackHolster, ACompanionPawn* InAICompanion)
+void UArmActionStack::Init(UMoveArm* InArmRef, ABaseInteractableCharacter* InOwnerCharacter, ABaseInteractableCharacter* InOwnerCompanion, USceneComponent* InBackHolster)
 {
-	ArmsRef = InArmsRef;
+	ArmRef = InArmRef;
 	OwnerCharacter = InOwnerCharacter;
 	BackHolsterRef = InBackHolster;
-	AICompanion = InAICompanion;
+	OwnerCompanion = InOwnerCompanion;
 }
 
 void UArmActionStack::AddMovingAction()
 {
 	ArmsDefaultMovement = NewObject<UActionArmMovingMovement>(this);
-	ArmsDefaultMovement->Init(ArmsRef);
+	ArmsDefaultMovement->Init(ArmRef);
 	this->PushAction(ArmsDefaultMovement);
 }
 void UArmActionStack::AddJumpingAction()
 {
 	ArmsJumpingMovement = NewObject<UActionArmJumpingMovement>(this);
-	ArmsJumpingMovement->Init(ArmsRef);
+	ArmsJumpingMovement->Init(ArmRef);
 	this->PushAction(ArmsJumpingMovement);
 }
 
 void UArmActionStack::AddHolsterAction()
 {
 	if (Contains(ArmsToHolster)  || Contains(ArmsWave) || Contains(ArmsPoint)) return;
-	UMoveArm* RightArm = nullptr;
-	for(UMoveArm* Arm : ArmsRef)
-	{
-		if (Arm->GetName().EndsWith(TEXT("_R")))
-		{
-			RightArm =  Arm;
-		}
-	}
 	
 	ArmsToHolster = NewObject<UActionArmToHolster>(this);
-	ArmsToHolster->Init(RightArm, BackHolsterRef, OwnerCharacter);
+	ArmsToHolster->Init(ArmRef, BackHolsterRef, OwnerCharacter);
 	this->PushAction(ArmsToHolster);
 }
 
@@ -64,32 +58,24 @@ void UArmActionStack::AddWaveAction()
 	if (Contains(ArmsPoint))
 	{
 		FVector PointingLocationRef = ArmsPoint->PointingLocation;
+		ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion);
 		if (IsValid(ArmsPoint->ActorPointedAt))
 		{
-			AICompanion->AddPickUpItem();
-			AICompanion->AddNewMoveTo(PointingLocationRef);
+			CompanionPawn->AddPickUpItem();
+			CompanionPawn->AddNewMoveTo(PointingLocationRef);
 		}
 		else
 		{
-			AICompanion->AddNewMoveTo(PointingLocationRef);
+			CompanionPawn->AddNewMoveTo(PointingLocationRef);
 		}
 		return;
 	}
 	
-	UMoveArm* RightArm = nullptr;
-	for(UMoveArm* Arm : ArmsRef)
-	{
-		if (Arm->GetName().EndsWith(TEXT("_R")))
-		{
-			RightArm =  Arm;
-		}
-	}
-	
 	ArmsWave = NewObject<UActionArmWave>(this);
-	ArmsWave->Init(RightArm, OwnerCharacter);
+	ArmsWave->Init(ArmRef, OwnerCharacter);
 	this->PushAction(ArmsWave);
-
-	AICompanion->AddNewMoveTo(OwnerCharacter->GetActorLocation());
+	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion);
+	CompanionPawn->AddNewMoveTo(OwnerCharacter->GetActorLocation());
 }
 
 void UArmActionStack::AddPointingAction()
@@ -100,15 +86,25 @@ void UArmActionStack::AddPointingAction()
 		this->RemoveAction(ArmsPoint);
 		return;
 	}
-	UMoveArm* RightArm = nullptr;
-	for(UMoveArm* Arm : ArmsRef)
-	{
-		if (Arm->GetName().EndsWith(TEXT("_R")))
-		{
-			RightArm =  Arm;
-		}
-	}
 	ArmsPoint = NewObject<UActionArmPoint>(this);
-	ArmsPoint->Init(RightArm, OwnerCharacter);
+	ArmsPoint->Init(ArmRef, OwnerCharacter);
 	this->PushAction(ArmsPoint);
+}
+
+void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
+{
+	if (Contains(ArmsHandHolding))
+	{
+		this->RemoveAction(ArmsHandHolding);
+		ArmsHandHolding = nullptr;
+		if  (Cast<ACompanionPawn>(OwnerCharacter))
+		{
+			GetMain(GetWorld())->ClearAllActionsButLast();
+		}
+		return;
+	}
+	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion);
+	ArmsHandHolding = NewObject<UActionArmHandHolding>(this);
+	ArmsHandHolding->Init(ArmRef, OtherCompanionArm, OwnerCharacter, CompanionPawn);
+	this->PushAction(ArmsHandHolding);
 }

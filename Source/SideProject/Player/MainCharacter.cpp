@@ -130,13 +130,6 @@ void AMainCharacter::ContinuousFalling(float Right, float Forward)
 }
 
 
-void AMainCharacter::Jump() 
-{
-	Super::Jump();
-	if (MovingModel == nullptr || GetMovementComponent()->IsFalling()) return;
-	MovingModel->SetLegsJumpingAnim();
-}
-
 void AMainCharacter::Falling() 
 {
 	Super::Falling();

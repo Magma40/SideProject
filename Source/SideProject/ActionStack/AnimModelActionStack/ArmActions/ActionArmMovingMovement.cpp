@@ -5,9 +5,9 @@
 
 UActionArmMovingMovement::UActionArmMovingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionArmMovingMovement::Init(TArray<UMoveArm*> InMoveArms)
+void UActionArmMovingMovement::Init(UMoveArm* InMoveArm)
 {
-	MoveArmsRef = InMoveArms;
+	MoveArmsRef = InMoveArm;
 }
 
 void UActionArmMovingMovement::OnBegin_Implementation(bool bFirstTime)
@@ -18,12 +18,9 @@ void UActionArmMovingMovement::OnBegin_Implementation(bool bFirstTime)
 void UActionArmMovingMovement::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	 for (UMoveArm* Arm : MoveArmsRef)
-	 {
-	 	if (Arm->ShouldHoldUpHands()) continue;
-	 	Arm->TargetPose.Position = FVector(0,25,  -50);
-	 	Arm->TargetPose.Rotation = FQuat::Identity;
-	 }
+	if (MoveArmsRef->ShouldHoldUpHands()) return;
+	MoveArmsRef->TargetPose.Position = FVector(0,25,  -50);
+	MoveArmsRef->TargetPose.Rotation = FQuat::Identity;
 }
 
 bool UActionArmMovingMovement::IsDone_Implementation() const

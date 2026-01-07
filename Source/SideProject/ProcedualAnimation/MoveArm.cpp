@@ -53,20 +53,6 @@ void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	UpdateIK();
 }
 
-// void UMoveArm::UpdateMoving(float DeltaTime)
-// {
-// 	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();;
-// 	if (!AnimSubsystem)
-// 	{
-// 		UE_LOG(LogTemp, Error, TEXT("UMoveArm - SetWaveAnim - AnimSubsystem was nullptr"));
-// 		return;
-// 	}
-// 	AnimSubsystem->PlayCurveAnim(WaveAnimCurve, 2.0f, [&](float CurrValue)
-// 	{
-// 		TargetPose.Position = FVector(CurrValue * 25, 0, CurrValue * 50);
-// 	});
-// }
-
 void UMoveArm::UpdateIK()
 {
 	if (ArmParts.Num() != 3) return;

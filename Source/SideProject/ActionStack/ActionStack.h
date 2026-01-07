@@ -57,6 +57,25 @@ public:
 	 {
 		 return Action  != nullptr && ActionStack.Contains(Action);
 	 }
+
+	template<typename T>
+	TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction)
+	 {
+	 	TScriptInterface<IActionInterface> ActionInterface;
+	 	UObject* ActionObject = Cast<UObject>(InAction);
+	 	if (!ActionObject) return ActionInterface;
+	 	ActionInterface.SetObject(ActionObject);
+	 	ActionInterface.SetInterface(Cast<IActionInterface>(ActionObject));
+	 	return ActionInterface;
+	 }
+
+	void ClearAllActionsButLast()
+	 {
+	 	while (ActionStack.Num() > 0)
+	 	{
+	 		RemoveAction(ActionStack[0]);
+	 	}
+	 }
 };
 
 UCLASS(Abstract, Blueprintable) // Why is this needed?
@@ -111,3 +130,4 @@ T* UActionStack::GetAction()
 	}
 	return nullptr;
 }
+

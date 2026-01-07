@@ -114,6 +114,12 @@ void AMovingModel::SetArmsPointingAnim()
 	AnimModelActionStack->PushPointingActionMovement();
 }
 
+void AMovingModel::SetArmsHoldingHandsAnim()
+{
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->PushHandHoldingActionMovement();
+}
+
 void AMovingModel::DrawDebugJoints()
 {
 	FVector Pos_Hips = 					Hips->GetComponentLocation();

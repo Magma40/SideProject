@@ -36,6 +36,8 @@ public:
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
 	UFUNCTION(BlueprintCallable) void DeattachFromBackHolster(); //Should deattach the item in the holster into the hand
 
+	virtual void Jump() override;
+	
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
@@ -43,6 +45,10 @@ public:
 	USceneComponent* BackHolster = nullptr;
 
 	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
 
 private:
 	UObject* ClosestObject = nullptr;

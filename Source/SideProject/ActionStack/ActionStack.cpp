@@ -66,7 +66,7 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 {
 	if (!Action || !IsValid(Action.GetObject())) return;
 	CurrentAction = nullptr;
-	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+	UE_LOG(LogTemp, Warning,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
 	ActionStack.Insert(Action, 0);
 }
 
@@ -84,7 +84,7 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)
 {
-	if (IsValid(Main)) return Main; 
+	//if (IsValid(Main)) return Main; 
 	UWorld* World = nullptr;
 	if (WorldContext)
 	{
@@ -102,6 +102,8 @@ UActionStack* UActionStack::GetMain(UObject* WorldContext)
 		UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
 		return nullptr;
 	}
-	Main = GM->ActionStack;
-	return Main;
+	// Main = GM->ActionStack;
+	// return Main;
+
+	return GM->ActionStack;
 }

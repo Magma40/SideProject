@@ -22,22 +22,31 @@ class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
 protected:
 	UAnimModelActionStack();
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Init();
+	
 	
 	AMovingModel* MovingModelRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	ABaseInteractableCharacter* CompanionOwnerCharacter = nullptr;
 	ULegActionStack* LegActionStackRef = nullptr;
-	UArmActionStack* ArmActionStackRef = nullptr;
+	UArmActionStack* ArmActionStack_RRef = nullptr;
+	UArmActionStack* ArmActionStack_LRef = nullptr;
 
 	UPROPERTY() UActionAnimModelMovingMovement* DefaultMovement = nullptr;
 	UPROPERTY() UActionAnimModelMovingMovement* AnimModelJumpingMovement = nullptr;
 
-	ACompanionPawn* AICompanion = nullptr;
+	float MinDistanceToHoldHands = 200.0f;
 
 public:
 	void PushDefaultActionMovement();
-	void PushJumpingActionMovement() const;
+	void PushJumpingActionMovement();
 	void PushHolsterActionMovement() const;
 	void PushWaveActionMovement() const;
 	void PushPointingActionMovement() const;
+	void PushHandHoldingActionMovement() const;
+
+	UArmActionStack* GetArmActionStack_R() { return ArmActionStack_RRef; }
+	UArmActionStack* GetArmActionStack_L() { return ArmActionStack_LRef; }
+	ULegActionStack* GetLegsActionStack() { return LegActionStackRef;}
 };

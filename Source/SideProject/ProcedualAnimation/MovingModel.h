@@ -46,6 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsPointingAnim();
+	UFUNCTION(BlueprintCallable) void SetArmsHoldingHandsAnim();
 	
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;

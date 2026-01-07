@@ -46,13 +46,5 @@ void UCompanionCharacter::OnAddActionPickUp()
 		{
 			Stack->PushAction(ActionPickUpItemRef);
 		}
-		
-		CompanionPawn->SetMoveToLocation(FVector(360, -1240, 120));
-		ActionMoveToRef = NewObject<UActionMoveTo>(this);
-		ActionMoveToRef->Init(this, CompanionPawn->GetMoveToLocation(),  CompanionPawn->MovingModel);
-		if (Stack)
-		{
-			Stack->PushAction(ActionMoveToRef);
-		}
 	}
 }

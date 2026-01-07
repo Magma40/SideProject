@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CookerSettings.h"
 #include "ActionStack/ActionStack.h"
 #include "ArmActionStack.generated.h"
 
@@ -15,6 +16,7 @@ class UActionArmJumpingMovement;
 class UActionArmToHolster;
 class UActionArmWave;
 class UActionArmPoint;
+class UActionArmHandHolding;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UArmActionStack : public UActionStack
@@ -26,22 +28,27 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void Init(const TArray<UMoveArm*>& InArmsRef, ABaseInteractableCharacter* InOwnerCharacter, USceneComponent* InBackHolster, ACompanionPawn* InAICompanion);
+	void Init(UMoveArm*  InArmsRef, ABaseInteractableCharacter* InOwnerCharacter,  ABaseInteractableCharacter* InOwnerCompanion, USceneComponent* InBackHolster);
 	void AddMovingAction();
 	void AddJumpingAction();
 	void AddHolsterAction();
 	void AddWaveAction();
 	void AddPointingAction();
+	void AddHandHoldingAction(UMoveArm* OtherCompanionArm);
+
+	UMoveArm* GetArm() const { return ArmRef; }
+	UActionArmHandHolding* GetHandHoldingAction() const { return ArmsHandHolding; }
 
 private:
-	TArray<UMoveArm*> ArmsRef;
+	UMoveArm* ArmRef;
 	UPROPERTY() USceneComponent* BackHolsterRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ACompanionPawn* AICompanion = nullptr;
+	ABaseInteractableCharacter* OwnerCompanion = nullptr;
 	
 	UPROPERTY() UActionArmMovingMovement* ArmsDefaultMovement = nullptr;
 	UPROPERTY() UActionArmJumpingMovement* ArmsJumpingMovement = nullptr;
 	UPROPERTY() UActionArmToHolster* ArmsToHolster = nullptr;
 	UPROPERTY() UActionArmWave* ArmsWave = nullptr;
 	UPROPERTY() UActionArmPoint* ArmsPoint = nullptr;
+	UPROPERTY() UActionArmHandHolding* ArmsHandHolding = nullptr;
 };

@@ -23,6 +23,8 @@ public:
 	void OnAddActionMoveTo();
 	void OnAddActionPickUp();
 
+	UActionMoveTo* GetMoveTo() const { return ActionMoveToRef; }
+
 private:
 
 	UPROPERTY() UActionMoveTo* ActionMoveToRef;

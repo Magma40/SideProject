@@ -18,8 +18,8 @@ public:
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(TArray<UMoveArm*> InMoveArms);
+	void Init(UMoveArm* InMoveArms);
 
 private:
-	TArray<UMoveArm*> MoveArmsRef;
+	UMoveArm* MoveArmsRef;
 };

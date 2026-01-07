@@ -5,9 +5,9 @@
 
 UActionArmJumpingMovement::UActionArmJumpingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionArmJumpingMovement::Init(const TArray<UMoveArm*>& InMoveArms)
+void UActionArmJumpingMovement::Init(UMoveArm* InMoveArm)
 {
-	MoveArmsRef = InMoveArms;
+	MoveArmRef = InMoveArm;
 }
 
 void UActionArmJumpingMovement::OnBegin_Implementation(bool bFirstTime)
