@@ -6,7 +6,7 @@
 #include "CompanionPawn.h"
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "ActionStack/Actions/ActionPickUpItem.h"
-#include "Chaos/PBDSuspensionConstraintData.h"
+#include "ActionStack/Actions/ActionContinuousMoveTo.h"
 
 void UCompanionCharacter::Initialize(APawn* InActorOwner)
 {
@@ -45,6 +45,22 @@ void UCompanionCharacter::OnAddActionPickUp()
 		if (Stack)
 		{
 			Stack->PushAction(ActionPickUpItemRef);
+		}
+	}
+}
+
+void UCompanionCharacter::OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer)
+{
+	if (!ActorOwner) return;
+	ABaseInteractableCharacter* CompanionPawn = Cast<ABaseInteractableCharacter>(ActorOwner);
+	if (IsValid(CompanionPawn))
+	{
+		ActionContinuousMoveToRef = NewObject<UActionContinuousMoveTo>(this);
+		UActionStack* Stack = UActionStack::GetMain(this);
+		ActionContinuousMoveToRef->Init(CompanionPawn, InPlayer);
+		if (Stack)
+		{
+			Stack->PushAction(ActionContinuousMoveToRef);
 		}
 	}
 }

@@ -28,6 +28,11 @@ void ACompanionPawn::AddNewMoveTo(FVector InLocation)
 	CompanionData->OnAddActionMoveTo();
 }
 
+void ACompanionPawn::AddNewActionContinuousMoveTo(ABaseInteractableCharacter* InPlayer)
+{
+	CompanionData->OnAddActionContinuousMove(InPlayer);
+}
+
 void ACompanionPawn::AddPickUpItem()
 {
 	CompanionData->OnAddActionPickUp();

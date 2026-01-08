@@ -19,8 +19,10 @@ public:
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+	void OnEnd_Implementation() override;
 
 	void Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
+	void RenderPointingToIndicator(FVector InHitLocation);
 
 private:
 	UMoveArm* MoveArmRef;
@@ -28,6 +30,8 @@ private:
 	TArray<FVector> AnimLocations;
 	float ElapsedTime = 0.0f;
 	float PlayRate = 1.0f;
+
+	TArray<AActor*> PointingIndicators;
 
 public:
 	FVector PointingLocation = FVector::ZeroVector;

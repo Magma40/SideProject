@@ -7,6 +7,8 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 
+#include "Components/StaticMeshComponent.h"
+#include "UObject/ConstructorHelpers.h"
 UActionArmPoint::UActionArmPoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
 
 void UActionArmPoint::Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
@@ -36,6 +38,16 @@ void UActionArmPoint::OnBegin_Implementation(bool bFirstTime)
 	}
 }
 
+void UActionArmPoint::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	while (PointingIndicators.Num() > 0)
+	{
+		AActor* Extra = PointingIndicators.Pop();
+		if (Extra) Extra->Destroy();
+	}
+}
+
 void UActionArmPoint::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
@@ -62,6 +74,7 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	Params.AddIgnoredActor(OwnerCharacter);
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
 	{
+		RenderPointingToIndicator(PointingLocation);
 		if (Hit.GetComponent()->GetOwner()->ActorHasTag("HandHeldItem"))
 		{
 			ActorPointedAt = Hit.GetComponent();
@@ -88,4 +101,66 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 bool UActionArmPoint::IsDone_Implementation() const
 {
 	return false;
+}
+
+void UActionArmPoint::RenderPointingToIndicator(FVector InHitLocation)
+{
+	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
+
+	const float EachSpawnDistance = 25.0f;
+	FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
+	FVector Direction = (InHitLocation - Start).GetSafeNormal();
+	float TotalDistance = FVector::Distance(InHitLocation, Start);
+	int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
+
+	// Spawn new indicators if we need more
+	while (PointingIndicators.Num() < RequiredCount)
+	{
+		AActor* NewIndicator = GetWorld()->SpawnActor<AActor>();
+		USceneComponent* Root = NewObject<USceneComponent>(NewIndicator);
+		Root->RegisterComponent();
+		NewIndicator->SetRootComponent(Root);
+		
+		// Inside the spawned actor class (or dynamically added component)
+		UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(NewIndicator);
+		Mesh->SetupAttachment(Root);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Mesh->SetHiddenInGame(false);
+
+		static UStaticMesh* SphereMesh = nullptr;
+		if (!SphereMesh)
+		{
+			SphereMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+		}
+		//UMaterialInterface* _ghostMaterial = nullptr;
+		//FString ghostMaterialName = "/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough";
+		//static ConstructorHelpers::FObjectFinder<UMaterialInterface> ghostMaterialAsset(*ghostMaterialName);
+		//_ghostMaterial = ghostMaterialAsset.Object;
+		
+		//SphereMesh->SetMaterial(0,   _ghostMaterial);
+		//Mesh->SetMaterial(0,  _ghostMaterial);
+		
+		Mesh->SetStaticMesh(SphereMesh);
+		Mesh->SetWorldScale3D(FVector(0.1f));
+		Mesh->RegisterComponent();
+		
+		PointingIndicators.Add(NewIndicator);
+	}
+
+	// Destroy extra indicators if we need fewer
+	while (PointingIndicators.Num() > RequiredCount)
+	{
+		AActor* Extra = PointingIndicators.Pop();
+		if (Extra) Extra->Destroy();
+	}
+
+	// Move indicators and draw debug spheres for visualization
+	for (int32 i = 0; i < PointingIndicators.Num(); i++)
+	{
+		FVector NewLocation = Start + Direction * EachSpawnDistance * (i + 1);
+		if (PointingIndicators[i])
+		{
+			PointingIndicators[i]->SetActorLocation(NewLocation);
+		}
+	}
 }

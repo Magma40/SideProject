@@ -20,6 +20,7 @@ public:
 	UFUNCTION(BlueprintCallable) FVector GetMoveToLocation(){ return Location; }
 
 	UFUNCTION(BlueprintCallable) void AddNewMoveTo(FVector InLocation);
+	UFUNCTION(BlueprintCallable) void AddNewActionContinuousMoveTo(ABaseInteractableCharacter* InPlayer);
 	UFUNCTION(BlueprintCallable) void AddPickUpItem();
 
 protected:

@@ -87,6 +87,16 @@ bool ABaseInteractableCharacter::TryToPickUpItem()
 			Best.Distance = Dist;
 		}
 	}
+
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseInteractableCharacter::StaticClass(),  Actors);
+	for (AActor* Actor : Actors)
+	{
+		ABaseInteractableCharacter* Character = Cast<ABaseInteractableCharacter>(Actor);
+		if (Character == this) continue;
+		if (Best.Object == Character->ItemInHand) Character->ItemInHand = nullptr;
+		else if (Best.Object == BackItemHolster) Character->BackItemHolster = nullptr;
+	}
 	
 	if (Best.Object && Best.Distance <= MinDistanceToPickUpItem)
 	{

@@ -10,8 +10,6 @@
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 #include "ActionStack/Characters/CompanionPawn.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/CharacterMovementComponent.h"
-
 
 UAnimModelActionStack::UAnimModelActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -51,23 +49,6 @@ void UAnimModelActionStack::BeginPlay()
 void UAnimModelActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (Cast<ACompanionPawn>(OwnerCharacter)) return;
-
-	TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetHandHoldingAction());
-	if (!ActionInterfaceHandingHolding) return;
-
-	if (ArmActionStack_LRef->Contains(ActionInterfaceHandingHolding))
-	{
-		if (OwnerCharacter->Sprinting) CompanionOwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionOwnerCharacter->MaxSprintSpeed;
-		else  CompanionOwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionOwnerCharacter->WalkSpeed;
-		
-		ACompanionPawn* AICompanion =  Cast<ACompanionPawn>(CompanionOwnerCharacter);
-		TScriptInterface<IActionInterface> ActionInterfaceMoveTo = GetInterfacedAction(AICompanion->CompanionData->GetMoveTo());
-		if (!CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->Contains(ActionInterfaceHandingHolding) || !ActionInterfaceMoveTo)
-		{
-			AICompanion->AddNewMoveTo(OwnerCharacter->GetActorLocation());
-		}
-	}
 }
 
 void UAnimModelActionStack::Init()
@@ -140,14 +121,28 @@ void UAnimModelActionStack::PushPointingActionMovement() const
 	ArmActionStack_RRef->AddPointingAction();
 }
 
-void UAnimModelActionStack::PushHandHoldingActionMovement() const
+void UAnimModelActionStack::PushHandHoldingActionMovement()
 {
 	if (Cast<ACompanionPawn>(OwnerCharacter)) return;
 	if (CompanionOwnerCharacter->ItemInHand != nullptr) return;
 
 	float HandDistances = FVector::Distance(OwnerCharacter->MovingModel->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->MovingModel->GetRightHand()->GetComponentLocation());
 	if (HandDistances > MinDistanceToHoldHands) return;
-	
-	ArmActionStack_LRef->AddHandHoldingAction(CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->GetArm());
-	CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->AddHandHoldingAction(ArmActionStack_LRef->GetArm());
+
+	ACompanionPawn* AICompanion =  Cast<ACompanionPawn>(CompanionOwnerCharacter);
+	TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(AICompanion->CompanionData->GetActionContinuousMoveTo());
+	if (!GetMain(GetWorld())->Contains(ActionInterfaceContinuousMoveTo))
+	{
+		ArmActionStack_LRef->AddHandHoldingAction(CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->GetArm());
+		CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->AddHandHoldingAction(ArmActionStack_LRef->GetArm());
+		AICompanion->AddNewActionContinuousMoveTo(OwnerCharacter);
+	}
+	else
+	{
+		TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->GetHandHoldingAction());
+		TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetHandHoldingAction());
+		ArmActionStack_LRef->RemoveAction(PlayerHandHoldingAction);
+		CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
+		GetMain(GetWorld())->RemoveAction(ActionInterfaceContinuousMoveTo);
+	}
 }

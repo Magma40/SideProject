@@ -44,7 +44,7 @@ public:
 	void PushHolsterActionMovement() const;
 	void PushWaveActionMovement() const;
 	void PushPointingActionMovement() const;
-	void PushHandHoldingActionMovement() const;
+	void PushHandHoldingActionMovement();
 
 	UArmActionStack* GetArmActionStack_R() { return ArmActionStack_RRef; }
 	UArmActionStack* GetArmActionStack_L() { return ArmActionStack_LRef; }

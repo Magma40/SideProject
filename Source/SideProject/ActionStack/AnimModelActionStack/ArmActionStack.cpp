@@ -93,16 +93,6 @@ void UArmActionStack::AddPointingAction()
 
 void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
 {
-	if (Contains(ArmsHandHolding))
-	{
-		this->RemoveAction(ArmsHandHolding);
-		ArmsHandHolding = nullptr;
-		if  (Cast<ACompanionPawn>(OwnerCharacter))
-		{
-			GetMain(GetWorld())->ClearAllActionsButLast();
-		}
-		return;
-	}
 	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion);
 	ArmsHandHolding = NewObject<UActionArmHandHolding>(this);
 	ArmsHandHolding->Init(ArmRef, OtherCompanionArm, OwnerCharacter, CompanionPawn);
