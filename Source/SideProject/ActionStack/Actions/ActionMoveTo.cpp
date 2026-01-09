@@ -2,20 +2,18 @@
 
 
 #include "ActionStack/Actions/ActionMoveTo.h"
-#include "ActionStack/Characters/CompanionCharacter.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "GameFramework/Pawn.h"
-#include "ProcedualAnimation/MovingModel.h"
+#include "Player//BaseInteractableCharacter.h"
 
 UActionMoveTo::UActionMoveTo(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionMoveTo::Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation, AMovingModel* InMovingModel)
+void UActionMoveTo::Init(ABaseInteractableCharacter* InCompanionCharacter, FVector InTargetLocation,  bool InNeedIndicator)
 {
 	CompanionCharacter = InCompanionCharacter;
 	TargetLocation = InTargetLocation;
-	MovingModel = InMovingModel;
+	bNeedIndicator = InNeedIndicator;
 }
 
 void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
@@ -24,10 +22,7 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 	bMoveCompleted = false;
 	if (!CompanionCharacter) return;
 	
-	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
-	if (!Pawn) return;
-	
-    AAIController* AIController = Pawn->GetController<AAIController>();
+    AAIController* AIController = CompanionCharacter->GetController<AAIController>();
 	if (!AIController) return;
 	
 	UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent();
@@ -44,20 +39,54 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 	if (Result != EPathFollowingRequestResult::RequestSuccessful)
 	{
 		// Extra debug info
-		UE_LOG(LogTemp, Error, TEXT("MoveTo FAILED! Pawn=%s Target=%s"), *Pawn->GetName(),*TargetLocation.ToString());
+		UE_LOG(LogTemp, Error, TEXT("MoveTo FAILED! Pawn=%s Target=%s"), *CompanionCharacter->GetName(),*TargetLocation.ToString());
 		
 		UE_LOG(LogTemp, Warning, TEXT(" - Controller: %s"), *AIController->GetName());
-		UE_LOG(LogTemp, Warning, TEXT(" - Pawn has NavAgentProperties? %s"), Pawn->GetNavAgentPropertiesRef().IsValid() ? TEXT("YES") : TEXT("NO"));
+		UE_LOG(LogTemp, Warning, TEXT(" - Pawn has NavAgentProperties? %s"), CompanionCharacter->GetNavAgentPropertiesRef().IsValid() ? TEXT("YES") : TEXT("NO"));
 		UE_LOG(LogTemp, Warning, TEXT(" - PathFollowingComponent Valid: %s"),PathComp ? TEXT("YES") : TEXT("NO"));
 		
 		bMoveCompleted = true;
 	}
+
+	if (!bNeedIndicator) return;
+	//SpawnIndicator
+	IndicatorActor = GetWorld()->SpawnActor<AActor>();
+	IndicatorActor->SetActorLabel("MoveToIndicator");
+	USceneComponent* Root = NewObject<USceneComponent>(IndicatorActor);
+	Root->RegisterComponent();
+	IndicatorActor->SetRootComponent(Root);
+	IndicatorActor->SetActorLocation(TargetLocation);
+		
+	// Inside the spawned actor class (or dynamically added component)
+	UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(IndicatorActor);
+	Mesh->SetupAttachment(Root);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Mesh->SetHiddenInGame(false);
+	
+	static UStaticMesh* ArrowMesh = nullptr;
+	if (!ArrowMesh)
+	{
+		ArrowMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/InteractiveToolsFramework/Meshes/GizmoArrowHandle.GizmoArrowHandle"));
+	}
+
+	Mesh->SetWorldScale3D(FVector(2.0f));
+	Mesh->SetRelativeLocation(FVector(0, 0, 1) * Mesh->GetComponentScale() * 100.0f);
+	Mesh->SetRelativeRotation(FRotator(-90, 0, 0));
+	Mesh->SetStaticMesh(ArrowMesh);
+	Mesh->RegisterComponent();
+		
+	UMaterialInterface* OutlineSeeThrough = nullptr;
+	OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
+	Mesh->SetMaterial(0,  OutlineSeeThrough);
 }
 
 
 void UActionMoveTo::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+	if (!bNeedIndicator) return;
+	float UpAndDown = TargetLocation.Z + FMath::Sin(GetWorld()->GetTimeSeconds() * 5.0f) * 25.0f;
+	IndicatorActor->SetActorLocation(FVector(IndicatorActor->GetActorLocation().X, IndicatorActor->GetActorLocation().Y, UpAndDown));
 }
 
 bool UActionMoveTo::IsDone_Implementation() const
@@ -66,12 +95,14 @@ bool UActionMoveTo::IsDone_Implementation() const
 	{
 		return true;
 	}
-	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
-	if (!Pawn)
-	{
-		return true;
-	}
 	return bMoveCompleted;
+}
+
+void UActionMoveTo::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	if (!bNeedIndicator) return;
+	IndicatorActor->Destroy();
 }
 
 void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
@@ -81,16 +112,12 @@ void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowing
 	// Cleanup delegate binding
 	if (CompanionCharacter)
 	{
-		APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
-		if (Pawn)
-		{
-			if (AAIController* AIController = Pawn->GetController<AAIController>())
+			if (AAIController* AIController = CompanionCharacter->GetController<AAIController>())
 			{
 				if (UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent())
 				{
 					PathComp->OnRequestFinished.RemoveAll(this);
 				}
 			}
-		}
 	}
 }

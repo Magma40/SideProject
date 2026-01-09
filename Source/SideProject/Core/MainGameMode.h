@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "ActionStack/ActionStack.h"
 #include "MainGameMode.generated.h"
 
 /**
@@ -17,8 +16,4 @@ class SIDEPROJECT_API AMainGameMode : public AGameModeBase
 
 public:
 	AMainGameMode();
-
-	// The single ActionStack instance for the game
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UActionStack* ActionStack;
 };

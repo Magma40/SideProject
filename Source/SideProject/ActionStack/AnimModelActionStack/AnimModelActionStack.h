@@ -10,7 +10,6 @@ class ABaseInteractableCharacter;
 class UArmActionStack;
 class ULegActionStack;
 class AMovingModel;
-class ACompanionPawn;
 
 class UActionAnimModelMovingMovement;
 

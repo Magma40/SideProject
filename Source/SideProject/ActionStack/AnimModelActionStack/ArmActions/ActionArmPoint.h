@@ -22,7 +22,7 @@ public:
 	void OnEnd_Implementation() override;
 
 	void Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
-	void RenderPointingToIndicator(FVector InHitLocation);
+	void RenderPointingToIndicator(FVector InHitLocation,  UActorComponent* InPointingAtItemActor);
 
 private:
 	UMoveArm* MoveArmRef;

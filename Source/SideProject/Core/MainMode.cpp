@@ -6,5 +6,4 @@
 AMainGameMode::AMainGameMode()
 {
 	// Create the ActionStack component and attach to GameMode
-	ActionStack = CreateDefaultSubobject<UActionStack>(TEXT("ActionStack"));
 }

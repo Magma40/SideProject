@@ -2,12 +2,11 @@
 
 
 #include "ActionStack/Actions/ActionPickUpItem.h"
-#include "ActionStack/Characters/CompanionCharacter.h"
 #include "Player/BaseInteractableCharacter.h"
 
 UActionPickUpItem::UActionPickUpItem(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
 
-void UActionPickUpItem::Init(UCompanionCharacter* InCompanionCharacter)
+void UActionPickUpItem::Init(ABaseInteractableCharacter* InCompanionCharacter)
 {
 	CompanionCharacter = InCompanionCharacter;
 }
@@ -16,12 +15,7 @@ void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	if (!CompanionCharacter) return;
-	
-	APawn* Pawn = CompanionCharacter->GetOwnerCharacter();
-	ABaseInteractableCharacter* InteractableCharacter = Cast<ABaseInteractableCharacter>(Pawn);
-	if (!InteractableCharacter) return;
-
-	if (InteractableCharacter->ActionPickUpItem())
+	if (CompanionCharacter->ActionPickUpItem())
 	{
 		TriedToPickUpItem = true;
 	}

@@ -8,7 +8,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "ActionMoveTo.generated.h"
 
-class UCompanionCharacter;
+class ABaseInteractableCharacter;
 class AMovingModel;
 
 /**
@@ -21,16 +21,18 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 
 public:
 	UActionMoveTo(const FObjectInitializer& ObjectInitializer);
-	void Init(UCompanionCharacter* InCompanionCharacter, FVector InTargetLocation,  AMovingModel* InMovingModel);
+	void Init(ABaseInteractableCharacter* InCompanionCharacter, FVector InTargetLocation, bool InNeedIndicator);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
+	void OnEnd_Implementation() override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
 private:
-	UCompanionCharacter* CompanionCharacter = nullptr;
+	ABaseInteractableCharacter* CompanionCharacter = nullptr;
 	FVector TargetLocation = FVector::ZeroVector;
 	float MinDistance = 50.0f;
-	AMovingModel* MovingModel = nullptr;
+	AActor* IndicatorActor = nullptr;
+	bool bNeedIndicator = true;
 	
 	bool bMoveCompleted = false;
 	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);

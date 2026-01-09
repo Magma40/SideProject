@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "VectorTypes.h"
+#include "ActionStack/Characters/CompanionActionStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
@@ -28,6 +29,14 @@ void ABaseInteractableCharacter::BeginPlay()
 	{
 		if (!Comp) continue;
 		if (Comp->GetName() == TEXT("BackItemHolster")) BackHolster = Comp;
+	}
+
+	AllComponents.Empty();
+	this->GetComponents<USceneComponent>(AllComponents);
+	for (USceneComponent* Comp : AllComponents)
+	{
+		if (!Comp) continue;
+		CompanionActionStack = Cast<UCompanionActionStack>(Comp);
 	}
 }
 
@@ -189,6 +198,17 @@ void ABaseInteractableCharacter::PickUpItemToHand(UObject* inSpecificPickUpItem)
 		//Prim->SetEnableGravity(false);
 		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	TArray<UStaticMeshComponent*> Components;
+	OwnerActor->GetComponents<UStaticMeshComponent>(Components);
+	for (UStaticMeshComponent* StaticMeshComponent : Components)
+	{
+		if (StaticMeshComponent)
+		{
+			StaticMeshComponent->SetOverlayMaterial(nullptr);
+		}
+	}
+	
 	OwnerActor->GetRootComponent()->AttachToComponent(MovingModel->GetRightHand(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	ItemInHand = ClosestObject;
 }

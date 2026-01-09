@@ -9,7 +9,6 @@
 
 class UMoveArm;
 class ABaseInteractableCharacter;
-class ACompanionPawn;
 
 class UActionArmMovingMovement;
 class UActionArmJumpingMovement;

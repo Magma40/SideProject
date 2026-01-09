@@ -2,7 +2,6 @@
 
 
 #include "ActionStack/ActionStack.h"
-#include "Core/MainGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
 UActionStack* UActionStack::Main = nullptr;
@@ -84,26 +83,27 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)
 {
-	//if (IsValid(Main)) return Main; 
-	UWorld* World = nullptr;
-	if (WorldContext)
-	{
-		World = WorldContext->GetWorld();
-	}
-	else if (GEngine && GEngine->GetWorldContexts().Num() > 0)
-	{
-		World = GEngine->GetWorldContexts()[0].World();
-	}
-
-	if (!World) return nullptr;
-	AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
-	if (!GM || !GM->ActionStack)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
-		return nullptr;
-	}
-	// Main = GM->ActionStack;
-	// return Main;
-
-	return GM->ActionStack;
+	if (IsValid(Main)) return Main;
+	else return nullptr;
+	// UWorld* World = nullptr;
+	// if (WorldContext)
+	// {
+	// 	World = WorldContext->GetWorld();
+	// }
+	// else if (GEngine && GEngine->GetWorldContexts().Num() > 0)
+	// {
+	// 	World = GEngine->GetWorldContexts()[0].World();
+	// }
+	//
+	// if (!World) return nullptr;
+	// AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
+	// if (!GM || !GM->ActionStack)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
+	// 	return nullptr;
+	// }
+	// // Main = GM->ActionStack;
+	// // return Main;
+	//
+	// return GM->ActionStack;
 }

@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "BaseInteractableCharacter.generated.h"
 
+class UCompanionActionStack;
+
 struct FPickupCandidate
 {
 	UObject* Object = nullptr;           // Could be actor OR component
@@ -43,6 +45,7 @@ public:
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
 	AMovingModel* MovingModel = nullptr;
 	USceneComponent* BackHolster = nullptr;
+	UCompanionActionStack* CompanionActionStack = nullptr;
 
 	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
 
