@@ -7,9 +7,6 @@
 #include "CompanionActionStack.generated.h"
 
 class ABaseInteractableCharacter;
-class UActionMoveTo;
-class UActionPickUpItem;
-class UActionContinuousMoveTo;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UCompanionActionStack : public UActionStack
@@ -21,8 +18,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Init();
-	
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 
 public:
 	//Actions
@@ -30,12 +25,6 @@ public:
 	void OnAddActionPickUp();
 	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
 
-	UActionMoveTo* GetActionMoveTo() const { return ActionMoveToRef; }
-	UActionContinuousMoveTo* GetActionContinuousMoveTo() const { return ActionContinuousMoveToRef; }
-	UActionPickUpItem* GetActionPickUp() const { return ActionPickUpItemRef; }
-
 private:
-	UPROPERTY() UActionMoveTo* ActionMoveToRef = nullptr;
-	UPROPERTY() UActionPickUpItem* ActionPickUpItemRef = nullptr;
-	UPROPERTY() UActionContinuousMoveTo* ActionContinuousMoveToRef = nullptr;
+	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 };

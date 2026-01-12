@@ -1,15 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "AnimModelActionStack.h"
 #include "ProcedualAnimation/MovingModel.h" 
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h"
 #include "Tools/GenericCalls.h"
 #include "Player/BaseInteractableCharacter.h"
-
 #include "ActionStack/Characters/CompanionActionStack.h"
 #include "ActionStack/AnimModelActionStack/LegActionStack.h"
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 #include "Kismet/GameplayStatics.h"
+#include "ProcedualAnimation/MoveArm.h"
 
 UAnimModelActionStack::UAnimModelActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -17,31 +16,6 @@ void UAnimModelActionStack::BeginPlay()
 {
 	Super::BeginPlay();
 	Main = this;
-	MovingModelRef = Cast<AMovingModel>(GetOwner());
-	if (!MovingModelRef)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - MovingModelRef not found or wrong type"), *GetOwner()->GetName());
-		return;
-	}
-	LegActionStackRef = Cast<ULegActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "LegActionStack"));
-	if (!LegActionStackRef)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - LegActionStackRef not found or wrong type"), *GetOwner()->GetName());
-		return;
-	}
-	ArmActionStack_LRef = Cast<UArmActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "ArmActionStack_L"));
-	if (!ArmActionStack_LRef)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - ArmActionStack_LRef not found or wrong type"), *GetOwner()->GetName());
-		return;
-	}
-	ArmActionStack_RRef = Cast<UArmActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "ArmActionStack_R"));
-	if (!ArmActionStack_RRef)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - ArmActionStack_RRef not found or wrong type"), *GetOwner()->GetName());
-		return;
-	}
-	
 	Init();
 	PushDefaultActionMovement();
 }
@@ -53,12 +27,37 @@ void UAnimModelActionStack::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UAnimModelActionStack::Init()
 {
+	MovingModelRef = Cast<AMovingModel>(GetOwner());
+	if (!MovingModelRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - MovingModelRef not found or wrong type"), *StaticClass()->GetName());
+		return;
+	}
+	LegActionStackRef = Cast<ULegActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "LegActionStack"));
+	if (!LegActionStackRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - LegActionStackRef not found or wrong type"),  *StaticClass()->GetName());
+		return;
+	}
+	ArmActionStack_LRef = Cast<UArmActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "ArmActionStack_L"));
+	if (!ArmActionStack_LRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - ArmActionStack_LRef not found or wrong type"),  *StaticClass()->GetName());
+		return;
+	}
+	ArmActionStack_RRef = Cast<UArmActionStack>(GenericCalls::FindChildByExactName(GetOwner(), "ArmActionStack_R"));
+	if (!ArmActionStack_RRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - ArmActionStack_RRef not found or wrong type"),  *StaticClass()->GetName());
+		return;
+	}
+	
 	MovingModelRef->InitSceneComponents();
 	OwnerCharacter = Cast<ABaseInteractableCharacter>(MovingModelRef->GetParentActor());
 	USceneComponent* BackHolsterRef = GenericCalls::FindChildByExactName(GetOwner(), "BackItemHolster");
 	if (!BackHolsterRef)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s:Init - BackHolsterRef not found or wrong type"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - BackHolsterRef not found or wrong type"), *StaticClass()->GetName());
 		return;
 	}
 	TArray<AActor*> Actors;
@@ -78,13 +77,12 @@ void UAnimModelActionStack::Init()
 		ArmActionStack_RRef->Init(Arms[0], OwnerCharacter, CompanionOwnerCharacter, BackHolsterRef);
 		ArmActionStack_LRef->Init(Arms[1], OwnerCharacter, CompanionOwnerCharacter, BackHolsterRef);
 	}
-	MovingModelRef->AnimModelActionStack = this;
+	MovingModelRef->SetAnimModelActionStack(this);
 }
 
 void UAnimModelActionStack::PushDefaultActionMovement()
 {
-	DefaultMovement = NewObject<UActionAnimModelMovingMovement>(this);
-	DefaultMovement->Init(MovingModelRef);
+	UActionAnimModelMovingMovement* DefaultMovement = UActionAnimModelMovingMovement::Create(this, MovingModelRef);
 	PushAction(DefaultMovement);
 
 	LegActionStackRef->AddMovingAction();
@@ -95,9 +93,9 @@ void UAnimModelActionStack::PushDefaultActionMovement()
 void UAnimModelActionStack::PushJumpingActionMovement()
 {
 	LegActionStackRef->AddJumpingAction();
-	if (OwnerCharacter->CompanionActionStack) return;
+	if (OwnerCharacter->GetCompanionActionStack()) return;
 	
-	TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetHandHoldingAction());
+	TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
 	if (!ActionInterfaceHandingHolding) return;
 	
 	if (ArmActionStack_LRef->Contains(ActionInterfaceHandingHolding))
@@ -123,25 +121,25 @@ void UAnimModelActionStack::PushPointingActionMovement() const
 
 void UAnimModelActionStack::PushHandHoldingActionMovement()
 {
-	if (OwnerCharacter->CompanionActionStack) return;
-	if (CompanionOwnerCharacter->ItemInHand != nullptr) return;
+	if (OwnerCharacter->GetCompanionActionStack()) return;
+	if (CompanionOwnerCharacter->GetItemInHand() != nullptr) return;
 
-	float HandDistances = FVector::Distance(OwnerCharacter->MovingModel->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->MovingModel->GetRightHand()->GetComponentLocation());
+	float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());
 	if (HandDistances > MinDistanceToHoldHands) return;
 
-	TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->CompanionActionStack->GetActionContinuousMoveTo());
-	if (!CompanionOwnerCharacter->CompanionActionStack->Contains(ActionInterfaceContinuousMoveTo))
+	TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
+	if (!CompanionOwnerCharacter->GetCompanionActionStack()->Contains(ActionInterfaceContinuousMoveTo))
 	{
-		ArmActionStack_LRef->AddHandHoldingAction(CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->GetArm());
-		CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->AddHandHoldingAction(ArmActionStack_LRef->GetArm());
-		CompanionOwnerCharacter->CompanionActionStack->OnAddActionContinuousMove(OwnerCharacter);
+		ArmActionStack_LRef->AddHandHoldingAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetArm());
+		CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandHoldingAction(ArmActionStack_LRef->GetArm());
+		CompanionOwnerCharacter->GetCompanionActionStack()->OnAddActionContinuousMove(OwnerCharacter);
 	}
 	else
 	{
-		TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->GetHandHoldingAction());
-		TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetHandHoldingAction());
+		TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
+		TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
 		ArmActionStack_LRef->RemoveAction(PlayerHandHoldingAction);
-		CompanionOwnerCharacter->MovingModel->AnimModelActionStack->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
-		CompanionOwnerCharacter->CompanionActionStack->RemoveAction(ActionInterfaceContinuousMoveTo);
+		CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
+		CompanionOwnerCharacter->GetCompanionActionStack()->RemoveAction(ActionInterfaceContinuousMoveTo);
 	}
 }

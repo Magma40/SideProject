@@ -1,19 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "AIController.h"
-#include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Player//BaseInteractableCharacter.h"
 
-UActionMoveTo::UActionMoveTo(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
-
-void UActionMoveTo::Init(ABaseInteractableCharacter* InCompanionCharacter, FVector InTargetLocation,  bool InNeedIndicator)
+UActionMoveTo* UActionMoveTo::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, const FVector& InTargetLocation, bool InNeedIndicator)
 {
-	CompanionCharacter = InCompanionCharacter;
-	TargetLocation = InTargetLocation;
-	bNeedIndicator = InNeedIndicator;
+	UActionMoveTo* Action = NewObject<UActionMoveTo>(Outer);
+	Action->CompanionCharacter = InCompanionCharacter;
+	Action->TargetLocation = InTargetLocation;
+	Action->bNeedIndicator = InNeedIndicator;
+	return Action;
 }
 
 void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
@@ -28,15 +25,16 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 	UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent();
 	if (!PathComp) return;
 
+	PathComp->AbortMove(*AIController, FPathFollowingResultFlags::ForcedScript);
 	PathComp->OnRequestFinished.AddUObject(this, &UActionMoveTo::OnMoveCompleted);
-	
+
 	FAIMoveRequest MoveRequest;
 	MoveRequest.SetGoalLocation(TargetLocation);
 	MoveRequest.SetAcceptanceRadius(MinDistance);
 
 	FNavPathSharedPtr NavPath;
-	EPathFollowingRequestResult::Type Result = AIController->MoveTo(MoveRequest, &NavPath);
-	if (Result != EPathFollowingRequestResult::RequestSuccessful)
+	MoveRequestID = AIController->MoveTo(MoveRequest, &NavPath);
+	if (MoveRequestID != EPathFollowingRequestResult::RequestSuccessful)
 	{
 		// Extra debug info
 		UE_LOG(LogTemp, Error, TEXT("MoveTo FAILED! Pawn=%s Target=%s"), *CompanionCharacter->GetName(),*TargetLocation.ToString());
@@ -75,13 +73,11 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 	Mesh->SetStaticMesh(ArrowMesh);
 	Mesh->RegisterComponent();
 		
-	UMaterialInterface* OutlineSeeThrough = nullptr;
-	OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
+	UMaterialInterface*  OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
 	Mesh->SetMaterial(0,  OutlineSeeThrough);
 }
 
-
-void UActionMoveTo::OnUpdate_Implementation(float DeltaTime) 
+void UActionMoveTo::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	if (!bNeedIndicator) return;
@@ -108,16 +104,11 @@ void UActionMoveTo::OnEnd_Implementation()
 void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	bMoveCompleted = true;
-
-	// Cleanup delegate binding
-	if (CompanionCharacter)
+	if (AAIController* AIController = CompanionCharacter->GetController<AAIController>())
 	{
-			if (AAIController* AIController = CompanionCharacter->GetController<AAIController>())
-			{
-				if (UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent())
-				{
-					PathComp->OnRequestFinished.RemoveAll(this);
-				}
-			}
+		if (UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent())
+		{
+			PathComp->OnRequestFinished.RemoveAll(this);
+		}
 	}
 }

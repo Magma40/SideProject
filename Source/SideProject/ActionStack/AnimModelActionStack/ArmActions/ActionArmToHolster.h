@@ -15,15 +15,13 @@ class SIDEPROJECT_API UActionArmToHolster : public UAction // Because that's wha
 	GENERATED_BODY()
 	
 public:
-	UActionArmToHolster(const FObjectInitializer& ObjectInitializer);
+	static UActionArmToHolster* Create(UObject* Outer, UMoveArm* InMoveArm, USceneComponent* InBackHolster, ABaseInteractableCharacter* InCharacter);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArm, USceneComponent* InBackHolster, ABaseInteractableCharacter* InCharacter);
-
 private:
-	UMoveArm* MoveArmRef;
+	UMoveArm* MoveArmRef = nullptr;
 	USceneComponent* BackHolsterRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 	TArray<FVector> AnimLocations;

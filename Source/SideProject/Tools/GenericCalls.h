@@ -22,10 +22,51 @@ namespace GenericCalls
 		Parent->GetChildrenComponents(false, FindChildren);
 
 		for (USceneComponent* Child : FindChildren)
-			if (Child->GetName().StartsWith(Prefix))
-				Matches.Add(Child);
+		{
+			if (Child->GetName().StartsWith(Prefix)) Matches.Add(Child);	
+		}
 
 		return Matches;
+	}
+
+	inline TArray<USceneComponent*> FindChildrenByPrefix(const AActor* Parent, const FString& Prefix)
+	{
+		TArray<USceneComponent*> Matches;
+		TArray<USceneComponent*> FindChildren;
+		Parent->GetComponents<USceneComponent>(FindChildren);
+
+		for (USceneComponent* Child : FindChildren)
+		{
+			if (Child->GetName().StartsWith(Prefix)) Matches.Add(Child);	
+		}
+
+		return Matches;
+	}
+
+	inline USceneComponent* FindChildByPrefix(const USceneComponent* Parent, const FString& Prefix)
+	{
+		TArray<USceneComponent*> FindChildren;
+		Parent->GetChildrenComponents(false, FindChildren);
+
+		for (USceneComponent* Child : FindChildren)
+		{
+			if (Child->GetName().StartsWith(Prefix)) return Child;
+		}
+
+		return nullptr;
+	}
+
+	inline USceneComponent* FindChildByEndPrefix(const USceneComponent* Parent, const FString& Prefix)
+	{
+		TArray<USceneComponent*> FindChildren;
+		Parent->GetChildrenComponents(false, FindChildren);
+
+		for (USceneComponent* Child : FindChildren)
+		{
+			if (Child->GetName().EndsWith(Prefix)) return Child;
+		}
+
+		return nullptr;
 	}
 
 	inline USceneComponent* FindChildByExactName(const USceneComponent* Parent, const FString& Target)
@@ -34,15 +75,28 @@ namespace GenericCalls
 		Parent->GetChildrenComponents(false, FindChildren);
 
 		for (USceneComponent* Child : FindChildren)
+		{
 			if (Child->GetName() == Target)return Child;
+		}
 
 		return nullptr;
 	}
 
 	inline USceneComponent* FindChildByExactName(const AActor* Parent, const FString& Name)
 	{
+		if (!IsValid(Parent))
+		{
+			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildByExactName - Parent was not found or is wrong"), "GenericCalls");
+			return nullptr;;
+		}
+		
 		TArray<USceneComponent*> AllComponents;
 		Parent->GetComponents<USceneComponent>(AllComponents);
+		if (AllComponents.IsEmpty())
+		{
+			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildByExactName - No children was found"), "GenericCalls");
+			return nullptr;;
+		}
 		for (USceneComponent* Comp : AllComponents)
 		{
 			if (!Comp) continue;
@@ -51,20 +105,17 @@ namespace GenericCalls
 		return nullptr;
 	}
 
-	// TArray<USceneComponent*> FindChildrenByPrefix(const AActor* Parent, const TArray<FString&> Names)
-	// {
-	// 	TArray<USceneComponent*> FoundByNames;
-	// 	//FoundByNames.SetNum(Names.Num());
-	// 	TArray<USceneComponent*> AllComponents;
-	// 	Parent->GetComponents<USceneComponent>(AllComponents);
-	// 	for (USceneComponent* Comp : AllComponents)
-	// 	{
-	// 		if (!Comp) continue;
-	// 		for (int i = 0; i < Names.Num(); ++i)
-	// 		{
-	// 			if (Names[i] == Comp->GetName()) FoundByNames[0] = Comp;
-	// 		}
-	// 	}
-	// 	return FoundByNames;
-	// }
+	inline AActor* FindChildActorByExactName(const AActor* Parent, const FString& Name)
+	{
+		TArray<AActor*> AttachedActors;
+		Parent->GetAttachedActors(AttachedActors);
+
+		for (AActor* Child : AttachedActors)
+		{
+			if (!Child) continue;
+			if (Child->GetName() == Name)return Child;
+		}
+
+		return nullptr;
+	}
 }

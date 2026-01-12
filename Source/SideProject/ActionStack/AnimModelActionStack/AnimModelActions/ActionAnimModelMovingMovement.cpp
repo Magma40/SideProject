@@ -1,13 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h"
 #include "ProcedualAnimation/MovingModel.h"
 
-UActionAnimModelMovingMovement::UActionAnimModelMovingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
-
-void UActionAnimModelMovingMovement::Init(AMovingModel* InMovingModel)
+UActionAnimModelMovingMovement* UActionAnimModelMovingMovement::Create(UObject* Outer, AMovingModel* InMovingModel)
 {
-	MovingModelRef = InMovingModel;
+	UActionAnimModelMovingMovement* Action = NewObject<UActionAnimModelMovingMovement>(Outer);
+	Action->MovingModelRef = InMovingModel;
+	return Action;
 }
 
 void UActionAnimModelMovingMovement::OnBegin_Implementation(bool bFirstTime)

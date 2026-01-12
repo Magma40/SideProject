@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "Tools/GenericCalls.h"
 #include "ProcedualAnimation/MoveLeg.h"
 
 UMoveLeg::UMoveLeg() { PrimaryComponentTick.bCanEverTick = true; }
@@ -11,35 +11,25 @@ void UMoveLeg::Init()
 	OtherLegs.Empty();
 	LegParts.Add(this);
 
-	TArray<USceneComponent*> LegChildren; // Get Knees
-	this->GetChildrenComponents(false, LegChildren);
-	for (USceneComponent* Child : LegChildren)
+	// Get Knee
+	LegParts.Add(GenericCalls::FindChildByPrefix(this, TEXT("Knee_")));
+	if (!IsValid(LegParts.Last()))
 	{
-		if (Child->GetName().Contains(TEXT("Knee_"))) LegParts.Add(Child);
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - Knee_ not found or wrong type"),  *StaticClass()->GetName());
+		return;
 	}
 
-	if (LegParts.Num() > 1)
+	// Get Foot
+	LegParts.Add(GenericCalls::FindChildByPrefix(LegParts.Last(), TEXT("Foot_")));
+	if (!IsValid(LegParts.Last()))
 	{
-		TArray<USceneComponent*> KneeChildren;
-		LegParts[1]->GetChildrenComponents(false, KneeChildren);
-		for (USceneComponent* Child : KneeChildren)
-		{
-			if (Child->GetName().Contains(TEXT("Foot_"))) LegParts.Add(Child);
-		}
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - Foot_ not found or wrong type"),  *StaticClass()->GetName());
+		return;
 	}
 
-	if (LegParts.Num() >= 3)
-	{
-		FVector FootLocal = GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
-		TargetPose.Position = FootLocal;
-		TargetPose.Rotation = LegParts[2]->GetComponentQuat();
-	}
-	
-	USceneComponent* Parent = GetAttachParent(); // Get Other Legs
-	if (!IsValid(Parent)) return;
-	TArray<USceneComponent*> Siblings;
-	Parent->GetChildrenComponents(false, Siblings);
-	for (USceneComponent* Child : Siblings)
+	// Get Other Leg
+	TArray<USceneComponent*> OtherComponents = GenericCalls::FindChildrenByPrefix(GetOwner(), TEXT("UpperLeg_"));
+	for (USceneComponent* Child : OtherComponents)
 	{
 		if (UMoveLeg* Other = Cast<UMoveLeg>(Child))
 		{
@@ -47,14 +37,11 @@ void UMoveLeg::Init()
 		}
 	}
 }
+
 void UMoveLeg::BeginPlay() // Please come home, because I miss you Gary!!
 {
 	Super::BeginPlay();
 	Init();
-	TargetPose.Position = LegParts[0]->GetComponentTransform().InverseTransformPosition(LegParts[2]->GetComponentLocation());
-	TargetPose.Rotation = LegParts[2]->GetComponentQuat();
-	LockedFootPosition.Position = TargetPose.Position;
-	LockedFootPosition.Rotation = TargetPose.Rotation;
 }
 
 void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -62,13 +49,6 @@ void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateIK(DeltaTime);
 }
-
-// void UMoveLeg::EnterIdle()
-// {
-// 	bIsJumping = false;
-// 	bFootPlanted = true;
-// 	TargetLocal = TargetPose.Position;
-// }
 
 void UMoveLeg::UpdateStepping(float DeltaTime)
 {

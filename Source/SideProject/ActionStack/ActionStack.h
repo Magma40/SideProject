@@ -69,7 +69,7 @@ public:
 	 	return ActionInterface;
 	 }
 
-	void ClearAllActionsButLast()
+	void ClearAllActions()
 	 {
 	 	while (ActionStack.Num() > 0)
 	 	{
@@ -78,7 +78,7 @@ public:
 	 }
 };
 
-UCLASS(Abstract, Blueprintable) // Why is this needed?
+UCLASS(Abstract, Blueprintable) 
 class SIDEPROJECT_API UAction : public UObject, public IActionInterface
 {
 	GENERATED_BODY()
@@ -124,9 +124,15 @@ template<typename T>
 T* UActionStack::GetAction()
 {
 	static_assert(TIsDerivedFrom<T, UObject>::IsDerived, "T must be a UObject type");
-	for (TScriptInterface Action : ActionStack)
+	for (const TScriptInterface<IActionInterface>& Action : ActionStack)
 	{
-		if (Action && Action.GetObject()->IsA(T::StaticClass())) return Cast<T>(Action);
+		if (Action)
+		{
+			if (T* TypedAction = Cast<T>(Action.GetObject()))
+			{
+				return TypedAction;
+			}
+		}
 	}
 	return nullptr;
 }

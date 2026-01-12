@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h"
 
-UActionAnimModelJumpingMovement::UActionAnimModelJumpingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
+UActionAnimModelJumpingMovement* UActionAnimModelJumpingMovement::Create(UObject* Outer)
+{
+	UActionAnimModelJumpingMovement* Action = NewObject<UActionAnimModelJumpingMovement>(Outer);
+	return Action;
+}
 
 void UActionAnimModelJumpingMovement::OnBegin_Implementation(bool bFirstTime)
 {

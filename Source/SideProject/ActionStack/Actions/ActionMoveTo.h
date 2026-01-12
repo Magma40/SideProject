@@ -20,8 +20,7 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 	GENERATED_BODY()
 
 public:
-	UActionMoveTo(const FObjectInitializer& ObjectInitializer);
-	void Init(ABaseInteractableCharacter* InCompanionCharacter, FVector InTargetLocation, bool InNeedIndicator);
+	static UActionMoveTo* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, const FVector& InTargetLocation, bool InNeedIndicator);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnEnd_Implementation() override;
@@ -36,4 +35,5 @@ private:
 	
 	bool bMoveCompleted = false;
 	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+	FAIRequestID  MoveRequestID;
 };

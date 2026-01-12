@@ -1,20 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.h"
-
-#include "Camera/CameraActor.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
-#include "Player/BaseInteractableCharacter.h"
 
-UActionArmHandHolding::UActionArmHandHolding(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
-
-void UActionArmHandHolding::Init(UMoveArm* InMoveArm, UMoveArm* InOtherMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InAICharacter)
+UActionArmHandHolding* UActionArmHandHolding::Create(UObject* Outer, UMoveArm* InMoveArm, UMoveArm* InOtherMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InAICharacter)
 {
-	MoveArmRef = InMoveArm;
-	OwnerCharacter = InCharacter;
-	AIOwnerCharacter =InAICharacter;
-	MoveOtherArmRef = InOtherMoveArm;
+	UActionArmHandHolding* Action = NewObject<UActionArmHandHolding>(Outer);
+	Action->MoveArmRef = InMoveArm;
+	Action->MoveOtherArmRef = InOtherMoveArm;
+	Action->OwnerCharacter = InCharacter;
+	Action->AIOwnerCharacter = InAICharacter;
+	return Action;
 }
 
 void UActionArmHandHolding::OnBegin_Implementation(bool bFirstTime)

@@ -1,20 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h"
-
 #include "Camera/CameraActor.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
-
 #include "Components/StaticMeshComponent.h"
 
-UActionArmPoint::UActionArmPoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
-
-void UActionArmPoint::Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
+UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
 {
-	MoveArmRef = InMoveArm;
-	OwnerCharacter = InCharacter;
+	UActionArmPoint* Action = NewObject<UActionArmPoint>(Outer);
+	Action->MoveArmRef = InMoveArm;
+	Action->OwnerCharacter = InCharacter;
+	return Action;
 }
 
 void UActionArmPoint::OnBegin_Implementation(bool bFirstTime)
@@ -25,8 +22,8 @@ void UActionArmPoint::OnBegin_Implementation(bool bFirstTime)
 	AnimLocations.Insert(HandLocationPos, 0);
 	
 	FHitResult Hit;
-	FVector Start = OwnerCharacter->TheMainCameraInScene->GetActorLocation();
-	FVector End = Start + (OwnerCharacter->TheMainCameraInScene->GetActorForwardVector() * 10000.f);
+	FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
+	FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
@@ -54,8 +51,8 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	Super::OnUpdate_Implementation(DeltaTime);
 
 	FHitResult Hit;
-	FVector Start = OwnerCharacter->TheMainCameraInScene->GetActorLocation();
-	FVector End = Start + (OwnerCharacter->TheMainCameraInScene->GetActorForwardVector() * 10000.f);
+	FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
+	FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
@@ -112,11 +109,11 @@ bool UActionArmPoint::IsDone_Implementation() const
 	return false;
 }
 
-void UActionArmPoint::RenderPointingToIndicator(FVector InHitLocation, UActorComponent* InPointingAtItemActor)
+void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, const UActorComponent* InPointingAtItemActor)
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
-	
-	const float EachSpawnDistance = 25.0f;
+
+	constexpr float EachSpawnDistance = 25.0f;
 	FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
 	FVector Direction = (InHitLocation - Start).GetSafeNormal();
 	float TotalDistance = FVector::Distance(InHitLocation, Start);
@@ -173,8 +170,7 @@ void UActionArmPoint::RenderPointingToIndicator(FVector InHitLocation, UActorCom
 
 	if (IsValid(InPointingAtItemActor))
 	{
-		UMaterialInterface* OutlineObject = nullptr;
-		OutlineObject = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineObject.Mat_OutlineObject"));
+		UMaterialInterface* OutlineObject = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineObject.Mat_OutlineObject"));
 
 		AActor* ActorRef = InPointingAtItemActor->GetOwner();
 		TArray<UStaticMeshComponent*> Components;

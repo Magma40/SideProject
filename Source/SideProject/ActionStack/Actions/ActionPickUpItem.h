@@ -17,8 +17,7 @@ class SIDEPROJECT_API UActionPickUpItem : public UAction
 	GENERATED_BODY()
 	
 public:
-	UActionPickUpItem(const FObjectInitializer& ObjectInitializer);
-	void Init(ABaseInteractableCharacter* InCompanionCharacter);
+	static UActionPickUpItem* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;

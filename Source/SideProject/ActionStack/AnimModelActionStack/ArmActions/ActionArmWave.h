@@ -15,15 +15,13 @@ class SIDEPROJECT_API UActionArmWave : public UAction
 	GENERATED_BODY()
 	
 public:
-	UActionArmWave(const FObjectInitializer& ObjectInitializer);
+	static UActionArmWave* Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
-
 private:
-	UMoveArm* MoveArmRef;
+	UMoveArm* MoveArmRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 	TArray<FVector> AnimLocations;
 	float ElapsedTime = 0.0f;

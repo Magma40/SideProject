@@ -13,13 +13,10 @@ class SIDEPROJECT_API UActionLegMovingMovement : public UAction
 	GENERATED_BODY()
 	
 public:
-	UActionLegMovingMovement(const FObjectInitializer& ObjectInitializer);
+	static UActionLegMovingMovement* Create(UObject* Outer, const TArray<UMoveLeg*>& InMoveLegs);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
-
-	void Init(TArray<UMoveLeg*> InMoveLegs);
-
 private:
 	TArray<UMoveLeg*> MoveLegsRef;
 };

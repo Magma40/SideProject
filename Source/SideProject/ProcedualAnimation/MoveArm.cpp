@@ -2,7 +2,7 @@
 
 
 #include "ProcedualAnimation/MoveArm.h"
-
+#include "Tools/GenericCalls.h"
 #include "Kismet/GameplayStatics.h"
 
 UMoveArm::UMoveArm() { PrimaryComponentTick.bCanEverTick = true; }
@@ -13,29 +13,30 @@ void UMoveArm::Init()
 	OtherArms.Empty();
 	ArmParts.Add(this);
 
-	TArray<USceneComponent*> ArmChildren; // Get Elbows
-	this->GetChildrenComponents(false, ArmChildren);
-	for (USceneComponent* Child : ArmChildren)
+	// Get Elbow
+	ArmParts.Add(GenericCalls::FindChildByPrefix(this, TEXT("Elbow_")));
+	if (!IsValid(ArmParts.Last()))
 	{
-		if (Child->GetName().Contains(TEXT("Elbow_"))) ArmParts.Add(Child);
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - Elbow_ not found or wrong type"),  *StaticClass()->GetName());
+		return;
 	}
 
-	TArray<USceneComponent*> ElbowChildren; // Get Hands
-	ArmParts[1]->GetChildrenComponents(false, ElbowChildren);
-	for (USceneComponent* Child : ElbowChildren)
+	// Get Hand
+	ArmParts.Add(GenericCalls::FindChildByPrefix(ArmParts.Last(), TEXT("Hand_")));
+	if (!IsValid(ArmParts.Last()))
 	{
-		if (Child->GetName().Contains(TEXT("Hand_"))) ArmParts.Add(Child);
+		UE_LOG(LogTemp, Error, TEXT("%s:Init - Hand_ not found or wrong type"),  *StaticClass()->GetName());
+		return;
 	}
-	
-	USceneComponent* Parent = GetAttachParent(); // Get Other Arm
-	if (!IsValid(Parent)) return;
-	TArray<USceneComponent*> Siblings;
-	Parent->GetChildrenComponents(false, Siblings);
-	for (USceneComponent* Child : Siblings)
+
+	// Get Other Arm
+	TArray<USceneComponent*> OtherComponents = GenericCalls::FindChildrenByPrefix(GetOwner(), TEXT("UpperArm_"));
+	for (USceneComponent* Child : OtherComponents)
 	{
-		UMoveArm* Other = Cast<UMoveArm>(Child);
-		// Skip myself
-		if (Other && Other != this)  OtherArms.Add(Other);
+		if (UMoveArm* Other = Cast<UMoveArm>(Child))
+		{
+			if (Other != this) OtherArms.Add(Other);
+		}
 	}
 }
 
@@ -43,8 +44,6 @@ void UMoveArm::BeginPlay() //And now my heart is beating like saddest metronome!
 {
 	Super::BeginPlay();
 	Init();
-	TargetPose.Position = FVector(0,25,  -50);
-	TargetPose.Rotation = FQuat::Identity;
 }
 
 void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

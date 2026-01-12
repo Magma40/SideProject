@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-//#include "ProcedualAnimation/MovingModel.h" // This hurts to add
 #include "MoveLeg.generated.h"
 
 USTRUCT(BlueprintType)
@@ -54,8 +53,7 @@ public: // Variables
 	float LiftAmount  = 0.0f;
 	float AirElapsedTime = 0.0f;
 
-	float LastStepEndTime = 0.f;
-
+	float LastStepEndTime = 0.0f;
 	
 	FLegsPose TargetPose = FLegsPose();
 	FLegsPose SourcePose = FLegsPose();

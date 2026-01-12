@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "CompanionActionStack.h"
 #include "Player/BaseInteractableCharacter.h"
-
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "ActionStack/Actions/ActionPickUpItem.h"
 #include "ActionStack/Actions/ActionContinuousMoveTo.h"
@@ -30,23 +28,20 @@ void UCompanionActionStack::Init()
 void UCompanionActionStack::OnAddActionMoveTo(FVector InMoveToLocation, bool InNeedIndicator)
 {
 	if (!OwnerCharacter) return;
-	ActionMoveToRef = NewObject<UActionMoveTo>(this);
-	ActionMoveToRef->Init(OwnerCharacter, InMoveToLocation, InNeedIndicator);
-	this->PushAction(ActionMoveToRef);
+	UActionMoveTo* ActionMoveTo = UActionMoveTo::Create(this, OwnerCharacter, InMoveToLocation, InNeedIndicator);
+	this->PushAction(ActionMoveTo);
 }
 
 void UCompanionActionStack::OnAddActionPickUp()
 {
 	if (!OwnerCharacter) return;
-	ActionPickUpItemRef = NewObject<UActionPickUpItem>(this);
-	ActionPickUpItemRef->Init(OwnerCharacter);
-	this->PushAction(ActionPickUpItemRef);
+	UActionPickUpItem* ActionPickUpItem = UActionPickUpItem::Create(this, OwnerCharacter);
+	this->PushAction(ActionPickUpItem);
 }
 
 void UCompanionActionStack::OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer)
 {
 	if (!OwnerCharacter) return;
-	ActionContinuousMoveToRef = NewObject<UActionContinuousMoveTo>(this);
-	ActionContinuousMoveToRef->Init(OwnerCharacter, InPlayer);
-	this->PushAction(ActionContinuousMoveToRef);
+	UActionContinuousMoveTo* ActionContinuousMoveTo = UActionContinuousMoveTo::Create(this, OwnerCharacter, InPlayer);
+	this->PushAction(ActionContinuousMoveTo);
 }

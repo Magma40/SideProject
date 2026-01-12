@@ -8,8 +8,6 @@
 
 class UMoveLeg;
 class ABaseInteractableCharacter;
-class UActionLegMovingMovement;
-class UActionLegJumpingMovement;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API ULegActionStack : public UActionStack
@@ -29,6 +27,4 @@ public:
 private: //Variables
 	TArray<UMoveLeg*> LegsRef;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	UPROPERTY() UActionLegMovingMovement* LegDefaultMovement = nullptr;
-	UPROPERTY() UActionLegJumpingMovement* LegJumpingMovement = nullptr;
 };

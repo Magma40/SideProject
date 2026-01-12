@@ -1,14 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ActionStack/Actions/ActionPickUpItem.h"
 #include "Player/BaseInteractableCharacter.h"
 
-UActionPickUpItem::UActionPickUpItem(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
-
-void UActionPickUpItem::Init(ABaseInteractableCharacter* InCompanionCharacter)
+UActionPickUpItem* UActionPickUpItem::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter)
 {
-	CompanionCharacter = InCompanionCharacter;
+	UActionPickUpItem* Action = NewObject<UActionPickUpItem>(Outer);
+	Action->CompanionCharacter = InCompanionCharacter;
+	return Action;
 }
 
 void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)

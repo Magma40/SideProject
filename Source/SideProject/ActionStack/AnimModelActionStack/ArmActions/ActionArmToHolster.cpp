@@ -1,18 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.h"
-
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 
-UActionArmToHolster::UActionArmToHolster(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
-
-void UActionArmToHolster::Init(UMoveArm* InMoveArm, USceneComponent* InBackHolster, ABaseInteractableCharacter* InCharacter)
+UActionArmToHolster* UActionArmToHolster::Create(UObject* Outer, UMoveArm* InMoveArm, USceneComponent* InBackHolster, ABaseInteractableCharacter* InCharacter)
 {
-	MoveArmRef = InMoveArm;
-	BackHolsterRef = InBackHolster;
-	OwnerCharacter = InCharacter;
+	UActionArmToHolster* Action = NewObject<UActionArmToHolster>(Outer);
+	Action->MoveArmRef = InMoveArm;
+	Action->BackHolsterRef = InBackHolster;
+	Action->OwnerCharacter = InCharacter;
+	return Action;
 }
 
 void UActionArmToHolster::OnBegin_Implementation(bool bFirstTime)

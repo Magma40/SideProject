@@ -13,13 +13,11 @@ class SIDEPROJECT_API UActionArmMovingMovement : public UAction
 	GENERATED_BODY()
 	
 public:
-	UActionArmMovingMovement(const FObjectInitializer& ObjectInitializer);
+	static UActionArmMovingMovement* Create(UObject* Outer, UMoveArm* InMoveArm);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArms);
-
 private:
-	UMoveArm* MoveArmsRef;
+	UMoveArm* MoveArmRef = nullptr;
 };

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "ActionStack/ActionStack.h"
-#include "Navigation/PathFollowingComponent.h"
 #include "ActionContinuousMoveTo.generated.h"
 
 class ABaseInteractableCharacter;
@@ -19,14 +18,13 @@ class SIDEPROJECT_API UActionContinuousMoveTo : public UAction
 	GENERATED_BODY()
 
 public:
-	UActionContinuousMoveTo(const FObjectInitializer& ObjectInitializer);
-	void Init(ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter);
+	static UActionContinuousMoveTo* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter);
 	bool IsDone_Implementation() const override;
 	void OnEnd_Implementation() override;
 	void OnUpdate_Implementation(float DeltaTime) override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void StartMove();
+	void StartMove() const;
 
 private:
 	ABaseInteractableCharacter* CompanionCharacter = nullptr;
@@ -34,6 +32,6 @@ private:
 
 	TWeakObjectPtr<AAIController> CachedController;
 	FTimerHandle FollowTimer;
-	float FollowDistance = 50.f;
+	float FollowDistance = 1.0f;
 	float CheckInterval = 0.1f;
 };

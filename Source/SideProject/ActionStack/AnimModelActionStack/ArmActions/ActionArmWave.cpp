@@ -1,17 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmWave.h"
-
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
-#include "Player/BaseInteractableCharacter.h"
 
-UActionArmWave::UActionArmWave(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
-
-void UActionArmWave::Init(UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
+UActionArmWave* UActionArmWave::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
 {
-	MoveArmRef = InMoveArm;
-	OwnerCharacter = InCharacter;
+	UActionArmWave* Action = NewObject<UActionArmWave>(Outer);
+	Action->MoveArmRef = InMoveArm;
+	Action->OwnerCharacter = InCharacter;
+	return Action;
 }
 
 void UActionArmWave::OnBegin_Implementation(bool bFirstTime)

@@ -25,7 +25,7 @@ protected:
 	ABaseInteractableCharacter();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	
+
 public:
 	//PickUpAndDrop
 	UFUNCTION(BlueprintCallable) virtual bool ActionPickUpItem();   //Try to pick up items through ActionStack
@@ -37,22 +37,29 @@ public:
 	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster(); //Checks if you can either add or remove item from holster
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
 	UFUNCTION(BlueprintCallable) void DeattachFromBackHolster(); //Should deattach the item in the holster into the hand
-
 	virtual void Jump() override;
+
+	UObject* GetItemInHand() const { return ItemInHand; }
+	UObject* GetItemInBackHolster() const { return BackItemHolster; }
+	AMovingModel* GetMovingModel() const { return MovingModel; }
+	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
+	ACameraActor* GetCameraActor() const  { return TheMainCameraInScene; }
 	
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
-	AMovingModel* MovingModel = nullptr;
-	USceneComponent* BackHolster = nullptr;
-	UCompanionActionStack* CompanionActionStack = nullptr;
-
-	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
 
 private:
 	UObject* ClosestObject = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand = nullptr;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster = nullptr;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
+	USceneComponent* BackHolster = nullptr;
+	UCompanionActionStack* CompanionActionStack = nullptr;
+
+protected:
+	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
+	AMovingModel* MovingModel = nullptr;
+
 };

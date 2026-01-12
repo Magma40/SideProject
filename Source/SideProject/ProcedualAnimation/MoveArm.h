@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-//#include "ProcedualAnimation/MovingModel.h" // This hurts to add
-#include "Tools/GenericCalls.h"
 #include "MoveArm.generated.h"
 
 USTRUCT(BlueprintType)
@@ -41,6 +39,4 @@ public: // Variables
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
 	bool ActionEnabled = false;
-
-	UPROPERTY(EditDefaultsOnly, Category= "Animation") UCurveFloat* WaveAnimCurve;
 };

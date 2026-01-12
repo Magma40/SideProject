@@ -10,8 +10,9 @@ class ABaseInteractableCharacter;
 class UArmActionStack;
 class ULegActionStack;
 class AMovingModel;
+class UActionArmHandHolding;
+class UActionContinuousMoveTo;
 
-class UActionAnimModelMovingMovement;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
@@ -31,9 +32,6 @@ protected:
 	ULegActionStack* LegActionStackRef = nullptr;
 	UArmActionStack* ArmActionStack_RRef = nullptr;
 	UArmActionStack* ArmActionStack_LRef = nullptr;
-
-	UPROPERTY() UActionAnimModelMovingMovement* DefaultMovement = nullptr;
-	UPROPERTY() UActionAnimModelMovingMovement* AnimModelJumpingMovement = nullptr;
 
 	float MinDistanceToHoldHands = 200.0f;
 

@@ -16,27 +16,28 @@ void ABaseInteractableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TArray<AActor*> ChildrenActors;
-	GetAllChildActors(ChildrenActors, true);
-	for (AActor* FoundChild : ChildrenActors)
+	// Get MovingModel
+	MovingModel = Cast<AMovingModel>(GenericCalls::FindChildActorByExactName(this, TEXT("BP_MovingModel")));
+	if (!MovingModel)
 	{
-		if (!FoundChild) continue;
-		MovingModel = Cast<AMovingModel>(FoundChild);
-	}
-	TArray<USceneComponent*> AllComponents;
-	MovingModel->GetComponents<USceneComponent>(AllComponents);
-	for (USceneComponent* Comp : AllComponents)
-	{
-		if (!Comp) continue;
-		if (Comp->GetName() == TEXT("BackItemHolster")) BackHolster = Comp;
+		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - MovingModel not found or wrong type"), *StaticClass()->GetName());
+		return;
 	}
 
-	AllComponents.Empty();
-	this->GetComponents<USceneComponent>(AllComponents);
-	for (USceneComponent* Comp : AllComponents)
+	// Get BackItemHolster
+	BackHolster = GenericCalls::FindChildByExactName(MovingModel, TEXT("BackItemHolster"));
+	if (!BackHolster)
 	{
-		if (!Comp) continue;
-		CompanionActionStack = Cast<UCompanionActionStack>(Comp);
+		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - BackHolster not found or wrong type"), *StaticClass()->GetName());
+		return;
+	}
+
+	// Get CompanionActionStack
+	CompanionActionStack = Cast<UCompanionActionStack>(GenericCalls::FindChildByExactName(this, TEXT("CompanionActionStack")));
+	if (!CompanionActionStack)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - CompanionActionStack not found or wrong type"), *StaticClass()->GetName());
+		return;
 	}
 }
 

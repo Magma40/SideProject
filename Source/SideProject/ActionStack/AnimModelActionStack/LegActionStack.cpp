@@ -1,11 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ActionStack/AnimModelActionStack/LegActionStack.h"
-
+#include "ArmActionStack.h"
 #include "LegActions/ActionLegMovingMovement.h"
 #include "LegActions/ActionLegJumpingMovement.h"
-
 
 ULegActionStack::ULegActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -23,13 +20,11 @@ void ULegActionStack::Init(const TArray<UMoveLeg*>& InLegsRef, ABaseInteractable
 
 void ULegActionStack::AddMovingAction()
 {
-	LegDefaultMovement = NewObject<UActionLegMovingMovement>(this);
-	LegDefaultMovement->Init(LegsRef);
-	this->PushAction(LegDefaultMovement);
+	UActionLegMovingMovement* DefaultMovingAction = UActionLegMovingMovement::Create(this, LegsRef);
+	this->PushAction(DefaultMovingAction);
 }
 void ULegActionStack::AddJumpingAction()
 {
-	LegJumpingMovement = NewObject<UActionLegJumpingMovement>(this);
-	LegJumpingMovement->Init(LegsRef, OwnerCharacter);
+	UActionLegJumpingMovement* LegJumpingMovement = UActionLegJumpingMovement::Create(this, LegsRef, OwnerCharacter);
 	this->PushAction(LegJumpingMovement);
 }

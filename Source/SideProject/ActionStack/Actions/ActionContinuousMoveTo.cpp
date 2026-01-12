@@ -1,20 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ActionStack/Actions/ActionContinuousMoveTo.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "NavigationSystem.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-UActionContinuousMoveTo::UActionContinuousMoveTo(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
-
-void UActionContinuousMoveTo::Init(ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter)
+UActionContinuousMoveTo* UActionContinuousMoveTo::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter)
 {
-	CompanionCharacter = InCompanionCharacter;
-	OtherCharacter = InOtherCharacter;
+	UActionContinuousMoveTo* Action = NewObject<UActionContinuousMoveTo>(Outer);
+	Action->CompanionCharacter = InCompanionCharacter;
+	Action->OtherCharacter = InOtherCharacter;
+	return Action;
 }
 
 void UActionContinuousMoveTo::OnBegin_Implementation(bool bFirstTime)
@@ -28,7 +25,7 @@ void UActionContinuousMoveTo::OnBegin_Implementation(bool bFirstTime)
 	GetWorld()->GetTimerManager().SetTimer(FollowTimer,this,&UActionContinuousMoveTo::StartMove,CheckInterval,true);
 }
 
-void UActionContinuousMoveTo::StartMove()
+void UActionContinuousMoveTo::StartMove() const
 {
 	const float DistSq = FVector::DistSquared(CompanionCharacter->GetActorLocation(),OtherCharacter->GetActorLocation());
 	if (DistSq <= FMath::Square(FollowDistance)) return;

@@ -15,16 +15,14 @@ class SIDEPROJECT_API UActionArmHandHolding : public UAction
 	GENERATED_BODY()
 	
 public:
-	UActionArmHandHolding(const FObjectInitializer& ObjectInitializer);
+	static UActionArmHandHolding* Create(UObject* Outer, UMoveArm* InMoveArm, UMoveArm* InOtherMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InAICharacter);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void Init(UMoveArm* InMoveArm, UMoveArm* InOtherMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InAICharacter);
-
 private:
-	UMoveArm* MoveArmRef;
-	UMoveArm* MoveOtherArmRef;
+	UMoveArm* MoveArmRef = nullptr;
+	UMoveArm* MoveOtherArmRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 	ABaseInteractableCharacter* AIOwnerCharacter = nullptr;
 	TArray<FVector> AnimLocations;

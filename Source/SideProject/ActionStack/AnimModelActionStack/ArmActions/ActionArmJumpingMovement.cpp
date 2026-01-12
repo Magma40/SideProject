@@ -1,13 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h"
-#include "ProcedualAnimation/MoveArm.h"
 
-UActionArmJumpingMovement::UActionArmJumpingMovement(const FObjectInitializer& ObjectInitializer)  : Super(ObjectInitializer) {}
-
-void UActionArmJumpingMovement::Init(UMoveArm* InMoveArm)
+UActionArmJumpingMovement* UActionArmJumpingMovement::Create(UObject* Outer, UMoveArm* InMoveArm)
 {
-	MoveArmRef = InMoveArm;
+	UActionArmJumpingMovement* Action = NewObject<UActionArmJumpingMovement>(Outer);
+	Action->MoveArmRef = InMoveArm;
+	return Action;
 }
 
 void UActionArmJumpingMovement::OnBegin_Implementation(bool bFirstTime)
