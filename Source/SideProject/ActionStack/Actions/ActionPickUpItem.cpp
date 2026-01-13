@@ -13,10 +13,8 @@ void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	if (!CompanionCharacter) return;
-	if (CompanionCharacter->ActionPickUpItem())
-	{
-		TriedToPickUpItem = true;
-	}
+	CompanionCharacter->TryToPickUpItem();
+	TriedToPickUpItem = true;
 }
 
 

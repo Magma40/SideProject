@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "CompanionPawn.generated.h"
 

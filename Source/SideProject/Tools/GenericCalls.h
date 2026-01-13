@@ -118,4 +118,30 @@ namespace GenericCalls
 
 		return nullptr;
 	}
+
+	template<typename T>
+	T* FindChildActorByClass(const AActor* Parent)
+	{
+		TArray<AActor*> AttachedActors;
+		Parent->GetAttachedActors(AttachedActors);
+		for (AActor* Child : AttachedActors)
+		{
+			if (!Child) continue;
+			if (T* CastChild = Cast<T>(Child)) return CastChild;
+		}
+		return nullptr;
+	}
+
+	template<typename T>
+	T* FindChildComponentByClass(const AActor* Parent)
+	{
+		TArray<USceneComponent*> AllComponents;
+		Parent->GetComponents<USceneComponent>(AllComponents);
+		for (USceneComponent* Child : AllComponents)
+		{
+			if (!Child) continue;
+			if (T* CastChild = Cast<T>(Child)) return CastChild;
+		}
+		return nullptr;
+	}
 }

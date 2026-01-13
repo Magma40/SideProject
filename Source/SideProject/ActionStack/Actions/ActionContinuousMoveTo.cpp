@@ -27,6 +27,7 @@ void UActionContinuousMoveTo::OnBegin_Implementation(bool bFirstTime)
 
 void UActionContinuousMoveTo::StartMove() const
 {
+	if (CompanionCharacter->GetCharacterMovement()->IsFalling()) return;
 	const float DistSq = FVector::DistSquared(CompanionCharacter->GetActorLocation(),OtherCharacter->GetActorLocation());
 	if (DistSq <= FMath::Square(FollowDistance)) return;
 

@@ -20,9 +20,15 @@ void UActionArmHandHolding::OnBegin_Implementation(bool bFirstTime)
 	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	AnimLocations.Insert(HandLocationPos, 0);
 
-	const FTransform XformOther = MoveOtherArmRef->ArmParts[0]->GetComponentTransform();
 	FVector HandLocationPosOther = Xform.InverseTransformPosition(MoveOtherArmRef->ArmParts[2]->GetComponentLocation());
 	AnimLocations.Insert(HandLocationPosOther, 1);
+	MoveArmRef->bEnableArmConstraints = false;
+}
+
+void UActionArmHandHolding::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	MoveArmRef->bEnableArmConstraints = true;
 }
 
 void UActionArmHandHolding::OnUpdate_Implementation(float DeltaTime) 
@@ -41,7 +47,6 @@ void UActionArmHandHolding::OnUpdate_Implementation(float DeltaTime)
 	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	AnimLocations[0] = HandLocationPos;
 
-	const FTransform XformOther = MoveOtherArmRef->ArmParts[0]->GetComponentTransform();
 	FVector HandLocationPosOther = Xform.InverseTransformPosition(MoveOtherArmRef->ArmParts[2]->GetComponentLocation());
 	AnimLocations[1]  = HandLocationPosOther;
 }

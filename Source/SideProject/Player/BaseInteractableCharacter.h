@@ -28,11 +28,9 @@ protected:
 
 public:
 	//PickUpAndDrop
-	UFUNCTION(BlueprintCallable) virtual bool ActionPickUpItem();   //Try to pick up items through ActionStack
-	UFUNCTION(BlueprintCallable) virtual bool AbleToPickUpItem();  //Should try to pick up item / press E
-	UFUNCTION(BlueprintCallable) virtual bool TryToPickUpItem();   //Looks around to see if anything can be picked up
+	UFUNCTION(BlueprintCallable) virtual void TryToPickUpItem();   //Looks around to see if anything can be picked up
 	UFUNCTION(BlueprintCallable) virtual void DropItemInHand();	 //Should drop item in hand infront of character
-	UFUNCTION(BlueprintCallable) virtual void PickUpItemToHand(UObject* inSpecificPickUpItem); //Should pick up item into hand
+	UFUNCTION(BlueprintCallable) virtual void PickUpItemToHand(UObject* InSpecificPickUpItem); //Should pick up item into hand
 
 	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster(); //Checks if you can either add or remove item from holster
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
@@ -54,12 +52,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand = nullptr;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster = nullptr;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 200.0f;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 75.0f;
 	USceneComponent* BackHolster = nullptr;
-	UCompanionActionStack* CompanionActionStack = nullptr;
+
+	TArray<FVector> AnimLocations;
+	float ElapsedTime = 0.0f;
+	float PlayRate = 1.0f;
 
 protected:
 	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
 	AMovingModel* MovingModel = nullptr;
-
+	UCompanionActionStack* CompanionActionStack = nullptr;
 };

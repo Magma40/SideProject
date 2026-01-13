@@ -22,4 +22,5 @@ void UJoint::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(!IsValid(JointReference)) return;;
 	SetWorldLocation(JointReference->GetComponentLocation());
+	SetWorldRotation(JointReference->GetComponentRotation());
 }

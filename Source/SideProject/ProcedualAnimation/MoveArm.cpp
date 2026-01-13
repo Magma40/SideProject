@@ -64,42 +64,54 @@ void UMoveArm::UpdateIK()
 	FVector UpperArmPos = Xform.InverseTransformPosition(UpperArm->GetComponentLocation());
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
-	FVector Target = TargetPose.Position;
-	if (Target == FVector::ZeroVector) return;
+	if (TargetPose.Position.IsNearlyZero()) return;
+
+	FVector ShoulderWorldPos = UpperArm->GetComponentLocation();
+	FVector TargetWorld = Xform.TransformPosition(TargetPose.Position);
+
+	FVector RestDirWS = (-UpperArm->GetForwardVector() + UpperArm->GetRightVector()).GetSafeNormal() ; // rest pose direction
+	FVector DesiredDirWS = (TargetWorld - ShoulderWorldPos).GetSafeNormal();
+	float TargetLen = (TargetWorld - ShoulderWorldPos).Size();
+
+	if (bEnableArmConstraints)
+	{
+		float MaxSwingDegrees = 75.f; // tweak per character
+		FVector LimitedDirWS = ConstrainSwingTwist(RestDirWS, DesiredDirWS, MaxSwingDegrees);
+		TargetWorld = ShoulderWorldPos + LimitedDirWS * TargetLen;	
+	}
+	FVector Target = Xform.InverseTransformPosition(TargetWorld);
 
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperArmPos;
 	float UpperLen = (ElbowPos - UpperArmPos).Size();
 	float LowerLen = (HandPos - ElbowPos).Size();
-	float TargetLen = RootToEff.Size();
-	TargetLen = FMath::Clamp(TargetLen, FMath::Abs(UpperLen - LowerLen) + 1e-3f, UpperLen + LowerLen - 1e-3f);
+	float ClampedTargetLen = RootToEff.Size();
+	ClampedTargetLen = FMath::Clamp(ClampedTargetLen,FMath::Abs(UpperLen - LowerLen) + 1e-3f,UpperLen + LowerLen - 1e-3f);
 	
 	// Law of cosines for knee angle
-	float A = (UpperLen * UpperLen + TargetLen * TargetLen - LowerLen * LowerLen) / (2.0f * UpperLen * TargetLen);
+	float A = (UpperLen * UpperLen + ClampedTargetLen * ClampedTargetLen - LowerLen * LowerLen) / (2.f * UpperLen * ClampedTargetLen);
 	A = FMath::Clamp(A, -1.f, 1.f);
 	float ElbowAngle = FMath::Acos(A);
 
-	FVector ForwardPoleDirWS = -UpperArm->GetRightVector() - UpperArm->GetUpVector();
-	FVector ForwardPoleDir = Xform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
-	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, 1, 0); 
-	
+	FVector PoleDirWS = -UpperArm->GetRightVector();
+	FVector PoleDirLS = Xform.InverseTransformVector(PoleDirWS).GetSafeNormal();
+
 	FVector DirToTarget = RootToEff.GetSafeNormal();
-	FVector PlaneNormal = FVector::CrossProduct(DirToTarget,  ForwardPoleDir).GetSafeNormal();
-	if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
+	FVector PlaneNormal = FVector::CrossProduct(DirToTarget, PoleDirLS).GetSafeNormal();
 	
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(ElbowAngle), PlaneNormal);
-	FVector NewElbowPos = UpperArmPos + RotatedDir * UpperLen;
-
-	FVector UpperArmToElbow = (NewElbowPos - UpperArmPos).GetSafeNormal() * UpperLen;
-	FVector FixedElbowPos = UpperArmPos + UpperArmToElbow;
-
-	FVector ElbowToTargetHand = (Target - FixedElbowPos).GetSafeNormal() * LowerLen;
-	FVector FixedHandPos = FixedElbowPos + ElbowToTargetHand;
 	
-	Elbow->SetRelativeLocation(FixedElbowPos);
-	FVector HandWorldPos = UpperArm->GetComponentTransform().TransformPosition(FixedHandPos);
+	FVector NewElbowPos = UpperArmPos + RotatedDir * UpperLen;
+	FVector FixedHandPos  = NewElbowPos + (Target - NewElbowPos).GetSafeNormal() * LowerLen;
+	
+	Elbow->SetRelativeLocation(NewElbowPos);
+	FVector HandWorldPos = Xform.TransformPosition(FixedHandPos);
 	FVector HandLocalToElbow = Elbow->GetComponentTransform().InverseTransformPosition(HandWorldPos);
 	Hand->SetRelativeLocation(HandLocalToElbow);
+	
+	FVector Direction = (HandLocalToElbow - NewElbowPos).GetSafeNormal();
+	Elbow->SetRelativeRotation(Direction.ToOrientationQuat());
+	Hand->SetRelativeRotation(TargetPose.Rotation);
 }
 
 bool UMoveArm::ShouldHoldUpHands()

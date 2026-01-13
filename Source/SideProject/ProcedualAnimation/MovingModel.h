@@ -38,7 +38,7 @@ public:
 	void UpdateHips();
 	float GetHipSway();
 
-	UFUNCTION(BlueprintCallable) void SetLegsJumpingAnim();
+	UFUNCTION(BlueprintCallable) void SetJumpingAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim();
 	UFUNCTION(BlueprintCallable) void SetArmsPointingAnim();
@@ -48,6 +48,8 @@ public:
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
 	USceneComponent* GetRightHand() const;
 	USceneComponent* GetLeftHand() const;
+	UMoveArm* GetRightArm() const;
+	UMoveArm* GetLeftArm() const;
 	TArray<UMoveLeg*> GetLegs();
 	TArray<UMoveArm*> GetArms();
 	UAnimModelActionStack* GetAnimModelActionStack() const { return AnimModelActionStack; }

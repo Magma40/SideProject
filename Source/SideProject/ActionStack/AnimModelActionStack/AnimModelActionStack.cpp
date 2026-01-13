@@ -2,6 +2,7 @@
 #include "AnimModelActionStack.h"
 #include "ProcedualAnimation/MovingModel.h" 
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h"
+#include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h"
 #include "Tools/GenericCalls.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "ActionStack/Characters/CompanionActionStack.h"
@@ -23,6 +24,22 @@ void UAnimModelActionStack::BeginPlay()
 void UAnimModelActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!IsValid(CompanionOwnerCharacter)) return;
+	if (!IsValid(CompanionOwnerCharacter->GetCompanionActionStack())) return;
+	if (CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>())
+	{
+		float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());
+		if (HandDistances > MinDistanceToHoldHands)
+		{
+			TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
+			TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
+			TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
+			ArmActionStack_LRef->RemoveAction(PlayerHandHoldingAction);
+			CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
+			CompanionOwnerCharacter->GetCompanionActionStack()->RemoveAction(ActionInterfaceContinuousMoveTo);
+		}
+
+	}
 }
 
 void UAnimModelActionStack::Init()
@@ -93,6 +110,8 @@ void UAnimModelActionStack::PushDefaultActionMovement()
 void UAnimModelActionStack::PushJumpingActionMovement()
 {
 	LegActionStackRef->AddJumpingAction();
+	UActionAnimModelJumpingMovement* JumpingMovement = UActionAnimModelJumpingMovement::Create(this, OwnerCharacter, CompanionOwnerCharacter);
+	this->PushAction(JumpingMovement);
 	if (OwnerCharacter->GetCompanionActionStack()) return;
 	
 	TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());

@@ -80,7 +80,7 @@ float AMovingModel::GetHipSway()
 	return HipSway;
 }
 
-void AMovingModel::SetLegsJumpingAnim()
+void AMovingModel::SetJumpingAnim()
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushJumpingActionMovement();
@@ -282,6 +282,24 @@ USceneComponent* AMovingModel::GetLeftHand() const
 	for(FLimbChain Arm : Arms)
 	{
 		if (Arm.End->GetName().EndsWith(TEXT("_L"))) return Arm.End;
+	}
+	return nullptr;
+}
+
+UMoveArm* AMovingModel::GetRightArm() const
+{
+	for(FLimbChain Arm : Arms)
+	{
+		if (Arm.Upper->GetName().EndsWith(TEXT("_R"))) return Cast<UMoveArm>(Arm.Upper);
+	}
+	return nullptr;
+}
+
+UMoveArm* AMovingModel::GetLeftArm() const
+{
+	for(FLimbChain Arm : Arms)
+	{
+		if (Arm.Upper->GetName().EndsWith(TEXT("_L"))) return Cast<UMoveArm>(Arm.Upper);
 	}
 	return nullptr;
 }

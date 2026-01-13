@@ -25,6 +25,13 @@ void UActionArmWave::OnBegin_Implementation(bool bFirstTime)
 	AnimLocations.Insert(MidOffset2, 2);
 	AnimLocations.Insert(MidOffset3, 3);
 	AnimLocations.Insert(HandLocationPos, 4);
+	MoveArmRef->bEnableArmConstraints = false;
+}
+
+void UActionArmWave::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	MoveArmRef->bEnableArmConstraints = true;
 }
 
 void UActionArmWave::OnUpdate_Implementation(float DeltaTime) 

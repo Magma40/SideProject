@@ -19,10 +19,10 @@ void UActionLegMovingMovement::OnBegin_Implementation(bool bFirstTime)
 		Leg->bFootPlanted = true;
 		Leg->bIsStepping = false;
 
-		Leg->TargetPose.Position = Leg->LegParts[0]->GetComponentTransform().InverseTransformPosition(Leg->LegParts[2]->GetComponentLocation());
-		Leg->TargetPose.Rotation = Leg->LegParts[2]->GetComponentQuat();
-		Leg->LockedFootPosition.Position = Leg->TargetPose.Position;
-		Leg->LockedFootPosition.Rotation = Leg->TargetPose.Rotation;
+		// Leg->TargetPose.Position = Leg->LegParts[0]->GetComponentTransform().InverseTransformPosition(Leg->LegParts[2]->GetComponentLocation());
+		// Leg->TargetPose.Rotation = Leg->LegParts[2]->GetComponentQuat();
+		// Leg->LockedFootPosition.Position = Leg->TargetPose.Position;
+		// Leg->LockedFootPosition.Rotation = Leg->TargetPose.Rotation;
 	}
 }
 

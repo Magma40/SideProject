@@ -73,7 +73,7 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 		FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
 		MoveArmRef->TargetPose.Position = PointLocation;
-		MoveArmRef->TargetPose.Rotation = FQuat::Identity;
+		//MoveArmRef->TargetPose.Rotation = FQuat::Identity;
 		//DrawDebugLine(GetWorld(),Start + (OwnerCharacter->TheMainCameraInScene->GetActorForwardVector() * 100.f),Hit.Location,FColor(255, 0, 0),false, -1, 0,1);
 	}
 	else
@@ -83,7 +83,7 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 		FVector PointLocation = Xform.InverseTransformPosition(End);
 		MoveArmRef->TargetPose.Position = PointLocation;
-		MoveArmRef->TargetPose.Rotation = FQuat::Identity;
+		//MoveArmRef->TargetPose.Rotation = FQuat::Identity;
 	}
 
 	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
@@ -116,9 +116,10 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 	constexpr float EachSpawnDistance = 25.0f;
 	FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
 	FVector Direction = (InHitLocation - Start).GetSafeNormal();
+	
 	float TotalDistance = FVector::Distance(InHitLocation, Start);
 	int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
-	
+	MoveArmRef->TargetPose.Rotation = FRotationMatrix::MakeFromZ(Direction).ToQuat();	
 	// Spawn new indicators if we need more
 	while (PointingIndicators.Num() < RequiredCount)
 	{
@@ -161,7 +162,7 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 	// Move indicators and draw debug spheres for visualization
 	for (int32 i = 0; i < PointingIndicators.Num(); i++)
 	{
-		FVector NewLocation = Start + Direction * EachSpawnDistance * (i + 1);
+		FVector NewLocation = Start + MoveArmRef->ArmParts[2]->GetUpVector() * EachSpawnDistance * (i + 1);
 		if (PointingIndicators[i])
 		{
 			PointingIndicators[i]->SetActorLocation(NewLocation);

@@ -29,14 +29,13 @@ void UActionArmToHolster::OnBegin_Implementation(bool bFirstTime)
 	//From Holster
 	AnimLocations.Insert(MidOffset, 3);
 	AnimLocations.Insert(HandLocationPos, 4);
-	
-	// UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();;
-	// if (!AnimSubsystem)
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("UMoveArm - SetWaveAnim - AnimSubsystem was nullptr"));
-	// 	return;
-	// }
-	// AnimLocations = AnimSubsystem->GenerateInBetweenAnimPositions(AnimLocations, 6);
+	MoveArmRef->bEnableArmConstraints = false;
+}
+
+void UActionArmToHolster::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	MoveArmRef->bEnableArmConstraints = true;
 }
 
 //Discovering Tuple and Pairs is the best thing that has happened to me

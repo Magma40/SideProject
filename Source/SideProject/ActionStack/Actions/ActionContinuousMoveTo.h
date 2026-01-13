@@ -32,6 +32,6 @@ private:
 
 	TWeakObjectPtr<AAIController> CachedController;
 	FTimerHandle FollowTimer;
-	float FollowDistance = 1.0f;
+	float FollowDistance = 25.0f;
 	float CheckInterval = 0.1f;
 };

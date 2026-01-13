@@ -38,5 +38,33 @@ public: // Variables
 	FArmsPose TargetPose = FArmsPose();
 	TArray<USceneComponent*> ArmParts;
 	TArray<UMoveArm*> OtherArms;
-	bool ActionEnabled = false;
+	bool bEnableArmConstraints = true;
 };
+
+static FVector ConstrainSwingTwist( const FVector& RestDirWS, const FVector& DesiredDirWS, float MaxSwingDegrees)
+{
+	// Quaternion rotating rest direction → desired direction
+	FQuat Delta = FQuat::FindBetweenNormals(RestDirWS, DesiredDirWS);
+
+	// Decompose into swing + twist around RestDir
+	FQuat Swing, Twist;
+	Delta.ToSwingTwist(RestDirWS, Swing, Twist);
+
+	// Extract swing angle
+	FVector SwingAxis;
+	float SwingAngle;
+	Swing.ToAxisAndAngle(SwingAxis, SwingAngle);
+
+	// Clamp swing angle
+	float MaxSwingRad = FMath::DegreesToRadians(MaxSwingDegrees);
+	SwingAngle = FMath::Clamp(SwingAngle, -MaxSwingRad, MaxSwingRad);
+
+	// Rebuild constrained swing
+	Swing = FQuat(SwingAxis, SwingAngle);
+
+	// Combine swing + original twist
+	FQuat Limited = Swing * Twist;
+
+	// Apply to rest direction
+	return Limited.RotateVector(RestDirWS).GetSafeNormal();
+}

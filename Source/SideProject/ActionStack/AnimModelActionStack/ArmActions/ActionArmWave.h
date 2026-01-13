@@ -19,6 +19,7 @@ public:
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
+	void OnEnd_Implementation() override;
 
 private:
 	UMoveArm* MoveArmRef = nullptr;

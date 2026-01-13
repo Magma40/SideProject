@@ -1,14 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/BaseInteractableCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "VectorTypes.h"
-#include "ActionStack/Characters/CompanionActionStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
+#include "Core/Subsystems/AnimationCurveSubsystem.h"
+#include "ProcedualAnimation/MoveArm.h"
 
 ABaseInteractableCharacter::ABaseInteractableCharacter() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -17,7 +16,7 @@ void ABaseInteractableCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Get MovingModel
-	MovingModel = Cast<AMovingModel>(GenericCalls::FindChildActorByExactName(this, TEXT("BP_MovingModel")));
+	MovingModel =  GenericCalls::FindChildActorByClass<AMovingModel>(this);
 	if (!MovingModel)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - MovingModel not found or wrong type"), *StaticClass()->GetName());
@@ -31,44 +30,84 @@ void ABaseInteractableCharacter::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - BackHolster not found or wrong type"), *StaticClass()->GetName());
 		return;
 	}
-
-	// Get CompanionActionStack
-	CompanionActionStack = Cast<UCompanionActionStack>(GenericCalls::FindChildByExactName(this, TEXT("CompanionActionStack")));
-	if (!CompanionActionStack)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - CompanionActionStack not found or wrong type"), *StaticClass()->GetName());
-		return;
-	}
 }
 
 // Called every frame
 void ABaseInteractableCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
 
-bool ABaseInteractableCharacter::ActionPickUpItem()
-{
-	if (AbleToPickUpItem())
+	if (AnimLocations.IsEmpty()) return;
+	
+	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	if (!AnimSubsystem)
 	{
-		if (TryToPickUpItem())
-		{
-			PickUpItemToHand(nullptr);
-			return true;
-		}
+		UE_LOG(LogTemp, Error,TEXT("%s - Tick - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
+		return;
 	}
-	return false;
+	const int BeforeMoveNum = AnimLocations.Num();
+	const TTuple<TTuple<TArray<FVector>, float>,FVector> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimLocations, ElapsedTime, PlayRate);
+	MovingModel->GetRightArm()->TargetPose.Position = NewValues.Value;
+	AnimLocations = NewValues.Key.Key;
+	ElapsedTime = NewValues.Key.Value;
+
+	if (AnimLocations.Num() % 2 == 0 && BeforeMoveNum != AnimLocations.Num()) // Hard coding ):
+	{
+		if (IsValid(ItemInHand)) DropItemInHand();
+		else PickUpItemToHand(ClosestObject);
+	}
+	else if (AnimLocations.Num() < 2) 	AnimLocations.Empty();
 }
 
-
-bool ABaseInteractableCharacter::AbleToPickUpItem()
+void ABaseInteractableCharacter::TryToPickUpItem()
 {
-		if (IsValid(ItemInHand)) return false;
-		return true;
-}
+	if (IsValid(ItemInHand))
+	{
+		if (GetCharacterMovement()->IsFalling()) return;
+		FVector Start = GetActorLocation() + FVector(0, 0, 50); 
+		FVector End = Start + (GetActorForwardVector() * 100.0f);
+		
+		USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
+		AActor* ActorItem = Cast<AActor>(ItemInHand);
+		AActor* OwnerActor = nullptr;
+		USceneComponent* RootComp = nullptr;
 
-bool ABaseInteractableCharacter::TryToPickUpItem()
-{
+		if (IsValid(ActorItem))
+		{
+			OwnerActor = ActorItem;
+			RootComp = ActorItem->GetRootComponent();
+		}
+		else if (IsValid(ComponentItem))
+		{
+			OwnerActor = ComponentItem->GetOwner();
+			RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
+		}
+
+		if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
+		
+		FHitResult HitResult(ForceInit);
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+		CollisionParams.AddIgnoredActor(OwnerActor);
+		CollisionParams.bTraceComplex = true;
+
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
+		if (!bHit) // Only drop if nothing was hit
+		{
+			const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
+			FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
+			AnimLocations.Insert(HandLocationPos, 0);
+			const FVector LastKnowHandLocation = HandLocationPos;
+
+			FVector DropLocation = GetActorLocation() + FVector(0, 0, 50) + (GetActorForwardVector() * 100.0f);
+			FVector DropLocalLocation = Xform.InverseTransformPosition(DropLocation);
+			AnimLocations.Insert(DropLocalLocation, 1);
+			AnimLocations.Insert(LastKnowHandLocation, 2);
+		}
+		return; 
+	}
+	
 	FVector HandLocation = MovingModel->GetRightHand()->GetComponentLocation();
 	FPickupCandidate Best;
 	
@@ -111,18 +150,27 @@ bool ABaseInteractableCharacter::TryToPickUpItem()
 	if (Best.Object && Best.Distance <= MinDistanceToPickUpItem)
 	{
 		ClosestObject = Best.Object;
-		return true;
+		const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
+		FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
+		AnimLocations.Insert(HandLocationPos, 0);
+		const FVector LastKnowHandLocation = HandLocationPos;
+
+		USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
+		AActor* ActorItem = Cast<AActor>(ClosestObject);
+		AActor* OwnerActor = nullptr;
+		
+		if (IsValid(ActorItem)) OwnerActor = ActorItem;
+		else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
+		
+		FVector ObjectLocalPos = Xform.InverseTransformPosition(OwnerActor->GetActorLocation());
+		AnimLocations.Insert(ObjectLocalPos, 1);
+		AnimLocations.Insert(LastKnowHandLocation, 2);
 	}
-	return false;
 }
 
 void ABaseInteractableCharacter::DropItemInHand()
 {
 	if (!IsValid(ItemInHand)) return;
-	if (GetCharacterMovement()->IsFalling()) return;
-
-	FVector Start = GetActorLocation() + FVector(0, 0, 50); 
-	FVector End = Start + (GetActorForwardVector() * 100.0f);
 
 	USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
 	AActor* ActorItem = Cast<AActor>(ItemInHand);
@@ -141,35 +189,21 @@ void ABaseInteractableCharacter::DropItemInHand()
 	}
 
 	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
-
-	FHitResult HitResult(ForceInit);
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
-	CollisionParams.AddIgnoredActor(OwnerActor);
-	CollisionParams.bTraceComplex = true;
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
-	if (!bHit) // Only drop if nothing was hit
+	OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	//OwnerActor->SetActorLocation(End);
+	TArray<UPrimitiveComponent*> Primitives;
+	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
+	for (UPrimitiveComponent* Prim : Primitives)
 	{
-		OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		OwnerActor->SetActorLocation(End);
-		TArray<UPrimitiveComponent*> Primitives;
-		OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
-		for (UPrimitiveComponent* Prim : Primitives)
-		{
-			if (!IsValid(Prim)) continue;
-			//Prim->SetSimulatePhysics(true);
-			//Prim->SetEnableGravity(true);
-			Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		}
-		ItemInHand = nullptr;
+		if (!IsValid(Prim)) continue;
+		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+	ItemInHand = nullptr;
 }
 	
-void ABaseInteractableCharacter::PickUpItemToHand(UObject* inSpecificPickUpItem)
+void ABaseInteractableCharacter::PickUpItemToHand(UObject* InSpecificPickUpItem)
 {
-	if (IsValid(inSpecificPickUpItem)) ClosestObject = inSpecificPickUpItem;
+	if (IsValid(InSpecificPickUpItem)) ClosestObject = InSpecificPickUpItem;
 	if (!IsValid(ClosestObject)) return;
 	
 	USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
@@ -253,6 +287,6 @@ void ABaseInteractableCharacter::Jump()
 {
 	Super::Jump();
 	if (MovingModel == nullptr || GetMovementComponent()->IsFalling()) return;
-	MovingModel->SetLegsJumpingAnim();
+	MovingModel->SetJumpingAnim();
 }
 
