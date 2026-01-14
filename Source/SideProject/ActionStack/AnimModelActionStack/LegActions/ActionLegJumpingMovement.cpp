@@ -32,7 +32,7 @@ void UActionLegJumpingMovement::OnUpdate_Implementation(float DeltaTime)
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
 		Leg->AirElapsedTime += DeltaTime;
-		float Rise = FMath::Min(Leg->AirElapsedTime * Leg->AirRiseSpeed, Leg->MaxAirRise);
+		const float Rise = FMath::Min(Leg->AirElapsedTime * Leg->AirRiseSpeed, Leg->MaxAirRise);
 		FVector Goal = Leg->StepTargetPose.Position + FVector(0, 0, Rise);
 		// Smooth blend
 		Leg->TargetLocal = FMath::VInterpTo(Leg->TargetLocal, Goal, DeltaTime, 10.f);

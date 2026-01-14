@@ -14,24 +14,24 @@ UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, AB
 	return Action;
 }
 
-void UActionArmPoint::OnBegin_Implementation(bool bFirstTime)
+void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	AnimLocations.Insert(HandLocationPos, 0);
+	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 	
 	FHitResult Hit;
-	FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
-	FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
+	const FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
+	const FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
 	{
 		PointingLocation = Hit.ImpactPoint;
-		FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
-		AnimLocations.Insert(PointLocation, 1);
+		const FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
+		AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, PointLocation));
 	}
 }
 
@@ -73,8 +73,28 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 		FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
 		MoveArmRef->TargetPose.Position = PointLocation;
-		//MoveArmRef->TargetPose.Rotation = FQuat::Identity;
-		//DrawDebugLine(GetWorld(),Start + (OwnerCharacter->TheMainCameraInScene->GetActorForwardVector() * 100.f),Hit.Location,FColor(255, 0, 0),false, -1, 0,1);
+
+		FVector LocationA = MoveArmRef->ArmParts[1]->GetComponentLocation();
+		FVector LocationB = MoveArmRef->ArmParts[2]->GetComponentLocation();
+		FVector Direction = LocationB - LocationA;
+		 if (!Direction.IsNearlyZero())
+        {
+            Direction.Normalize();
+            FVector NewZAxis = Direction;
+            FVector WorldUpVector = FVector::UpVector; 
+            FVector NewXAxis = FVector::CrossProduct(WorldUpVector, NewZAxis).GetSafeNormal();
+		 	if (NewXAxis.IsNearlyZero())
+            {
+                FVector WorldRightVector = FVector::RightVector;
+                NewXAxis = FVector::CrossProduct(WorldRightVector, NewZAxis).GetSafeNormal();
+            }
+
+            FVector NewYAxis = FVector::CrossProduct(NewZAxis, NewXAxis).GetSafeNormal();
+		 	FMatrix Matrix( FPlane(NewXAxis, 0.f), FPlane(NewYAxis, 0.f), FPlane(NewZAxis, 0.f), FPlane(0.f, 0.f, 0.f, 1.f));
+            FRotator NewRotation = Matrix.Rotator();
+			FQuat RelativeQuat = Xform.InverseTransformRotation(NewRotation.Quaternion());
+		 	MoveArmRef->TargetPose.Rotation = RelativeQuat;
+        }
 	}
 	else
 	{
@@ -83,25 +103,25 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 		FVector PointLocation = Xform.InverseTransformPosition(End);
 		MoveArmRef->TargetPose.Position = PointLocation;
-		//MoveArmRef->TargetPose.Rotation = FQuat::Identity;
 	}
 
-	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
-	AnimLocations.Empty();
+	AnimTransforms.Empty();
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	AnimLocations.Insert(HandLocationPos, 0);
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 
 	FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
-	AnimLocations.Insert(PointLocation, 1);
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, PointLocation));
 	
-	const TTuple<TTuple<TArray<FVector>, float>,FVector> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimLocations, ElapsedTime, PlayRate);
-	MoveArmRef->TargetPose.Position = NewValues.Value;
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
+	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
 }
 
 bool UActionArmPoint::IsDone_Implementation() const
@@ -114,12 +134,11 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
 
 	constexpr float EachSpawnDistance = 25.0f;
-	FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
-	FVector Direction = (InHitLocation - Start).GetSafeNormal();
+	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
+
+	const float TotalDistance = FVector::Distance(InHitLocation, Start);
+	const int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
 	
-	float TotalDistance = FVector::Distance(InHitLocation, Start);
-	int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
-	MoveArmRef->TargetPose.Rotation = FRotationMatrix::MakeFromZ(Direction).ToQuat();	
 	// Spawn new indicators if we need more
 	while (PointingIndicators.Num() < RequiredCount)
 	{
@@ -145,8 +164,7 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 		Mesh->SetWorldScale3D(FVector(0.1f));
 		Mesh->RegisterComponent();
 		
-		UMaterialInterface* OutlineSeeThrough = nullptr;
-		OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
+		UMaterialInterface* OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
 		Mesh->SetMaterial(0,  OutlineSeeThrough);
 		
 		PointingIndicators.Add(NewIndicator);
@@ -173,7 +191,7 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 	{
 		UMaterialInterface* OutlineObject = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineObject.Mat_OutlineObject"));
 
-		AActor* ActorRef = InPointingAtItemActor->GetOwner();
+		const AActor* ActorRef = InPointingAtItemActor->GetOwner();
 		TArray<UStaticMeshComponent*> Components;
 		ActorRef->GetComponents<UStaticMeshComponent>(Components);
 		for (UStaticMeshComponent* StaticMeshComponent : Components)
@@ -188,7 +206,7 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 	{
 		if (IsValid(ActorPointedAt))
 		{
-			AActor* ActorRef = ActorPointedAt->GetOwner();
+			const AActor* ActorRef = ActorPointedAt->GetOwner();
 			TArray<UStaticMeshComponent*> Components;
 			ActorRef->GetComponents<UStaticMeshComponent>(Components);
 			for (UStaticMeshComponent* StaticMeshComponent : Components)

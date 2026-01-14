@@ -26,7 +26,7 @@ private:
 	UMoveArm* MoveOtherArmRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 	ABaseInteractableCharacter* AIOwnerCharacter = nullptr;
-	TArray<FVector> AnimLocations;
+	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
 	float PlayRate = 0.1f;
 

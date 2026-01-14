@@ -9,7 +9,7 @@
 
 AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
 
-void AMovingModel::InitSceneComponents()
+void AMovingModel::InitSceneComponents() // This one is called through UAnimModelActionStack
 {
 	// Get Hips
 	Hips = GenericCalls::FindChildByExactName(this, TEXT("Hips"));
@@ -35,14 +35,13 @@ void AMovingModel::InitSceneComponents()
 void AMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
-	//InitSceneComponents();
 	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
-	float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
-	float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
+	const float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
+	const float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
 	BaseHipHeight = HipLocalZ - FootLocalZ;
 }
 
-void AMovingModel::Tick(float DeltaTime)
+void AMovingModel::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//DrawDebugJoints();
@@ -52,12 +51,12 @@ void AMovingModel::Tick(float DeltaTime)
 void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
-	float HipSway =  GetHipSway();
+	const float HipSway =  GetHipSway();
 	
 	//Apply New Hip Location
-	float DesiredHipHeight = BaseHipHeight;
-	float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
-	FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSway;
+	const float DesiredHipHeight = BaseHipHeight;
+	const float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
+	const FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSway;
 	Hips->SetRelativeLocation(NewHipLocalPos);
 }
 
@@ -65,14 +64,14 @@ float AMovingModel::GetHipSway()
 {
 	float HipSway = 0.0f;
 	//Leg Logic
-	for (FLimbChain& Leg : Legs)
+	for (const FLimbChain& Leg : Legs)
 	{
-		UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
+		const UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
 		if (!IsValid(UpperLeg)) continue;
 		if (UpperLeg->IsStepping())
 		{
-			float Lift = UpperLeg->GetLiftAmount();
-			bool IsRight = UpperLeg->GetName().EndsWith(TEXT("_R"));
+			const float Lift = UpperLeg->GetLiftAmount();
+			const bool IsRight = UpperLeg->GetName().EndsWith(TEXT("_R"));
 			HipSway = Lift * (IsRight ? 1.f : -1.f);
 		}
 	}
@@ -154,24 +153,24 @@ void AMovingModel::DrawDebugJoints()
 		else  Pos_Hand_L = Arm.End->GetComponentLocation();
 	}
 
-	DrawDebugSphere(GetWorld(), Pos_Hips, 				8.f, 12, FColor::Cyan);
-	DrawDebugSphere(GetWorld(), Pos_Chest, 				8.f, 12, FColor::Cyan);
+	DrawDebugSphere(GetWorld(), Pos_Hips,8.f, 12, FColor::Cyan);
+	DrawDebugSphere(GetWorld(), Pos_Chest, 8.f, 12, FColor::Cyan);
 
-	DrawDebugSphere(GetWorld(), Pos_UpperLeg_R, 	8.f, 12, FColor::Green);
-	DrawDebugSphere(GetWorld(), Pos_Knee_R, 			8.f, 12, FColor::Emerald);
-	DrawDebugSphere(GetWorld(), Pos_Foot_R, 			8.f, 12, FColor::Purple);
+	DrawDebugSphere(GetWorld(), Pos_UpperLeg_R,8.f, 12, FColor::Green);
+	DrawDebugSphere(GetWorld(), Pos_Knee_R, 8.f, 12, FColor::Emerald);
+	DrawDebugSphere(GetWorld(), Pos_Foot_R, 8.f, 12, FColor::Purple);
 
-	DrawDebugSphere(GetWorld(), Pos_UpperLeg_L, 	8.f, 12, FColor::Green);
-	DrawDebugSphere(GetWorld(), Pos_Knee_L, 			8.f, 12, FColor::Emerald);
-	DrawDebugSphere(GetWorld(), Pos_Foot_L, 			8.f, 12, FColor::Purple);
+	DrawDebugSphere(GetWorld(), Pos_UpperLeg_L, 8.f, 12, FColor::Green);
+	DrawDebugSphere(GetWorld(), Pos_Knee_L, 8.f, 12, FColor::Emerald);
+	DrawDebugSphere(GetWorld(), Pos_Foot_L, 8.f, 12, FColor::Purple);
 
-	DrawDebugSphere(GetWorld(), Pos_UpperArm_R, 	8.f, 12, FColor::Yellow);
-	DrawDebugSphere(GetWorld(), Pos_Elbow_R, 			8.f, 12, FColor::Orange);
-	DrawDebugSphere(GetWorld(), Pos_Hand_R, 			8.f, 12, FColor::Red);
+	DrawDebugSphere(GetWorld(), Pos_UpperArm_R, 8.f, 12, FColor::Yellow);
+	DrawDebugSphere(GetWorld(), Pos_Elbow_R, 8.f, 12, FColor::Orange);
+	DrawDebugSphere(GetWorld(), Pos_Hand_R, 8.f, 12, FColor::Red);
 
-	DrawDebugSphere(GetWorld(), Pos_UpperArm_L, 	8.f, 12, FColor::Yellow);
-	DrawDebugSphere(GetWorld(), Pos_Elbow_L, 			8.f, 12, FColor::Orange);
-	DrawDebugSphere(GetWorld(), Pos_Hand_L, 			8.f, 12, FColor::Red);
+	DrawDebugSphere(GetWorld(), Pos_UpperArm_L, 8.f, 12, FColor::Yellow);
+	DrawDebugSphere(GetWorld(), Pos_Elbow_L, 8.f, 12, FColor::Orange);
+	DrawDebugSphere(GetWorld(), Pos_Hand_L, 8.f, 12, FColor::Red);
 }
 void AMovingModel::DrawDebugLimbs()
 {
@@ -270,7 +269,7 @@ TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const F
 
 USceneComponent* AMovingModel::GetRightHand() const
 {
-	for(FLimbChain Arm : Arms)
+	for(const FLimbChain Arm : Arms)
 	{
 		if (Arm.End->GetName().EndsWith(TEXT("_R"))) return Arm.End;
 	}
@@ -279,7 +278,7 @@ USceneComponent* AMovingModel::GetRightHand() const
 
 USceneComponent* AMovingModel::GetLeftHand() const
 {
-	for(FLimbChain Arm : Arms)
+	for(const FLimbChain Arm : Arms)
 	{
 		if (Arm.End->GetName().EndsWith(TEXT("_L"))) return Arm.End;
 	}
@@ -288,7 +287,7 @@ USceneComponent* AMovingModel::GetLeftHand() const
 
 UMoveArm* AMovingModel::GetRightArm() const
 {
-	for(FLimbChain Arm : Arms)
+	for(const FLimbChain Arm : Arms)
 	{
 		if (Arm.Upper->GetName().EndsWith(TEXT("_R"))) return Cast<UMoveArm>(Arm.Upper);
 	}
@@ -297,7 +296,7 @@ UMoveArm* AMovingModel::GetRightArm() const
 
 UMoveArm* AMovingModel::GetLeftArm() const
 {
-	for(FLimbChain Arm : Arms)
+	for(const FLimbChain Arm : Arms)
 	{
 		if (Arm.Upper->GetName().EndsWith(TEXT("_L"))) return Cast<UMoveArm>(Arm.Upper);
 	}
@@ -307,7 +306,7 @@ UMoveArm* AMovingModel::GetLeftArm() const
 TArray<UMoveLeg*> AMovingModel::GetLegs()
 {
 	TArray<UMoveLeg*> LegsTops;
-	for(FLimbChain Leg : Legs)
+	for(const FLimbChain Leg : Legs)
 	{
 		LegsTops.Add(Cast<UMoveLeg>(Leg.Upper));
 	}
@@ -317,7 +316,7 @@ TArray<UMoveLeg*> AMovingModel::GetLegs()
 TArray<UMoveArm*> AMovingModel::GetArms()
 {
 	TArray<UMoveArm*> ArmsTops;
-	for(FLimbChain Arm : Arms)
+	for(const FLimbChain Arm : Arms)
 	{
 		ArmsTops.Add(Cast<UMoveArm>(Arm.Upper));
 	}

@@ -21,7 +21,7 @@ protected:
 
 public:
 	//Actions
-	void OnAddActionMoveTo(FVector InMoveToLocation, bool InNeedIndicator);
+	void OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator);
 	void OnAddActionPickUp();
 	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
 

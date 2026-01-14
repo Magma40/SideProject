@@ -14,7 +14,7 @@ UActionContinuousMoveTo* UActionContinuousMoveTo::Create(UObject* Outer, ABaseIn
 	return Action;
 }
 
-void UActionContinuousMoveTo::OnBegin_Implementation(bool bFirstTime)
+void UActionContinuousMoveTo::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 
@@ -55,7 +55,7 @@ void UActionContinuousMoveTo::StartMove() const
 	}
 }
 
-void UActionContinuousMoveTo::OnUpdate_Implementation(float DeltaTime)
+void UActionContinuousMoveTo::OnUpdate_Implementation(const float DeltaTime)
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	if (OtherCharacter->Sprinting) CompanionCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionCharacter->MaxSprintSpeed;

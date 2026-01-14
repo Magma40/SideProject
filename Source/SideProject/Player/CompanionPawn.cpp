@@ -19,7 +19,7 @@ void ACompanionPawn::BeginPlay()
 	}
 }
 
-void ACompanionPawn::Tick(float DeltaTime)
+void ACompanionPawn::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }

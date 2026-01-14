@@ -9,7 +9,7 @@ UActionPickUpItem* UActionPickUpItem::Create(UObject* Outer, ABaseInteractableCh
 	return Action;
 }
 
-void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)
+void UActionPickUpItem::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	if (!CompanionCharacter) return;
@@ -18,7 +18,7 @@ void UActionPickUpItem::OnBegin_Implementation(bool bFirstTime)
 }
 
 
-void UActionPickUpItem::OnUpdate_Implementation(float DeltaTime) 
+void UActionPickUpItem::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 }

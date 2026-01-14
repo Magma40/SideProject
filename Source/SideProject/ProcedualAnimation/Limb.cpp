@@ -19,15 +19,15 @@ void ULimb::BeginPlay()
 	}
 }
 
-void ULimb::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void ULimb::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if(!IsValid(AttachedParent) && !IsValid(AttachedChild)) return;;
-	FVector ParentPos = AttachedParent->GetComponentLocation();
-	FVector ChildPos = AttachedChild->GetComponentLocation();
+	const FVector ParentPos = AttachedParent->GetComponentLocation();
+	const FVector ChildPos = AttachedChild->GetComponentLocation();
 
-	FVector MidPoint = (ParentPos + ChildPos) * 0.5f;
-	FVector Direction = (ParentPos - ChildPos).GetSafeNormal();
+	const FVector MidPoint = (ParentPos + ChildPos) * 0.5f;
+	const FVector Direction = (ParentPos - ChildPos).GetSafeNormal();
 	FRotator LookAtRotation = Direction.Rotation();
 	LookAtRotation += FRotator(90, 0, 0);
 	

@@ -9,12 +9,12 @@ UActionAnimModelMovingMovement* UActionAnimModelMovingMovement::Create(UObject* 
 	return Action;
 }
 
-void UActionAnimModelMovingMovement::OnBegin_Implementation(bool bFirstTime)
+void UActionAnimModelMovingMovement::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 }
 
-void UActionAnimModelMovingMovement::OnUpdate_Implementation(float DeltaTime) 
+void UActionAnimModelMovingMovement::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	MovingModelRef->UpdateHips();

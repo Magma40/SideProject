@@ -166,6 +166,6 @@ public:
 	/* Play easing function with output between 0.0 - 1.0 */
 	void PlayEasingFunc(EEasingFunc::Type EasingType, float EasingExp, float InPlayRate, const TFunction<void(float)>& Func);
 
-	static TTuple<TTuple<TArray<FVector>, float>,FVector> CustomAnim( float DeltaTime, TArray<FVector> TheLocations, float ElapsedTime, float PlayRate);
+	static TTuple<TTuple<TArray<FTransform>, float>,FTransform> CustomAnim( float DeltaTime, TArray<FTransform> TheLocations, float ElapsedTime, float PlayRate);
 	static TArray<FVector> GenerateInBetweenAnimPositions(TArray<FVector> TheLocations, int HowManyIndexes);
 };

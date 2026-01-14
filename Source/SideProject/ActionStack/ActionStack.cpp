@@ -11,13 +11,13 @@ void UActionStack::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UActionStack::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateActions(DeltaTime);
 }
 
- void UActionStack::UpdateActions(float DeltaTime)
+ void UActionStack::UpdateActions(const float DeltaTime)
 {
 	if (IsEmpty()) return;
 
@@ -38,7 +38,7 @@ void UActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	if (CurrentAction && IsValid(CurrentAction.GetObject()))
 	{
 		TScriptInterface<IActionInterface> SafeAction = CurrentAction;
-		SafeAction->Execute_OnUpdate(SafeAction.GetObject(), DeltaTime); // Changing this while being updated causes "Exception 0x80000003"
+		SafeAction->Execute_OnUpdate(SafeAction.GetObject(), DeltaTime);
 
 		// Action may have ended or been destroyed during update
 		if (SafeAction && IsValid(SafeAction.GetObject()))

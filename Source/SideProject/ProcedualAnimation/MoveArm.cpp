@@ -46,7 +46,7 @@ void UMoveArm::BeginPlay() //And now my heart is beating like saddest metronome!
 	Init();
 }
 
-void UMoveArm::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMoveArm::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateIK();
@@ -109,8 +109,11 @@ void UMoveArm::UpdateIK()
 	FVector HandLocalToElbow = Elbow->GetComponentTransform().InverseTransformPosition(HandWorldPos);
 	Hand->SetRelativeLocation(HandLocalToElbow);
 	
-	FVector Direction = (HandLocalToElbow - NewElbowPos).GetSafeNormal();
-	Elbow->SetRelativeRotation(Direction.ToOrientationQuat());
+	FVector ElbowToHandLS  = (FixedHandPos  - NewElbowPos).GetSafeNormal();
+	FVector PlaneNormalLS = FVector::CrossProduct(ElbowToHandLS, PoleDirLS).GetSafeNormal();
+	FQuat ElbowRotation = FRotationMatrix::MakeFromXZ(ElbowToHandLS, PlaneNormalLS).ToQuat();
+
+	//Elbow->SetRelativeRotation(ElbowRotation);
 	Hand->SetRelativeRotation(TargetPose.Rotation);
 }
 
@@ -120,7 +123,6 @@ bool UMoveArm::ShouldHoldUpHands()
 	FVector StartWorld = UpperArmWorld.GetLocation();
 	FVector EndWorld   = UpperArmWorld.GetLocation()  + GetRightVector() * 75;
 	TargetPose.Position = FVector(0,25,  -50);
-	TargetPose.Rotation = FQuat::Identity;
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -141,7 +143,7 @@ bool UMoveArm::ShouldHoldUpHands()
 		FVector UpLocal = UpperArmWorld.InverseTransformVector(FVector::UpVector);
 		FVector NormalLocal = UpperArmWorld.InverseTransformVector(Hit.ImpactNormal);
 
-		TargetPose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
+		//TargetPose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
 		return true;
 	}
 	FVector WorldPos = UpperArmWorld.TransformPosition(TargetPose.Position);

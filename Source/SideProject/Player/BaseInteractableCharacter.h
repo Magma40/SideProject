@@ -55,7 +55,7 @@ private:
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 75.0f;
 	USceneComponent* BackHolster = nullptr;
 
-	TArray<FVector> AnimLocations;
+	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
 	float PlayRate = 1.0f;
 

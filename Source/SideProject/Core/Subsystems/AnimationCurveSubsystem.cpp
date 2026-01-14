@@ -4,7 +4,7 @@
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimationCurveSubsystem)
 
-void UAnimationCurveSubsystem::Tick(float DeltaTime)
+void UAnimationCurveSubsystem::Tick(const float DeltaTime)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(CurveAnimationsTick)
 	
@@ -72,19 +72,21 @@ TStatId UAnimationCurveSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(AnimationCurveSubsystem, STATGROUP_Tickables);
 }
 
-TTuple<TTuple<TArray<FVector>, float>,FVector> UAnimationCurveSubsystem::CustomAnim(float DeltaTime, TArray<FVector> TheLocations, float ElapsedTime, float PlayRate)
+TTuple<TTuple<TArray<FTransform>, float>,FTransform> UAnimationCurveSubsystem::CustomAnim(float DeltaTime, TArray<FTransform> TheTransforms, float ElapsedTime, float PlayRate)
 {
-	PlayRate = PlayRate / TheLocations.Num();
+	PlayRate = PlayRate / TheTransforms.Num();
 	ElapsedTime += DeltaTime;
 	const float Alpha = FMath::Clamp(ElapsedTime / PlayRate, 0.f, 1.f);
-	FVector NewLocation = FMath::Lerp(TheLocations[0], TheLocations[1], Alpha);
-
+	const FVector NewLocation = FMath::Lerp(TheTransforms[0].GetLocation(), TheTransforms[1].GetLocation(), Alpha);
+	const FQuat NewRotation = FQuat::Slerp(TheTransforms[0].GetRotation(), TheTransforms[1].GetRotation(), Alpha);
+	FTransform NewTransform = FTransform(NewRotation, NewLocation);
+	
 	if (Alpha >= 1.f - KINDA_SMALL_NUMBER)
 	{
-		TheLocations.RemoveAt(0);
+		TheTransforms.RemoveAt(0);
 		ElapsedTime = 0.0f;
 	}
-	return MakeTuple(MakeTuple(TheLocations, ElapsedTime),NewLocation);
+	return MakeTuple(MakeTuple(TheTransforms, ElapsedTime),NewTransform);
 }
 
 TArray<FVector> UAnimationCurveSubsystem::GenerateInBetweenAnimPositions(TArray<FVector> TheLocations, int HowManyIndexes)

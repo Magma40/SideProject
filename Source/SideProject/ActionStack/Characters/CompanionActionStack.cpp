@@ -25,7 +25,7 @@ void UCompanionActionStack::Init()
 	OwnerCharacter = Cast<ABaseInteractableCharacter>(GetOwner());
 }
 
-void UCompanionActionStack::OnAddActionMoveTo(FVector InMoveToLocation, bool InNeedIndicator)
+void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator)
 {
 	if (!OwnerCharacter) return;
 	UActionMoveTo* ActionMoveTo = UActionMoveTo::Create(this, OwnerCharacter, InMoveToLocation, InNeedIndicator);

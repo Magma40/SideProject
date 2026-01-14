@@ -8,12 +8,12 @@ UActionArmJumpingMovement* UActionArmJumpingMovement::Create(UObject* Outer, UMo
 	return Action;
 }
 
-void UActionArmJumpingMovement::OnBegin_Implementation(bool bFirstTime)
+void UActionArmJumpingMovement::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 }
 
-void UActionArmJumpingMovement::OnUpdate_Implementation(float DeltaTime) 
+void UActionArmJumpingMovement::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 }

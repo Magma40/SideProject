@@ -12,17 +12,17 @@ UActionAnimModelJumpingMovement* UActionAnimModelJumpingMovement::Create(UObject
 	return Action;
 }
 
-void UActionAnimModelJumpingMovement::OnBegin_Implementation(bool bFirstTime)
+void UActionAnimModelJumpingMovement::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 }
 
-void UActionAnimModelJumpingMovement::OnUpdate_Implementation(float DeltaTime) 
+void UActionAnimModelJumpingMovement::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	if (Cast<ACompanionPawn>(OwnerCharacter))
 	{
-		FVector PlayerDirVelocity = OtherOwnerCharacter->GetVelocity();
+		const FVector PlayerDirVelocity = OtherOwnerCharacter->GetVelocity();
 		OwnerCharacter->AddMovementInput(PlayerDirVelocity, DeltaTime);
 		AAIController* AIController = OwnerCharacter->GetController<AAIController>();
 		if (!AIController) return;

@@ -13,22 +13,22 @@ UActionArmToHolster* UActionArmToHolster::Create(UObject* Outer, UMoveArm* InMov
 	return Action;
 }
 
-void UActionArmToHolster::OnBegin_Implementation(bool bFirstTime)
+void UActionArmToHolster::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	FVector HolsterLocationPos = Xform.InverseTransformPosition(BackHolsterRef->GetComponentLocation());
-	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	FVector MidOffset = HandLocationPos + FVector(-10.f, -15.f, 75.f); // offset
+	const FTransform HandTransform =  FTransform(FRotator(0, 0, 0),  Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation()));
+	const FTransform MidOffset =  FTransform(FRotator(0, 0, -90),  HandTransform.GetLocation() + FVector(-20.f, -15.f, 75.f));
+	const FTransform HolsterTransform =  FTransform( FRotator(0, 0, -180),   Xform.InverseTransformPosition(BackHolsterRef->GetComponentLocation()));
 
 	//To Holster
-	AnimLocations.Insert(HandLocationPos, 0);
-	AnimLocations.Insert(MidOffset, 1);
-	AnimLocations.Insert(HolsterLocationPos, 2);
+	AnimTransforms.Add(HandTransform);
+	AnimTransforms.Add(MidOffset);
+	AnimTransforms.Add(HolsterTransform);
 
 	//From Holster
-	AnimLocations.Insert(MidOffset, 3);
-	AnimLocations.Insert(HandLocationPos, 4);
+	AnimTransforms.Add(MidOffset);
+	AnimTransforms.Add(HandTransform);
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
@@ -39,23 +39,26 @@ void UActionArmToHolster::OnEnd_Implementation()
 }
 
 //Discovering Tuple and Pairs is the best thing that has happened to me
-void UActionArmToHolster::OnUpdate_Implementation(float DeltaTime) 
+void UActionArmToHolster::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
 
-	const int BeforeMoveNum = AnimLocations.Num();
-	const TTuple<TTuple<TArray<FVector>, float>,FVector> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimLocations, ElapsedTime, PlayRate);
-	MoveArmRef->TargetPose.Position = NewValues.Value;
-	AnimLocations = NewValues.Key.Key;
+	const int BeforeMoveNum = AnimTransforms.Num();
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
+	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
+	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 
-	if (BeforeMoveNum != AnimLocations.Num())
+	UE_LOG(LogTemp, Error, TEXT("Current Rotation Is - %s"),  *MoveArmRef->ArmParts[2]->GetComponentRotation().ToString());
+
+	if (BeforeMoveNum != AnimTransforms.Num() && AnimTransforms.Num() == 3)
 	{
 		OwnerCharacter->TryToInteractWithBackHolster();
 	}
@@ -63,5 +66,5 @@ void UActionArmToHolster::OnUpdate_Implementation(float DeltaTime)
 
 bool UActionArmToHolster::IsDone_Implementation() const
 {
-	return AnimLocations.Num() <= 1;
+	return AnimTransforms.Num() <= 1;
 }

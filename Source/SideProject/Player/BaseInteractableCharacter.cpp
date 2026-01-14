@@ -33,30 +33,31 @@ void ABaseInteractableCharacter::BeginPlay()
 }
 
 // Called every frame
-void ABaseInteractableCharacter::Tick(float DeltaTime)
+void ABaseInteractableCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (AnimLocations.IsEmpty()) return;
-	
-	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	if (AnimTransforms.IsEmpty()) return;
+
+	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - Tick - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
-	const int BeforeMoveNum = AnimLocations.Num();
-	const TTuple<TTuple<TArray<FVector>, float>,FVector> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimLocations, ElapsedTime, PlayRate);
-	MovingModel->GetRightArm()->TargetPose.Position = NewValues.Value;
-	AnimLocations = NewValues.Key.Key;
+	const int BeforeMoveNum = AnimTransforms.Num();
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	MovingModel->GetRightArm()->TargetPose.Position = NewValues.Value.GetLocation();
+	MovingModel->GetRightArm()->TargetPose.Rotation = NewValues.Value.GetRotation();
+	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 
-	if (AnimLocations.Num() % 2 == 0 && BeforeMoveNum != AnimLocations.Num()) // Hard coding ):
+	if (AnimTransforms.Num() % 2 == 0 && BeforeMoveNum != AnimTransforms.Num()) // Hard coding ):
 	{
 		if (IsValid(ItemInHand)) DropItemInHand();
 		else PickUpItemToHand(ClosestObject);
 	}
-	else if (AnimLocations.Num() < 2) 	AnimLocations.Empty();
+	else if (AnimTransforms.Num() < 2) 	AnimTransforms.Empty();
 }
 
 void ABaseInteractableCharacter::TryToPickUpItem()
@@ -97,13 +98,13 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		{
 			const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
 			FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
-			AnimLocations.Insert(HandLocationPos, 0);
+			AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, HandLocationPos));
 			const FVector LastKnowHandLocation = HandLocationPos;
 
 			FVector DropLocation = GetActorLocation() + FVector(0, 0, 50) + (GetActorForwardVector() * 100.0f);
 			FVector DropLocalLocation = Xform.InverseTransformPosition(DropLocation);
-			AnimLocations.Insert(DropLocalLocation, 1);
-			AnimLocations.Insert(LastKnowHandLocation, 2);
+			AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, DropLocalLocation));
+			AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, LastKnowHandLocation));
 		}
 		return; 
 	}
@@ -152,7 +153,7 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		ClosestObject = Best.Object;
 		const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
 		FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
-		AnimLocations.Insert(HandLocationPos, 0);
+		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, HandLocationPos));
 		const FVector LastKnowHandLocation = HandLocationPos;
 
 		USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
@@ -163,8 +164,8 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
 		
 		FVector ObjectLocalPos = Xform.InverseTransformPosition(OwnerActor->GetActorLocation());
-		AnimLocations.Insert(ObjectLocalPos, 1);
-		AnimLocations.Insert(LastKnowHandLocation, 2);
+		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, ObjectLocalPos));
+		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, LastKnowHandLocation));
 	}
 }
 
@@ -190,7 +191,6 @@ void ABaseInteractableCharacter::DropItemInHand()
 
 	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
 	OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	//OwnerActor->SetActorLocation(End);
 	TArray<UPrimitiveComponent*> Primitives;
 	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
 	for (UPrimitiveComponent* Prim : Primitives)
@@ -205,10 +205,10 @@ void ABaseInteractableCharacter::PickUpItemToHand(UObject* InSpecificPickUpItem)
 {
 	if (IsValid(InSpecificPickUpItem)) ClosestObject = InSpecificPickUpItem;
 	if (!IsValid(ClosestObject)) return;
-	
-	USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
-	AActor* ActorItem = Cast<AActor>(ClosestObject);
-	AActor* OwnerActor = nullptr;
+
+	const USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
+	const AActor* ActorItem = Cast<AActor>(ClosestObject);
+	const AActor* OwnerActor = nullptr;
 	USceneComponent* RootComp = nullptr;
 
 	if (IsValid(ActorItem))
@@ -230,7 +230,6 @@ void ABaseInteractableCharacter::PickUpItemToHand(UObject* InSpecificPickUpItem)
 	{
 		if (!IsValid(Prim)) continue;
 		Prim->SetSimulatePhysics(false);
-		//Prim->SetEnableGravity(false);
 		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
@@ -250,7 +249,7 @@ void ABaseInteractableCharacter::PickUpItemToHand(UObject* InSpecificPickUpItem)
 
 void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this too fast will break it, resulting mostly with BackItemHolster being valid
 {
-	float Distance =	UE::Geometry::Distance(MovingModel->GetRightHand()->GetComponentLocation(), BackHolster->GetComponentLocation());
+	const float Distance =	UE::Geometry::Distance(MovingModel->GetRightHand()->GetComponentLocation(), BackHolster->GetComponentLocation());
 	if (Distance > 50) return;
 	if (IsValid(BackItemHolster) && !IsValid(ItemInHand))
 	{
@@ -266,7 +265,7 @@ void ABaseInteractableCharacter::AttachToBackHolster()
 {
 	if (!IsValid(ItemInHand)) return;
 
-	USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
+	const USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
 	AActor* ActorItem = Cast<AActor>(ItemInHand);
 	AActor* OwnerActor = nullptr;
 

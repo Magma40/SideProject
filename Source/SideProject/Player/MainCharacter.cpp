@@ -48,7 +48,7 @@ void AMainCharacter::BeginPlay()
 	DefaultMaxSprintSpeed = MaxSprintSpeed;
 }
 
-void AMainCharacter::Tick(float DeltaTime)
+void AMainCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,FString::Printf(TEXT("bWasJumping = %d"), bWasJumping));	uint8 bIsFallingNow = GetCharacterMovement()->IsFalling();

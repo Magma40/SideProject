@@ -44,16 +44,16 @@ void UMoveLeg::BeginPlay() // Please come home, because I miss you Gary!!
 	Init();
 }
 
-void UMoveLeg::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMoveLeg::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateIK(DeltaTime);
 }
 
-void UMoveLeg::UpdateStepping(float DeltaTime)
+void UMoveLeg::UpdateStepping(const float DeltaTime)
 {
 	StepElapsed += DeltaTime;
-	float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.f, 1.f);
+	const float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.f, 1.f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
 	
 	TargetPose.Position = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) + FVector(0, 0, LiftAmount);
@@ -75,12 +75,12 @@ bool UMoveLeg::ShouldStep() const
 {
 	if (bIsJumping || bIsStepping) return false;
 	if (GetWorld()->TimeSeconds - LastStepEndTime < StepCooldown) return false;
-	
-	FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition.Position);
-	float Dist = FVector::Dist(GetGroundPose().Position, LocalLockedFootPos);
+
+	const FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition.Position);
+	const float Dist = FVector::Dist(GetGroundPose().Position, LocalLockedFootPos);
 	if (Dist < StepTrigger) return false;
 	
-	for (UMoveLeg* L : OtherLegs)
+	for (const UMoveLeg* L : OtherLegs)
 	{
 		if (L && L->IsStepping())
 		{

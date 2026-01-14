@@ -11,20 +11,21 @@ UActionArmWave* UActionArmWave::Create(UObject* Outer, UMoveArm* InMoveArm, ABas
 	return Action;
 }
 
-void UActionArmWave::OnBegin_Implementation(bool bFirstTime)
+void UActionArmWave::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	FVector MidOffset = HandLocationPos + FVector(-30.f, -25.f, 125.f); // offset
-	FVector MidOffset2 = HandLocationPos + FVector(+20.f, -25.f, 125.f); // offset
-	FVector MidOffset3 = HandLocationPos + FVector(0.0f, 0.0f, 125.f); // offset
-	
-	AnimLocations.Insert(HandLocationPos, 0);
-	AnimLocations.Insert(MidOffset, 1);
-	AnimLocations.Insert(MidOffset2, 2);
-	AnimLocations.Insert(MidOffset3, 3);
-	AnimLocations.Insert(HandLocationPos, 4);
+	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
+	const FVector MidOffset = HandLocationPos + FVector(-30.f, -25.f, 125.f); // offset
+	const FVector MidOffset2 = HandLocationPos + FVector(+20.f, -25.f, 125.f); // offset
+	const FVector MidOffset3 = HandLocationPos + FVector(0.0f, 0.0f, 125.f); // offset
+
+
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset));
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset2));
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset3));
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
@@ -34,23 +35,24 @@ void UActionArmWave::OnEnd_Implementation()
 	MoveArmRef->bEnableArmConstraints = true;
 }
 
-void UActionArmWave::OnUpdate_Implementation(float DeltaTime) 
+void UActionArmWave::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
 
-	const TTuple<TTuple<TArray<FVector>, float>,FVector> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimLocations, ElapsedTime, PlayRate);
-	MoveArmRef->TargetPose.Position = NewValues.Value;
-	AnimLocations = NewValues.Key.Key;
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
+	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
+	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 }
 
 bool UActionArmWave::IsDone_Implementation() const
 {
-	return AnimLocations.Num() <= 1;
+	return AnimTransforms.Num() <= 1;
 }

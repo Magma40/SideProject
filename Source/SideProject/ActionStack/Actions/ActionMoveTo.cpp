@@ -13,7 +13,7 @@ UActionMoveTo* UActionMoveTo::Create(UObject* Outer, ABaseInteractableCharacter*
 	return Action;
 }
 
-void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
+void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	bMoveCompleted = false;
@@ -47,6 +47,7 @@ void UActionMoveTo::OnBegin_Implementation(bool bFirstTime)
 	}
 
 	if (!bNeedIndicator) return;
+	
 	//SpawnIndicator
 	IndicatorActor = GetWorld()->SpawnActor<AActor>();
 	IndicatorActor->SetActorLabel("MoveToIndicator");
@@ -81,7 +82,7 @@ void UActionMoveTo::OnUpdate_Implementation(const float DeltaTime)
 {
 	Super::OnUpdate_Implementation(DeltaTime);
 	if (!bNeedIndicator) return;
-	float UpAndDown = TargetLocation.Z + FMath::Sin(GetWorld()->GetTimeSeconds() * 5.0f) * 25.0f;
+	const float UpAndDown = TargetLocation.Z + FMath::Sin(GetWorld()->GetTimeSeconds() * 5.0f) * 25.0f;
 	IndicatorActor->SetActorLocation(FVector(IndicatorActor->GetActorLocation().X, IndicatorActor->GetActorLocation().Y, UpAndDown));
 }
 
@@ -104,7 +105,7 @@ void UActionMoveTo::OnEnd_Implementation()
 void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	bMoveCompleted = true;
-	if (AAIController* AIController = CompanionCharacter->GetController<AAIController>())
+	if (const AAIController* AIController = CompanionCharacter->GetController<AAIController>())
 	{
 		if (UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent())
 		{

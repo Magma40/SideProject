@@ -31,9 +31,9 @@ void UAnimModelActionStack::TickComponent(float DeltaTime, ELevelTick TickType, 
 		float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());
 		if (HandDistances > MinDistanceToHoldHands)
 		{
-			TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
-			TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
-			TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
+			const TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
+			const TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
+			const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
 			ArmActionStack_LRef->RemoveAction(PlayerHandHoldingAction);
 			CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
 			CompanionOwnerCharacter->GetCompanionActionStack()->RemoveAction(ActionInterfaceContinuousMoveTo);
@@ -113,8 +113,8 @@ void UAnimModelActionStack::PushJumpingActionMovement()
 	UActionAnimModelJumpingMovement* JumpingMovement = UActionAnimModelJumpingMovement::Create(this, OwnerCharacter, CompanionOwnerCharacter);
 	this->PushAction(JumpingMovement);
 	if (OwnerCharacter->GetCompanionActionStack()) return;
-	
-	TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
+
+	const TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
 	if (!ActionInterfaceHandingHolding) return;
 	
 	if (ArmActionStack_LRef->Contains(ActionInterfaceHandingHolding))
@@ -143,10 +143,10 @@ void UAnimModelActionStack::PushHandHoldingActionMovement()
 	if (OwnerCharacter->GetCompanionActionStack()) return;
 	if (CompanionOwnerCharacter->GetItemInHand() != nullptr) return;
 
-	float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());
+	const float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());
 	if (HandDistances > MinDistanceToHoldHands) return;
 
-	TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
+	const TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(CompanionOwnerCharacter->GetCompanionActionStack()->GetAction<UActionContinuousMoveTo>());
 	if (!CompanionOwnerCharacter->GetCompanionActionStack()->Contains(ActionInterfaceContinuousMoveTo))
 	{
 		ArmActionStack_LRef->AddHandHoldingAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetArm());
@@ -155,8 +155,8 @@ void UAnimModelActionStack::PushHandHoldingActionMovement()
 	}
 	else
 	{
-		TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
-		TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
+		const TScriptInterface<IActionInterface> CompanionHandHoldingAction = GetInterfacedAction(CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>());
+		const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
 		ArmActionStack_LRef->RemoveAction(PlayerHandHoldingAction);
 		CompanionOwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(CompanionHandHoldingAction);
 		CompanionOwnerCharacter->GetCompanionActionStack()->RemoveAction(ActionInterfaceContinuousMoveTo);

@@ -55,9 +55,9 @@ void UArmActionStack::AddWaveAction()
 	
 	if (OwnerCharacter->GetItemInHand() != nullptr) return;
 	OwnerCompanion->GetCompanionActionStack()->ClearAllActions();
-	if (UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
+	if (const UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
 	{
-		FVector PointingLocationRef = PointAction->GetPointingLocation();
+		const FVector PointingLocationRef = PointAction->GetPointingLocation();
 		if (IsValid(PointAction->GetActorPointedAt()))
 		{
 			OwnerCompanion->GetCompanionActionStack()->OnAddActionPickUp();
