@@ -18,6 +18,8 @@ public:
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
+	bool ShouldHoldUpHands() const;
+	
 private:
 	UMoveArm* MoveArmRef = nullptr;
 };

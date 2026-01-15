@@ -1,5 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
+
+#include "AnimModelActionStack.h"
 #include "ActionStack/Characters/CompanionActionStack.h"
 #include "ArmActions/ActionArmMovingMovement.h"
 #include "ArmActions/ActionArmJumpingMovement.h"
@@ -8,6 +10,7 @@
 #include "ArmActions/ActionArmPoint.h"
 #include "ArmActions/ActionArmHandHolding.h"
 #include "Player/BaseInteractableCharacter.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 
 UArmActionStack::UArmActionStack() { PrimaryComponentTick.bCanEverTick = true; }
@@ -57,6 +60,8 @@ void UArmActionStack::AddWaveAction()
 	OwnerCompanion->GetCompanionActionStack()->ClearAllActions();
 	if (const UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
 	{
+		if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()) OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
+		if (UActionArmHandHolding* ActionRef = OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()) OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(ActionRef);
 		const FVector PointingLocationRef = PointAction->GetPointingLocation();
 		if (IsValid(PointAction->GetActorPointedAt()))
 		{

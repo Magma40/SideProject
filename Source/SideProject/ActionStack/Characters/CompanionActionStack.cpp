@@ -4,6 +4,7 @@
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "ActionStack/Actions/ActionPickUpItem.h"
 #include "ActionStack/Actions/ActionContinuousMoveTo.h"
+#include "ProcedualAnimation/MovingModel.h"
 
 UCompanionActionStack::UCompanionActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -28,6 +29,11 @@ void UCompanionActionStack::Init()
 void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator)
 {
 	if (!OwnerCharacter) return;
+	if (UActionContinuousMoveTo* ContinuousMoveTo = GetAction<UActionContinuousMoveTo>())
+	{
+		const TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(ContinuousMoveTo);
+		RemoveAction(ActionInterfaceContinuousMoveTo);
+	}
 	UActionMoveTo* ActionMoveTo = UActionMoveTo::Create(this, OwnerCharacter, InMoveToLocation, InNeedIndicator);
 	this->PushAction(ActionMoveTo);
 }

@@ -19,7 +19,7 @@ void UActionArmToHolster::OnBegin_Implementation(const bool bFirstTime)
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	const FTransform HandTransform =  FTransform(FRotator(0, 0, 0),  Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation()));
 	const FTransform MidOffset =  FTransform(FRotator(0, 0, -90),  HandTransform.GetLocation() + FVector(-20.f, -15.f, 75.f));
-	const FTransform HolsterTransform =  FTransform( FRotator(0, 0, -180),   Xform.InverseTransformPosition(BackHolsterRef->GetComponentLocation()));
+	const FTransform HolsterTransform =  FTransform( FRotator(25, 90, -180),   Xform.InverseTransformPosition(BackHolsterRef->GetComponentLocation()));
 
 	//To Holster
 	AnimTransforms.Add(HandTransform);
@@ -55,9 +55,7 @@ void UActionArmToHolster::OnUpdate_Implementation(const float DeltaTime)
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
 	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
-
-	UE_LOG(LogTemp, Error, TEXT("Current Rotation Is - %s"),  *MoveArmRef->ArmParts[2]->GetComponentRotation().ToString());
-
+	
 	if (BeforeMoveNum != AnimTransforms.Num() && AnimTransforms.Num() == 3)
 	{
 		OwnerCharacter->TryToInteractWithBackHolster();

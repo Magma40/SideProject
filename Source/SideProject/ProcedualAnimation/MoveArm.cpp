@@ -10,7 +10,6 @@ UMoveArm::UMoveArm() { PrimaryComponentTick.bCanEverTick = true; }
 void UMoveArm::Init()
 {
 	ArmParts.Empty();
-	OtherArms.Empty();
 	ArmParts.Add(this);
 
 	// Get Elbow
@@ -28,22 +27,14 @@ void UMoveArm::Init()
 		UE_LOG(LogTemp, Error, TEXT("%s:Init - Hand_ not found or wrong type"),  *StaticClass()->GetName());
 		return;
 	}
-
-	// Get Other Arm
-	TArray<USceneComponent*> OtherComponents = GenericCalls::FindChildrenByPrefix(GetOwner(), TEXT("UpperArm_"));
-	for (USceneComponent* Child : OtherComponents)
-	{
-		if (UMoveArm* Other = Cast<UMoveArm>(Child))
-		{
-			if (Other != this) OtherArms.Add(Other);
-		}
-	}
 }
 
 void UMoveArm::BeginPlay() //And now my heart is beating like saddest metronome!!
 {
 	Super::BeginPlay();
 	Init();
+	TargetPose.Position = FVector(0,25,  -50);
+	TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
 }
 
 void UMoveArm::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -56,6 +47,7 @@ void UMoveArm::UpdateIK()
 {
 	if (ArmParts.Num() != 3) return;
 	if (!IsValid(ArmParts[0]) || !IsValid(ArmParts[1]) || !IsValid(ArmParts[2])) return;
+	//if (TargetPose.Position.IsNearlyZero()) return;
 	USceneComponent* UpperArm = ArmParts[0];
 	USceneComponent* Elbow = ArmParts[1];
 	USceneComponent* Hand= ArmParts[2];
@@ -64,7 +56,6 @@ void UMoveArm::UpdateIK()
 	FVector UpperArmPos = Xform.InverseTransformPosition(UpperArm->GetComponentLocation());
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
-	if (TargetPose.Position.IsNearlyZero()) return;
 
 	FVector ShoulderWorldPos = UpperArm->GetComponentLocation();
 	FVector TargetWorld = Xform.TransformPosition(TargetPose.Position);
@@ -115,40 +106,5 @@ void UMoveArm::UpdateIK()
 
 	//Elbow->SetRelativeRotation(ElbowRotation);
 	Hand->SetRelativeRotation(TargetPose.Rotation);
-}
-
-bool UMoveArm::ShouldHoldUpHands()
-{
-	FTransform UpperArmWorld = this->GetComponentTransform();
-	FVector StartWorld = UpperArmWorld.GetLocation();
-	FVector EndWorld   = UpperArmWorld.GetLocation()  + GetRightVector() * 75;
-	TargetPose.Position = FVector(0,25,  -50);
-
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwner()->GetParentActor());
-	Params.AddIgnoredActor(GetOwner());
-	TArray<AActor*> ActorsAround; //  Gather actors
-	UGameplayStatics::GetAllActorsWithTag (GetWorld(), "HandHeldItem", ActorsAround);
-	for (AActor* Actor : ActorsAround)
-	{
-		Params.AddIgnoredActor(Actor);
-	}
-	
-	if (GetWorld()->LineTraceSingleByChannel(Hit, StartWorld, EndWorld, ECC_Visibility, Params))
-	{
-		FVector LocalPoint = UpperArmWorld.InverseTransformPosition(Hit.ImpactPoint);
-		TargetPose.Position = LocalPoint;
-
-		FVector UpLocal = UpperArmWorld.InverseTransformVector(FVector::UpVector);
-		FVector NormalLocal = UpperArmWorld.InverseTransformVector(Hit.ImpactNormal);
-
-		//TargetPose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
-		return true;
-	}
-	FVector WorldPos = UpperArmWorld.TransformPosition(TargetPose.Position);
-	//DrawDebugLine(GetWorld(), StartWorld, EndWorld, FColor::Red);
-	//DrawDebugSphere(GetWorld(), WorldPos, 	8.f, 12, FColor::Red);
-	return false;
 }
 

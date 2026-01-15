@@ -29,15 +29,12 @@ protected: //Functions
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Init();
-
-public:
 	void UpdateIK();
-	bool ShouldHoldUpHands();
 
 public: // Variables
+	
 	FArmsPose TargetPose = FArmsPose();
 	TArray<USceneComponent*> ArmParts;
-	TArray<UMoveArm*> OtherArms;
 	bool bEnableArmConstraints = true;
 };
 
