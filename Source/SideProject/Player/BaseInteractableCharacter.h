@@ -7,6 +7,7 @@
 #include "BaseInteractableCharacter.generated.h"
 
 class UCompanionActionStack;
+class APlayerCamera;
 
 struct FPickupCandidate
 {
@@ -41,7 +42,7 @@ public:
 	UObject* GetItemInBackHolster() const { return BackItemHolster; }
 	AMovingModel* GetMovingModel() const { return MovingModel; }
 	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
-	ACameraActor* GetCameraActor() const  { return TheMainCameraInScene; }
+	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
@@ -60,7 +61,7 @@ private:
 	float PlayRate = 1.0f;
 
 protected:
-	UPROPERTY() ACameraActor* TheMainCameraInScene = nullptr;
+	UPROPERTY() APlayerCamera* TheMainCameraInScene = nullptr;
 	AMovingModel* MovingModel = nullptr;
 	UCompanionActionStack* CompanionActionStack = nullptr;
 };

@@ -56,31 +56,31 @@ void UMoveArm::UpdateIK()
 	FVector UpperArmPos = Xform.InverseTransformPosition(UpperArm->GetComponentLocation());
 	FVector ElbowPos     = Xform.InverseTransformPosition(Elbow->GetComponentLocation());
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
+	FVector Target = TargetPose.Position;
 
-	FVector ShoulderWorldPos = UpperArm->GetComponentLocation();
-	FVector TargetWorld = Xform.TransformPosition(TargetPose.Position);
-
-	FVector RestDirWS = (-UpperArm->GetForwardVector() + UpperArm->GetRightVector()).GetSafeNormal() ; // rest pose direction
-	FVector DesiredDirWS = (TargetWorld - ShoulderWorldPos).GetSafeNormal();
-	float TargetLen = (TargetWorld - ShoulderWorldPos).Size();
-
-	if (bEnableArmConstraints)
+	if (bEnableArmConstraints) 	// Optional swing constraint
 	{
+		FVector TargetWorld = Xform.TransformPosition(TargetPose.Position);
+		FVector RestDirWS = (-UpperArm->GetForwardVector() + UpperArm->GetRightVector()).GetSafeNormal() ; // rest pose direction
+		FVector DesiredDirWS = (TargetWorld - Xform.GetLocation()).GetSafeNormal();
+		float TargetLen = (TargetWorld - Xform.GetLocation()).Size();
+		
 		float MaxSwingDegrees = 75.f; // tweak per character
 		FVector LimitedDirWS = ConstrainSwingTwist(RestDirWS, DesiredDirWS, MaxSwingDegrees);
-		TargetWorld = ShoulderWorldPos + LimitedDirWS * TargetLen;	
+		TargetWorld = Xform.GetLocation() + LimitedDirWS * TargetLen;
+
+		Target = Xform.InverseTransformPosition(TargetWorld);
 	}
-	FVector Target = Xform.InverseTransformPosition(TargetWorld);
 
 	// --- TWO BONE IK ---
 	FVector RootToEff = Target - UpperArmPos;
 	float UpperLen = (ElbowPos - UpperArmPos).Size();
 	float LowerLen = (HandPos - ElbowPos).Size();
-	float ClampedTargetLen = RootToEff.Size();
-	ClampedTargetLen = FMath::Clamp(ClampedTargetLen,FMath::Abs(UpperLen - LowerLen) + 1e-3f,UpperLen + LowerLen - 1e-3f);
+	float TargetLen  = RootToEff.Size();
+	TargetLen  = FMath::Clamp(TargetLen ,FMath::Abs(UpperLen - LowerLen) + 1e-3f,UpperLen + LowerLen - 1e-3f);
 	
 	// Law of cosines for knee angle
-	float A = (UpperLen * UpperLen + ClampedTargetLen * ClampedTargetLen - LowerLen * LowerLen) / (2.f * UpperLen * ClampedTargetLen);
+	float A = (UpperLen * UpperLen + TargetLen  * TargetLen  - LowerLen * LowerLen) / (2.0f * UpperLen * TargetLen);
 	A = FMath::Clamp(A, -1.f, 1.f);
 	float ElbowAngle = FMath::Acos(A);
 

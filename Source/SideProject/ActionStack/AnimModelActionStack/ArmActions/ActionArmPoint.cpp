@@ -1,16 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h"
-#include "Camera/CameraActor.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "WorldObjects/PlayerCamera.h"
 
 UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
 {
 	UActionArmPoint* Action = NewObject<UActionArmPoint>(Outer);
 	Action->MoveArmRef = InMoveArm;
 	Action->OwnerCharacter = InCharacter;
+	Action->TheMainCameraInScene = APlayerCamera::GetCamera(InCharacter->GetWorld());
 	return Action;
 }
 
@@ -22,8 +23,8 @@ void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 	
 	FHitResult Hit;
-	const FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
-	const FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
+	const FVector Start = TheMainCameraInScene->GetActorLocation();
+	const FVector End = Start + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
@@ -51,8 +52,8 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	Super::OnUpdate_Implementation(DeltaTime);
 
 	FHitResult Hit;
-	FVector Start = OwnerCharacter->GetCameraActor()->GetActorLocation();
-	FVector End = Start + (OwnerCharacter->GetCameraActor()->GetActorForwardVector() * 10000.f);
+	const FVector Start = TheMainCameraInScene->GetActorLocation();
+	const FVector End = Start + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);

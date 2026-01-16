@@ -28,6 +28,7 @@ void UActionArmMovingMovement::OnUpdate_Implementation(const float DeltaTime)
 	// {
 	// 	MoveArmRef->TargetPose.Position = FVector(0,25,  -50);
 	// 	MoveArmRef->TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
+	// 	MoveArmRef->bEnableArmConstraints = true;
 	// }
 }
 
@@ -38,9 +39,10 @@ bool UActionArmMovingMovement::IsDone_Implementation() const
 
 bool UActionArmMovingMovement::ShouldHoldUpHands() const
 {
+	MoveArmRef->bEnableArmConstraints = false;
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	FVector StartWorld = Xform.GetLocation();
-	FVector EndWorld   = Xform.GetLocation() + MoveArmRef->ArmParts[0]->GetRightVector() * 75;
+	FVector EndWorld   = Xform.GetLocation() + MoveArmRef->ArmParts[0]->GetRightVector() * 150;
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -57,11 +59,7 @@ bool UActionArmMovingMovement::ShouldHoldUpHands() const
 	{
 		FVector LocalPoint = Xform.InverseTransformPosition(Hit.ImpactPoint);
 		MoveArmRef->TargetPose.Position = LocalPoint;
-		MoveArmRef->TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
-
-		FVector UpLocal = Xform.InverseTransformVector(FVector::UpVector);
-		FVector NormalLocal = Xform.InverseTransformVector(Hit.ImpactNormal);
-		//TargetPose.Rotation = FQuat::FindBetweenNormals(UpLocal, NormalLocal);
+		MoveArmRef->TargetPose.Rotation = 	FQuat::FindBetweenNormals( Xform.InverseTransformVector(FVector::UpVector), Xform.InverseTransformVector(Hit.ImpactNormal).GetSafeNormal());
 		return true;
 	}
 	return false;

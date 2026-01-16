@@ -8,10 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SideProject.h"
-#include "ActionStack/ActionStack.h"
-#include "Camera/CameraActor.h"
-#include "Kismet/GameplayStatics.h"
-#include "ProcedualAnimation/MovingModel.h"
+#include "WorldObjects/PlayerCamera.h"
 
 AMainCharacter::AMainCharacter()
 {
@@ -35,16 +32,12 @@ AMainCharacter::AMainCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
-
-	ActionStack = CreateDefaultSubobject<UActionStack>(TEXT("ActionStack"));
 }
 
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	UActionStack::Main = ActionStack;
-	AActor* FoundTheMainCameraInScene = UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass());
-	TheMainCameraInScene = Cast<ACameraActor>(FoundTheMainCameraInScene);
+	TheMainCameraInScene = APlayerCamera::GetCamera(GetWorld());
 	DefaultMaxSprintSpeed = MaxSprintSpeed;
 }
 
@@ -102,7 +95,7 @@ void AMainCharacter::DoMove(float Right, float Forward)
 	if (TheMainCameraInScene != nullptr)
 	{
 		// find out which way is forward
-		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
+		const FRotator Rotation = 	TheMainCameraInScene->GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 		
 		// get forward and right vector

@@ -8,9 +8,7 @@
 #include "Logging/LogMacros.h"
 #include "MainCharacter.generated.h"
 
-class UCameraComponent;
 class UInputAction;
-class UActionStack;
 struct FInputActionValue;
 class AMovingModel;
 
@@ -28,12 +26,16 @@ protected: //Functions
 
 	//Movement
 	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
 	void ContinuousFalling(float Right, float Forward);
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoMove(float Right, float Forward);
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpStart() { Jump(); }
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpEnd() { StopJumping(); }
+	UInputAction* GetLookAction() const { return LookAction; }
+	UInputAction* GetMoveAction() const { return MoveAction; }
+	UInputAction* GetMouseLookAction() const { return MouseLookAction; }
 
 protected: //Variables
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* JumpAction;
@@ -50,8 +52,5 @@ protected: //Variables
 	float LastOldForwardValue = 0.0f;
 	float LastOldRightValue = 0.0f;
 	float DefaultMaxSprintSpeed = 1.0f;
-
-public:
-	UPROPERTY() UActionStack* ActionStack;
 };
 

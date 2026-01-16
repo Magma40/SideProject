@@ -6,6 +6,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmPoint.generated.h"
 
+class APlayerCamera;
 class UMoveArm;
 class ABaseInteractableCharacter;
 
@@ -36,4 +37,5 @@ private:
 	TArray<AActor*> PointingIndicators;
 	FVector PointingLocation = FVector::ZeroVector;
 	UActorComponent* ActorPointedAt = nullptr;
+	APlayerCamera* TheMainCameraInScene = nullptr;
 };
