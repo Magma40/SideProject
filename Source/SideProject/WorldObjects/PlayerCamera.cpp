@@ -18,7 +18,6 @@ void APlayerCamera::SetNewCameraPoint(AActor* NewCameraPoint)
 {
 	if(!IsValid(NewCameraPoint)) return;
 	const FTransform NewCameraTransform = NewCameraPoint->GetActorTransform();
-	this->SetActorTransform(NewCameraTransform);
 	StartTransform = NewCameraTransform;
 	CurrentCameraPoint = NewCameraPoint;
 }

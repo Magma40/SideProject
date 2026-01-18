@@ -5,6 +5,7 @@
     <projectFile profileName="EpicGames.AspNet">../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/Shared/EpicGames.AspNet/EpicGames.AspNet.csproj</projectFile>
     <projectFile kind="Docker">../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile>../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/UnrealBuildTool/UnrealBuildTool.csproj</projectFile>
+    <projectFile kind="Docker">C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile kind="Docker">$PROJECT_DIR$/../../../../../../SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/EpicGames.Perforce.Fixture.csproj</projectFile>
     <projectFile>Intermediate/ProjectFiles/SideProject.vcxproj</projectFile>
     <projectFile>Intermediate/ProjectFiles/UE5.vcxproj</projectFile>
@@ -15,17 +16,22 @@
   <component name="ChangeListManager">
     <list default="true" id="972e900e-ca4c-4eff-a37a-b1c31a22aafb" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SideProject/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/Model/BP_AnimModel.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/SideProject.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/CharacterBlueprints/Player/BP_PlayerCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Systems/CameraManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Systems/CameraManager.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/2/V0/9XTUAMN5S6UUCFB5K0ZGZM.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/3/XG/ZG25NX562IYKOVGCJ0MD1H.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/3/XG/ZG25NX562IYKOVGCJ0MD1H.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/5/KG/ETKAO35ANVW90XFH3J8GJ2.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/5/KG/ETKAO35ANVW90XFH3J8GJ2.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/5/W9/ZAAGYIUQZ2W6WEO3HPXAX7.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/5/W9/ZAAGYIUQZ2W6WEO3HPXAX7.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/6/UK/OT5UOZ3WBJ9P30TU3DBDEK.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/6/YB/C5UDZYKFL5M0YW62JXMPIZ.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/7/GV/W5DNM2FP1ON7VGU0C2BGMV.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/C/27/6ZCCZ1F7ZO6DM3C8OLVGTF.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/D/13/EPTYZCFZWXT7Z7XYKZ88XK.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Lvl_ThirdPerson/D/50/395Y4QE4IIEWI3KSE3SB6L.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/SideProject/WorldObjects/PlayerCamera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/SideProject/WorldObjects/PlayerCamera.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,64 +45,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://20" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/include/atomic" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/ApplicationCore/Public/Android/AndroidInputInterface.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/Templates/Casts.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -133,7 +83,6 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/Elliot.Coffell/OneDrive - Change Maker Education/Documents/Unreal Projects/SideProject/Source/SideProject/Player/MainCharacter.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Joint.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Joint.h" root0="FORCE_HIGHLIGHTING" />
@@ -232,10 +181,10 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/AutomationTool/AutomationTool.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
@@ -255,10 +204,10 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="PTY_MODE" value="Auto" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Programs/UnrealBuildTool/UnrealBuildTool.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
@@ -280,9 +229,21 @@
       <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
       <option name="SEND_DEBUG_REQUEST" value="1" />
       <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <option name="AUTO_ATTACH_CHILDREN" value="0" />
       <method v="2">
         <option name="Build" />
       </method>
+    </configuration>
+    <configuration name="EpicGames.Perforce.Fixture/Dockerfile (10)" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="containerName" value="epicgames.perforce.fixture" />
+          <option name="contextFolderPath" value="D:\Unity2023\Repository\SideProject" />
+          <option name="sourceFilePath" value="C:/SSDGAMES/EpicGames/UE_5.6/Engine/Source/Programs/Shared/EpicGames.Perforce.Fixture/Dockerfile" />
+        </settings>
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
+      <method v="2" />
     </configuration>
     <configuration name="EpicGames.Perforce.Fixture/Dockerfile (1)" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
       <deployment type="dockerfile">
@@ -513,6 +474,9 @@
       <workItem from="1768560334389" duration="446000" />
       <workItem from="1768560865214" duration="2119000" />
       <workItem from="1768567424344" duration="15620000" />
+      <workItem from="1768593944189" duration="5478000" />
+      <workItem from="1768607545809" duration="20688000" />
+      <workItem from="1768758733676" duration="3045000" />
     </task>
     <servers />
   </component>

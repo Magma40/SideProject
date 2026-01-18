@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "CameraActionStack.h"
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
+#include "ActionStack/CameraActionStack/Actions/ActionToCameraPoint.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/BaseInteractableCharacter.h"
 #include "Player/MainCharacter.h"
 #include "WorldObjects/PlayerCamera.h"
 
@@ -31,4 +31,10 @@ void UCameraActionStack::PushDefaultActionMovement()
 {
 	UActionCameraDefaultMovement* DefaultMovement = UActionCameraDefaultMovement::Create(this, OwnerCharacter, PlayerCamera);
 	PushAction(DefaultMovement);
+}
+
+void UCameraActionStack::PushToCameraPointAction()
+{
+	UActionToCameraPoint* ToCameraPoint = UActionToCameraPoint::Create(this, PlayerCamera);
+	PushAction(ToCameraPoint);
 }

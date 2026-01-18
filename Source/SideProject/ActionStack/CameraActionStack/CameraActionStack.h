@@ -23,5 +23,6 @@ protected:
 	AMainCharacter* OwnerCharacter = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
 public:
-	void PushDefaultActionMovement();
+ 	void PushDefaultActionMovement();
+	UFUNCTION(BlueprintCallable) void PushToCameraPointAction();
 };

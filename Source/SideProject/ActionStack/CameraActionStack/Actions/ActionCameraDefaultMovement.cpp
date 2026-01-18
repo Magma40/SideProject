@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
-
 #include "EnhancedInputComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Player/MainCharacter.h"
 #include "WorldObjects/PlayerCamera.h"
 
@@ -32,6 +31,30 @@ void UActionCameraDefaultMovement::OnBegin_Implementation(const bool bFirstTime)
 void UActionCameraDefaultMovement::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
+	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+	
+	const FVector GroundPos(CurrentLocation.X, CurrentLocation.Y, OwnerCharacter->GetActorLocation().Z);
+	const FRotator CameraRot = StartTransformLocation.Rotation();
+	const FRotator YawRotation(0, CameraRot.Yaw, 0);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector ForwardDirection = -FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	
+	const float SideOffset = 250.f; // width of the cone/box
+	const float Distance = FVector::Dist2D(PlayerPos, CurrentLocation);
+	const FVector End = GroundPos + ForwardDirection * Distance;
+	const FVector EndRight = End + (RightDirection * SideOffset);
+	const FVector EndLeft  = End - (RightDirection * SideOffset);
+	const FVector BeginRight = GroundPos + (RightDirection * SideOffset);
+	const FVector BeginLeft  = GroundPos - (RightDirection * SideOffset);
+
+	DrawDebugLine(GetWorld(), GroundPos, End, FColor::Cyan, false, 0.f, 0, 2.f);
+	DrawDebugLine(GetWorld(), BeginRight, EndRight, FColor::Cyan, false, 0.f, 0, 2.f);
+	DrawDebugLine(GetWorld(), BeginLeft, EndLeft, FColor::Cyan, false, 0.f, 0, 2.f);
+	DrawDebugLine(GetWorld(), EndLeft, End, FColor::Cyan, false, 0.f, 0, 2.f);
+	DrawDebugLine(GetWorld(), EndRight, End, FColor::Cyan, false, 0.f, 0, 2.f);
+
 }
 
 bool UActionCameraDefaultMovement::IsDone_Implementation() const
@@ -61,17 +84,29 @@ void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionVal
 {
 	if (!IsValid(PlayerCamera)) return;
 	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
-	const FVector2D Input = Value.Get<FVector2D>();
 	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
 	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+	
+	// Ground reference
+	const FVector GroundPos(CurrentLocation.X, CurrentLocation.Y, OwnerCharacter->GetActorLocation().Z);
+	const FRotator CameraRot = StartTransformLocation.Rotation();
+	const FRotator YawRotation(0, CameraRot.Yaw, 0);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-	// Apply input only to X
-	float DesiredX = CurrentLocation.X + (Input.X * -1) * OwnerCharacter->GetMovementComponent()->GetMaxSpeed() * GetWorld()->GetDeltaSeconds();
+	const float SideOffset = 250.f; // width of the cone/box
+	const float Distance = FVector::DotProduct(PlayerPos, CurrentLocation);
+	const FVector End = GroundPos + ForwardDirection * Distance;
+	if (FMath::Abs(FVector::DotProduct(PlayerPos - End, RightDirection)) < SideOffset)
+	{
+		const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
+        const float DirectionSpeed = FVector::DotProduct(Velocity.GetSafeNormal(),RightDirection);
+		const FVector DesiredLocation = CurrentLocation + RightDirection * DirectionSpeed * OwnerCharacter->GetMovementComponent()->GetMaxSpeed() * GetWorld()->GetDeltaSeconds();
+		float Offset = FVector::DotProduct(DesiredLocation - StartTransformLocation, RightDirection);
+		Offset = FMath::Clamp(Offset, MinSliderValue, MaxSliderValue);
 
-	// Clamp relative to start position
-	DesiredX = FMath::Clamp(DesiredX,   StartTransformLocation.X + MinSliderValue, StartTransformLocation.X + MaxSliderValue );
-
-	// Rebuild location: X changes, Y/Z fixed
-	const FVector NewLocation( DesiredX, StartTransformLocation.Y, StartTransformLocation.Z);
-	PlayerCamera->SetActorLocation(NewLocation);
+		const FVector NewLocation = StartTransformLocation + RightDirection * Offset;
+		PlayerCamera->SetActorLocation(NewLocation);
+	}
 }
