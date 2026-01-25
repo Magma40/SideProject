@@ -8,6 +8,7 @@
 #include "Tools/GenericCalls.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
+#include "WorldInteractions/InteractionManager.h"
 
 ABaseInteractableCharacter::ABaseInteractableCharacter() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -280,6 +281,21 @@ void ABaseInteractableCharacter::DeattachFromBackHolster()
 {
 	PickUpItemToHand(BackItemHolster);
 	BackItemHolster = nullptr;
+}
+
+void ABaseInteractableCharacter::TryToInteractWithWorld()
+{
+	UInteractionManager* InteractionManager = UInteractionManager::GetMain(GetWorld());
+	if (!IsValid(InteractionManager)) return;
+
+	for (auto Interaction : InteractionManager->GetInteractions(this))
+	{
+		UInteractionBehaviour* ActionRef = Cast<UInteractionBehaviour>(Interaction.GetObject());
+		if (ActionRef->CanInteract_Implementation(this))
+		{
+			ActionRef->PerformInteraction_Implementation(this);
+		}
+	}
 }
 
 void ABaseInteractableCharacter::Jump() 

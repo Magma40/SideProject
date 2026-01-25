@@ -36,13 +36,20 @@ public:
 	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster(); //Checks if you can either add or remove item from holster
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
 	UFUNCTION(BlueprintCallable) void DeattachFromBackHolster(); //Should deattach the item in the holster into the hand
-	virtual void Jump() override;
 
+	UFUNCTION(BlueprintCallable) void TryToInteractWithWorld();
+	
+	virtual void Jump() override;
+	
 	UObject* GetItemInHand() const { return ItemInHand; }
+	void ResetItemInHand(){ ItemInHand = nullptr; }
+	
 	UObject* GetItemInBackHolster() const { return BackItemHolster; }
 	AMovingModel* GetMovingModel() const { return MovingModel; }
 	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
 	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
+	bool IsCharacterInteracting() const  { return InteractionEnabled; }
+	void SetCharacterInteracting(const bool bNewCharacterInteracting){ InteractionEnabled = bNewCharacterInteracting; } ;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
@@ -59,6 +66,8 @@ private:
 	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
 	float PlayRate = 1.0f;
+
+	bool InteractionEnabled = false;
 
 protected:
 	UPROPERTY() APlayerCamera* TheMainCameraInScene = nullptr;

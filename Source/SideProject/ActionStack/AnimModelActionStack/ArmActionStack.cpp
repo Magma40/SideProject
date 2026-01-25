@@ -9,6 +9,7 @@
 #include "ArmActions/ActionArmWave.h"
 #include "ArmActions/ActionArmPoint.h"
 #include "ArmActions/ActionArmHandHolding.h"
+#include "ArmActions/ActionArmHandToLocation.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "ProcedualAnimation/MovingModel.h"
 
@@ -98,4 +99,18 @@ void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
 {
 	UActionArmHandHolding* ArmsHandHolding = UActionArmHandHolding::Create(this, ArmRef, OtherCompanionArm, OwnerCharacter, OwnerCompanion);
 	this->PushAction(ArmsHandHolding);
+}
+
+void UArmActionStack::AddHandToLocation(const FVector& InToLocation)
+{
+	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
+	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
+	if (UActionArmHandToLocation* ActionRef = GetAction<UActionArmHandToLocation>())
+	{
+		this->RemoveAction(ActionRef);
+		return;
+	}
+	UActionArmHandToLocation* HandToLocation = UActionArmHandToLocation::Create(this, ArmRef, InToLocation);
+	this->PushAction(HandToLocation);
+	
 }

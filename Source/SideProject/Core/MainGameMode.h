@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "MainGameMode.generated.h"
 
+class UInteractionManager;
 /**
  * 
  */
@@ -16,4 +17,7 @@ class SIDEPROJECT_API AMainGameMode : public AGameModeBase
 
 public:
 	AMainGameMode();
+	UPROPERTY() UInteractionManager* InteractionManager = nullptr;
+
+	UInteractionManager* GetInteractionManager();
 };
