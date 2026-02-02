@@ -6,6 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "Debug/ReporterGraph.h"
 #include "UObject/Interface.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "InteractionManager.generated.h"
 
 class ABaseInteractableCharacter;
@@ -18,7 +19,7 @@ enum class EActionType : uint8
 	Passive
 };
 
-UINTERFACE(MinimalAPI, Blueprintable)
+UINTERFACE(Blueprintable)
 class UInteractionInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -29,41 +30,33 @@ class IInteractionInterface
 	GENERATED_BODY()
 
 public:
-	EActionType Type;
-	float DistanceForInteraction;
-	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) bool CanInteract(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetDistanceToInteraction(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void PerformInteraction(ABaseInteractableCharacter* InteractingCharacter);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetInteractionDistance();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EActionType GetInteractionType(); 
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SIDEPROJECT_API UInteractionManager : public USceneComponent
+class SIDEPROJECT_API UInteractionManager : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
-protected:
-	UInteractionManager();
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 private:
-	TSet<TScriptInterface<IInteractionInterface>> Interactions = TSet<TScriptInterface<IInteractionInterface>>();
+	UPROPERTY() TSet<UObject*> Interactions;
 	
 public:
-	static UInteractionManager* Main;
-	static UInteractionManager* GetMain(UObject* WorldContext = nullptr);
-
-	TSet<TScriptInterface<IInteractionInterface>> GetInteractions(ABaseInteractableCharacter* InteractingCharacter);
+	TSet<UObject*>  GetInteractions(ABaseInteractableCharacter* InteractingCharacter);
 	
-	void AddInteraction(const TScriptInterface<IInteractionInterface>& Interaction);
-	void RemoveInteraction(const TScriptInterface<IInteractionInterface>& Interaction);	
+	void AddInteraction(UObject* Interaction);
+	void RemoveInteraction(const UObject* Interaction);	
 
 	template<typename T>
 	T* GetInteraction();
-	bool Contains(const TScriptInterface<IInteractionInterface>& Interaction) const
+	bool Contains(const UObject* Interaction) const
 	{
-		return Interaction  != nullptr && Interactions.Contains(Interaction);
+		return IsValid(Interaction) && IsValid(this) && Interactions.Contains(Interaction);
 	}
 
 	template<typename T>
@@ -83,13 +76,17 @@ class SIDEPROJECT_API UInteractionBehaviour : public USceneComponent, public IIn
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	EActionType Type;
 	float DistanceForInteraction;
 	
+public:
 	virtual bool CanInteract_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return false; }
 	virtual float GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return 0.0f;}
 	virtual void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override {}
+
+	virtual float GetInteractionDistance_Implementation() override { return DistanceForInteraction; } 
+	virtual EActionType GetInteractionType_Implementation() override { return Type; }
 
 // protected:
 // 	UInteractionBehaviour() { UInteractionManager::GetMain()->AddInteraction(this); }

@@ -20,6 +20,8 @@ void UActionArmHandToLocation::OnBegin_Implementation(const bool bFirstTime)
 
 	const FVector ToLocationPos = Xform.InverseTransformPosition(ToLocation);
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, ToLocationPos));
+
+	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 }
 
 void UActionArmHandToLocation::OnUpdate_Implementation(const float DeltaTime) 

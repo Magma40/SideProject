@@ -30,9 +30,9 @@ public:
 private:
 	ABaseInteractableCharacter* InteractingCharacter = nullptr;
 	bool Interacting = false;
+	bool bIsLocked = false;
 
 public:
 	UPROPERTY(EditAnywhere, Category="DoorReferences") AActor* Lock = nullptr;
-	UPROPERTY(EditAnywhere, Category="DoorReferences") TSubclassOf<UObject> ItemNeeded = nullptr;
 };
 

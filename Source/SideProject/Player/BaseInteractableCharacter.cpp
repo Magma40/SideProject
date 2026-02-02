@@ -9,6 +9,7 @@
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "WorldInteractions/InteractionManager.h"
+#include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 
 ABaseInteractableCharacter::ABaseInteractableCharacter() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -69,28 +70,10 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		FVector Start = GetActorLocation() + FVector(0, 0, 50); 
 		FVector End = Start + (GetActorForwardVector() * 100.0f);
 		
-		USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
-		AActor* ActorItem = Cast<AActor>(ItemInHand);
-		AActor* OwnerActor = nullptr;
-		USceneComponent* RootComp = nullptr;
-
-		if (IsValid(ActorItem))
-		{
-			OwnerActor = ActorItem;
-			RootComp = ActorItem->GetRootComponent();
-		}
-		else if (IsValid(ComponentItem))
-		{
-			OwnerActor = ComponentItem->GetOwner();
-			RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
-		}
-
-		if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
-		
 		FHitResult HitResult(ForceInit);
 		FCollisionQueryParams CollisionParams;
 		CollisionParams.AddIgnoredActor(this);
-		CollisionParams.AddIgnoredActor(OwnerActor);
+		CollisionParams.AddIgnoredActor(ItemInHand);
 		CollisionParams.bTraceComplex = true;
 
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.0f, 0, 2.0f);
@@ -113,58 +96,35 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 	FVector HandLocation = MovingModel->GetRightHand()->GetComponentLocation();
 	FPickupCandidate Best;
 	
-	TArray<AActor*> ActorsAround; //  Gather actors
-	UGameplayStatics::GetAllActorsWithTag (GetWorld(), "HandHeldItem", ActorsAround);
-	for (AActor* Actor : ActorsAround)
+	TArray<AActor*> InteractableItems; //  Gather actors
+	UGameplayStatics::GetAllActorsWithInterface(GetWorld(), UInteractableItemInterface::StaticClass(), InteractableItems);
+	for (AActor* Actor : InteractableItems)
 	{
-		if (Actor == BackItemHolster) continue;
-		float Dist = FVector::Dist(HandLocation, Actor->GetActorLocation());
+		AInteractableItemBase* InteractableItem = Cast<AInteractableItemBase>(Actor);
+		if (InteractableItem == BackItemHolster) continue;
+		float Dist = FVector::Dist(HandLocation, InteractableItem->GetActorLocation());
 		if (Dist < Best.Distance)
 		{
-			Best.Object = Actor;
+			Best.Object = InteractableItem;
 			Best.Distance = Dist;
 		}
-	}
-
-	TArray<USceneComponent*> ComponentsAround;  //  Gather components 
-	GenericCalls::GetAllComponentsWithTag(GetWorld(), "HandHeldItem", ComponentsAround);
-	for (USceneComponent* Comp : ComponentsAround)
-	{
-		if (Comp == BackItemHolster) continue;
-		float Dist = FVector::Dist(HandLocation, Comp->GetComponentLocation());
-		if (Dist < Best.Distance)
-		{
-			Best.Object = Comp;
-			Best.Distance = Dist;
-		}
-	}
-
-	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseInteractableCharacter::StaticClass(),  Actors);
-	for (AActor* Actor : Actors)
-	{
-		ABaseInteractableCharacter* Character = Cast<ABaseInteractableCharacter>(Actor);
-		if (Character == this) continue;
-		if (Best.Object == Character->ItemInHand) Character->ItemInHand = nullptr;
-		else if (Best.Object == BackItemHolster) Character->BackItemHolster = nullptr;
 	}
 	
 	if (Best.Object && Best.Distance <= MinDistanceToPickUpItem)
 	{
+		if (ABaseInteractableCharacter* OwnerCharacter = Best.Object->GetOwnerCharacter())
+		{
+			if (Best.Object == OwnerCharacter->ItemInHand) OwnerCharacter->ItemInHand = nullptr;
+			else if (Best.Object == OwnerCharacter->BackItemHolster) OwnerCharacter->BackItemHolster = nullptr;
+		}
+		
 		ClosestObject = Best.Object;
 		const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
 		FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
 		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, HandLocationPos));
 		const FVector LastKnowHandLocation = HandLocationPos;
-
-		USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
-		AActor* ActorItem = Cast<AActor>(ClosestObject);
-		AActor* OwnerActor = nullptr;
 		
-		if (IsValid(ActorItem)) OwnerActor = ActorItem;
-		else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
-		
-		FVector ObjectLocalPos = Xform.InverseTransformPosition(OwnerActor->GetActorLocation());
+		FVector ObjectLocalPos = Xform.InverseTransformPosition(ClosestObject->GetActorLocation());
 		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, ObjectLocalPos));
 		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, LastKnowHandLocation));
 	}
@@ -173,79 +133,19 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 void ABaseInteractableCharacter::DropItemInHand()
 {
 	if (!IsValid(ItemInHand)) return;
-
-	USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
-	AActor* ActorItem = Cast<AActor>(ItemInHand);
-	AActor* OwnerActor = nullptr;
-	USceneComponent* RootComp = nullptr;
-
-	if (IsValid(ActorItem))
-	{
-		OwnerActor = ActorItem;
-		RootComp = ActorItem->GetRootComponent();
-	}
-	else if (IsValid(ComponentItem))
-	{
-		OwnerActor = ComponentItem->GetOwner();
-		RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
-	}
-
-	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
-	OwnerActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	TArray<UPrimitiveComponent*> Primitives;
-	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
-	for (UPrimitiveComponent* Prim : Primitives)
-	{
-		if (!IsValid(Prim)) continue;
-		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}
+	ItemInHand->DetachFromComponent_Implementation();
+	ItemInHand->SetOwnerCharacter(nullptr);
 	ItemInHand = nullptr;
 }
 	
-void ABaseInteractableCharacter::PickUpItemToHand(UObject* InSpecificPickUpItem)
+void ABaseInteractableCharacter::PickUpItemToHand(AInteractableItemBase* InSpecificPickUpItem)
 {
 	if (IsValid(InSpecificPickUpItem)) ClosestObject = InSpecificPickUpItem;
 	if (!IsValid(ClosestObject)) return;
-
-	const USceneComponent* ComponentItem = Cast<USceneComponent>(ClosestObject);
-	const AActor* ActorItem = Cast<AActor>(ClosestObject);
-	const AActor* OwnerActor = nullptr;
-	USceneComponent* RootComp = nullptr;
-
-	if (IsValid(ActorItem))
-	{
-		OwnerActor = ActorItem;
-		RootComp = ActorItem->GetRootComponent();
-	}
-	else if (IsValid(ComponentItem))
-	{
-		OwnerActor = ComponentItem->GetOwner();
-		RootComp = OwnerActor ? OwnerActor->GetRootComponent() : nullptr;
-	}
-
-	if (!IsValid(OwnerActor) || !IsValid(RootComp)) return;
-
-	TArray<UPrimitiveComponent*> Primitives;
-	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
-	for (UPrimitiveComponent* Prim : Primitives)
-	{
-		if (!IsValid(Prim)) continue;
-		Prim->SetSimulatePhysics(false);
-		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	TArray<UStaticMeshComponent*> Components;
-	OwnerActor->GetComponents<UStaticMeshComponent>(Components);
-	for (UStaticMeshComponent* StaticMeshComponent : Components)
-	{
-		if (StaticMeshComponent)
-		{
-			StaticMeshComponent->SetOverlayMaterial(nullptr);
-		}
-	}
-	
-	OwnerActor->GetRootComponent()->AttachToComponent(MovingModel->GetRightHand(),FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	ClosestObject->AttachToComponent_Implementation(MovingModel->GetRightHand());
+	ClosestObject->SetOwnerCharacter(this);
 	ItemInHand = ClosestObject;
+	ClosestObject = nullptr;
 }
 
 void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this too fast will break it, resulting mostly with BackItemHolster being valid
@@ -265,16 +165,8 @@ void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this to
 void ABaseInteractableCharacter::AttachToBackHolster()
 {
 	if (!IsValid(ItemInHand)) return;
-
-	const USceneComponent* ComponentItem = Cast<USceneComponent>(ItemInHand);
-	AActor* ActorItem = Cast<AActor>(ItemInHand);
-	AActor* OwnerActor = nullptr;
-
-	if (IsValid(ActorItem)) OwnerActor = ActorItem;
-	else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
-
-	OwnerActor->AttachToComponent(BackHolster, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	BackItemHolster = OwnerActor;
+	ItemInHand->AttachToComponent_Implementation(BackHolster);
+	BackItemHolster = ItemInHand;
 	ItemInHand = nullptr;
 }
 void ABaseInteractableCharacter::DeattachFromBackHolster()
@@ -285,12 +177,12 @@ void ABaseInteractableCharacter::DeattachFromBackHolster()
 
 void ABaseInteractableCharacter::TryToInteractWithWorld()
 {
-	UInteractionManager* InteractionManager = UInteractionManager::GetMain(GetWorld());
+	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
 	if (!IsValid(InteractionManager)) return;
 
 	for (auto Interaction : InteractionManager->GetInteractions(this))
 	{
-		UInteractionBehaviour* ActionRef = Cast<UInteractionBehaviour>(Interaction.GetObject());
+		UInteractionBehaviour* ActionRef = Cast<UInteractionBehaviour>(Interaction);
 		if (ActionRef->CanInteract_Implementation(this))
 		{
 			ActionRef->PerformInteraction_Implementation(this);

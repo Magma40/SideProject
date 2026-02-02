@@ -8,14 +8,14 @@
 
 class UCompanionActionStack;
 class APlayerCamera;
+class AInteractableItemBase;
+class AMovingModel;
 
 struct FPickupCandidate
 {
-	UObject* Object = nullptr;           // Could be actor OR component
+	AInteractableItemBase* Object = nullptr;
 	float Distance = FLT_MAX;
 };
-
-class AMovingModel;
 
 UCLASS()
 class SIDEPROJECT_API ABaseInteractableCharacter : public ACharacter
@@ -31,7 +31,7 @@ public:
 	//PickUpAndDrop
 	UFUNCTION(BlueprintCallable) virtual void TryToPickUpItem();   //Looks around to see if anything can be picked up
 	UFUNCTION(BlueprintCallable) virtual void DropItemInHand();	 //Should drop item in hand infront of character
-	UFUNCTION(BlueprintCallable) virtual void PickUpItemToHand(UObject* InSpecificPickUpItem); //Should pick up item into hand
+	UFUNCTION(BlueprintCallable) virtual void PickUpItemToHand(AInteractableItemBase* InSpecificPickUpItem); //Should pick up item into hand
 
 	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster(); //Checks if you can either add or remove item from holster
 	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
@@ -41,10 +41,10 @@ public:
 	
 	virtual void Jump() override;
 	
-	UObject* GetItemInHand() const { return ItemInHand; }
+	AInteractableItemBase* GetItemInHand() const { return ItemInHand; }
 	void ResetItemInHand(){ ItemInHand = nullptr; }
 	
-	UObject* GetItemInBackHolster() const { return BackItemHolster; }
+	AInteractableItemBase* GetItemInBackHolster() const { return BackItemHolster; }
 	AMovingModel* GetMovingModel() const { return MovingModel; }
 	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
 	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
@@ -56,10 +56,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
 
 private:
-	UObject* ClosestObject = nullptr;
+	AInteractableItemBase* ClosestObject = nullptr;
 
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* ItemInHand = nullptr;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") UObject* BackItemHolster = nullptr;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* ItemInHand = nullptr;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* BackItemHolster = nullptr;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 60.0f;
 	USceneComponent* BackHolster = nullptr;
 

@@ -17,7 +17,4 @@ class SIDEPROJECT_API AMainGameMode : public AGameModeBase
 
 public:
 	AMainGameMode();
-	UPROPERTY() UInteractionManager* InteractionManager = nullptr;
-
-	UInteractionManager* GetInteractionManager();
 };

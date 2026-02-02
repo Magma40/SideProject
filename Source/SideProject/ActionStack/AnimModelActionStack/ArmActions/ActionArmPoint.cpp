@@ -4,6 +4,8 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 #include "WorldObjects/PlayerCamera.h"
 
 UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
@@ -18,22 +20,6 @@ UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, AB
 void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
-	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
-	
-	FHitResult Hit;
-	const FVector Start = TheMainCameraInScene->GetActorLocation();
-	const FVector End = Start + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
-
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OwnerCharacter);
-	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
-	{
-		PointingLocation = Hit.ImpactPoint;
-		const FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
-		AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, PointLocation));
-	}
 }
 
 void UActionArmPoint::OnEnd_Implementation()
@@ -56,55 +42,53 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	const FVector End = Start + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
 
 	FCollisionQueryParams Params;
+	TArray<AActor*> ActorsToIgnore;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InvisibleWall", ActorsToIgnore);
 	Params.AddIgnoredActor(OwnerCharacter);
+	Params.AddIgnoredActor(TheMainCameraInScene);
+	Params.AddIgnoredActors(ActorsToIgnore);
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
 	{
-		if (Hit.GetComponent()->GetOwner()->ActorHasTag("HandHeldItem"))
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractableItemInterface::StaticClass()))
 		{
-			ActorPointedAt = Hit.GetComponent();
-			RenderPointingToIndicator(PointingLocation,  Hit.GetComponent());
+			ActorPointedAt = Cast<AInteractableItemBase>(HitActor);
+			RenderPointingToIndicator(Hit.ImpactPoint, ActorPointedAt);
 		}
 		else
 		{
-			RenderPointingToIndicator(PointingLocation,  nullptr);
+			RenderPointingToIndicator(Hit.ImpactPoint, nullptr);
 			ActorPointedAt = nullptr;
 		}
-		
-		PointingLocation = Hit.ImpactPoint;
-		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-		FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
-		MoveArmRef->TargetPose.Position = PointLocation;
-
-		FVector LocationA = MoveArmRef->ArmParts[1]->GetComponentLocation();
-		FVector LocationB = MoveArmRef->ArmParts[2]->GetComponentLocation();
-		FVector Direction = LocationB - LocationA;
-		 if (!Direction.IsNearlyZero())
-        {
-            Direction.Normalize();
-            FVector NewZAxis = Direction;
-            FVector WorldUpVector = FVector::UpVector; 
-            FVector NewXAxis = FVector::CrossProduct(WorldUpVector, NewZAxis).GetSafeNormal();
-		 	if (NewXAxis.IsNearlyZero())
-            {
-                FVector WorldRightVector = FVector::RightVector;
-                NewXAxis = FVector::CrossProduct(WorldRightVector, NewZAxis).GetSafeNormal();
-            }
-
-            FVector NewYAxis = FVector::CrossProduct(NewZAxis, NewXAxis).GetSafeNormal();
-		 	FMatrix Matrix( FPlane(NewXAxis, 0.f), FPlane(NewYAxis, 0.f), FPlane(NewZAxis, 0.f), FPlane(0.f, 0.f, 0.f, 1.f));
-            FRotator NewRotation = Matrix.Rotator();
-			FQuat RelativeQuat = Xform.InverseTransformRotation(NewRotation.Quaternion());
-		 	MoveArmRef->TargetPose.Rotation = RelativeQuat;
-        }
 	}
-	else
+
+	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
+	FQuat RelativeQuat;
+
+	FVector LocationA = MoveArmRef->ArmParts[1]->GetComponentLocation();
+	FVector LocationB = MoveArmRef->ArmParts[2]->GetComponentLocation();
+	FVector Direction = LocationB - LocationA;
+	Direction.Normalize();
+	FVector NewZAxis = Direction;
+	FVector WorldUpVector = FVector::UpVector; 
+	FVector NewXAxis = FVector::CrossProduct(WorldUpVector, NewZAxis).GetSafeNormal();
+	if (NewXAxis.IsNearlyZero())
 	{
-		RenderPointingToIndicator(PointingLocation,  nullptr);
-		ActorPointedAt = nullptr;
-		const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-		FVector PointLocation = Xform.InverseTransformPosition(End);
-		MoveArmRef->TargetPose.Position = PointLocation;
+		FVector WorldRightVector = FVector::RightVector;
+		NewXAxis = FVector::CrossProduct(WorldRightVector, NewZAxis).GetSafeNormal();
 	}
+
+	FVector NewYAxis = FVector::CrossProduct(NewZAxis, NewXAxis).GetSafeNormal();
+	FMatrix Matrix( FPlane(NewXAxis, 0.f), FPlane(NewYAxis, 0.f), FPlane(NewZAxis, 0.f), FPlane(0.f, 0.f, 0.f, 1.f));
+	FRotator NewRotation = Matrix.Rotator();
+	RelativeQuat = Xform.InverseTransformRotation(NewRotation.Quaternion());
+	
+	AnimTransforms.Empty();
+	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
+	AnimTransforms.Add(FTransform(RelativeQuat, HandLocationPos));
+
+	FVector PointLocation = Xform.InverseTransformPosition(PointingLocation);
+	AnimTransforms.Add(FTransform(RelativeQuat, PointLocation));
 
 	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
 	if (!AnimSubsystem)
@@ -112,13 +96,6 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
-	AnimTransforms.Empty();
-	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
-
-	FVector PointLocation = Xform.InverseTransformPosition(Hit.ImpactPoint);
-	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, PointLocation));
 	
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
@@ -130,9 +107,10 @@ bool UActionArmPoint::IsDone_Implementation() const
 	return false;
 }
 
-void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, const UActorComponent* InPointingAtItemActor)
+void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AInteractableItemBase* InPointingAtItemActor)
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
+	PointingLocation = InHitLocation;
 
 	constexpr float EachSpawnDistance = 25.0f;
 	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
@@ -188,35 +166,5 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, co
 		}
 	}
 
-	if (IsValid(InPointingAtItemActor))
-	{
-		UMaterialInterface* OutlineObject = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineObject.Mat_OutlineObject"));
-
-		const AActor* ActorRef = InPointingAtItemActor->GetOwner();
-		TArray<UStaticMeshComponent*> Components;
-		ActorRef->GetComponents<UStaticMeshComponent>(Components);
-		for (UStaticMeshComponent* StaticMeshComponent : Components)
-		{
-			if (StaticMeshComponent)
-			{
-				StaticMeshComponent->SetOverlayMaterial(OutlineObject);
-			}
-		}
-	}
-	else // Reset the last object that was outlined
-	{
-		if (IsValid(ActorPointedAt))
-		{
-			const AActor* ActorRef = ActorPointedAt->GetOwner();
-			TArray<UStaticMeshComponent*> Components;
-			ActorRef->GetComponents<UStaticMeshComponent>(Components);
-			for (UStaticMeshComponent* StaticMeshComponent : Components)
-			{
-				if (StaticMeshComponent)
-				{
-					StaticMeshComponent->SetOverlayMaterial(nullptr);
-				}
-			}
-		}
-	}
+	if (IsValid(InPointingAtItemActor)) InPointingAtItemActor->SetNeedOutlineMaterial(EMaterialOverlayStatus::Active);
 }

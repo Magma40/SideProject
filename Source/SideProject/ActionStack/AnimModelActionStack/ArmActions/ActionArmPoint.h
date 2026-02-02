@@ -9,6 +9,7 @@
 class APlayerCamera;
 class UMoveArm;
 class ABaseInteractableCharacter;
+class AInteractableItemBase;
 
 UCLASS()
 class SIDEPROJECT_API UActionArmPoint : public UAction
@@ -22,10 +23,10 @@ public:
 	void OnBegin_Implementation(bool bFirstTime) override;
 	void OnEnd_Implementation() override;
 
-	void RenderPointingToIndicator(const FVector& InHitLocation, const UActorComponent* InPointingAtItemActor);
+	void RenderPointingToIndicator(const FVector& InHitLocation, AInteractableItemBase* InPointingAtItemActor);
 
 	FVector GetPointingLocation() const { return PointingLocation; } 
-	UActorComponent* GetActorPointedAt() const { return ActorPointedAt; }
+	AInteractableItemBase* GetActorPointedAt() { return ActorPointedAt; }
 	
 private:
 	UMoveArm* MoveArmRef = nullptr;
@@ -36,6 +37,6 @@ private:
 
 	TArray<AActor*> PointingIndicators;
 	FVector PointingLocation = FVector::ZeroVector;
-	UActorComponent* ActorPointedAt = nullptr;
+	AInteractableItemBase* ActorPointedAt = nullptr;
 	APlayerCamera* TheMainCameraInScene = nullptr;
 };

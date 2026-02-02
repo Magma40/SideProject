@@ -6,9 +6,8 @@
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandToLocation.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "ProcedualAnimation/MovingModel.h"
-#include "Tools/GenericCalls.h"
+#include "WorldInteractions/ItemInteractions/KeyItem.h"
 
-//__________ ADoor __________
 UDoor::UDoor()  
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -28,7 +27,8 @@ void UDoor::BeginPlay()
 		if (!Child) continue;
 		Lock = Child;
 	}
-	UInteractionManager::GetMain(GetOwner()->GetWorld())->AddInteraction(this);
+	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
+	if (IsValid(InteractionManager)) InteractionManager->AddInteraction(this);
 }
 
 void UDoor::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -44,15 +44,8 @@ void UDoor::TickComponent(const float DeltaTime, const ELevelTick TickType, FAct
 		}
 		
 		if (!IsValid(InteractingCharacter->GetItemInHand())) return;
-		if ( !InteractingCharacter->GetItemInHand()->IsA(ItemNeeded)) return;
-		const USceneComponent* ComponentItem = Cast<USceneComponent>(InteractingCharacter->GetItemInHand());
-		const AActor* ActorItem = Cast<AActor>(InteractingCharacter->GetItemInHand());
-		const AActor* OwnerActor = nullptr;
-
-		if (IsValid(ActorItem)) OwnerActor = ActorItem;
-		else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
-		
-		if (FVector::Distance(OwnerActor->GetActorLocation(), Lock->GetActorLocation()) < 50.0f)
+		if ( !Cast<AKeyItem>(InteractingCharacter->GetItemInHand())) return;
+		if (FVector::Distance(InteractingCharacter->GetItemInHand()->GetActorLocation(), Lock->GetActorLocation()) < 50.0f)
 		{
 			Interacting = false;
 			Unlock();
@@ -83,25 +76,14 @@ void UDoor::PerformInteraction_Implementation(ABaseInteractableCharacter* InInte
 
 void UDoor::Unlock()
 {
-	const USceneComponent* ComponentItem = Cast<USceneComponent>(InteractingCharacter->GetItemInHand());
-	const AActor* ActorItem = Cast<AActor>(InteractingCharacter->GetItemInHand());
-	const AActor* OwnerActor = nullptr;
-
-	if (IsValid(ActorItem)) OwnerActor = ActorItem;
-	else if (IsValid(ComponentItem)) OwnerActor = ComponentItem->GetOwner();
-
-	TArray<UPrimitiveComponent*> Primitives;
-	OwnerActor->GetComponents<UPrimitiveComponent>(Primitives);
-	for (UPrimitiveComponent* Prim : Primitives)
-	{
-		if (!IsValid(Prim)) continue;
-		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		Prim->SetSimulatePhysics(true);
-		Prim->SetEnableGravity(true);
-	}
-	OwnerActor->GetRootComponent()->AttachToComponent(Lock->GetRootComponent() ,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	TArray<UStaticMeshComponent*> Meshes;
+	Lock->GetComponents<UStaticMeshComponent>(Meshes);
+	InteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(Meshes[0]);
+	InteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
 	InteractingCharacter->ResetItemInHand();
-
+	bIsLocked = false;
+	
+	TArray<UPrimitiveComponent*> Primitives;
 	Lock->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	Lock->GetComponents<UPrimitiveComponent>(Primitives);
 	for (UPrimitiveComponent* Prim : Primitives)
@@ -111,8 +93,12 @@ void UDoor::Unlock()
 		Prim->SetSimulatePhysics(true);
 		Prim->SetEnableGravity(true);
 	}
-	UInteractionManager::GetMain(GetOwner()->GetWorld())->RemoveInteraction(this);
-	DestroyComponent(false);	
+	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
+	if (IsValid(InteractionManager))
+	{
+		InteractionManager->RemoveInteraction(this);
+		DestroyComponent(false);
+	}
 }
 
 
