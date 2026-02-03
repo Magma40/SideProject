@@ -7,7 +7,7 @@ void UInteractionManager::AddInteraction(UObject* Interaction)
 {
 	if (!IsValid(Interaction) && !IsValid(this)) return;
 	if(Contains(Interaction)) return;
-	UE_LOG(LogTemp, Warning,TEXT("Interaction %s Has Been Added Onto The %s"),*Interaction->StaticClass()->GetFName().ToString(), *StaticClass()->GetFName().ToString());
+	UE_LOG(LogTemp, Warning,TEXT("Interaction %s Has Been Added Onto The %s"),*Interaction->GetFName().ToString(), *StaticClass()->GetFName().ToString());
 	Interactions.Add(Interaction);
 }
 
@@ -15,7 +15,7 @@ void UInteractionManager::RemoveInteraction(const UObject* Interaction)
 {
 	if (!IsValid(Interaction) && !IsValid(this)) return;
 	if(!Contains(Interaction)) return;
-	UE_LOG(LogTemp, Error,TEXT("Interaction %s Has Been Removed From The %s"),*Interaction->StaticClass()->GetFName().ToString(), *StaticClass()->GetFName().ToString());
+	UE_LOG(LogTemp, Error,TEXT("Interaction %s Has Been Removed From The %s"),*Interaction->GetFName().ToString(), *StaticClass()->GetFName().ToString());
 	Interactions.Remove(Interaction);
 }
 

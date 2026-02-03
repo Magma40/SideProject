@@ -41,11 +41,11 @@ public:
 	
 	virtual void Jump() override;
 	
-	AInteractableItemBase* GetItemInHand() const { return ItemInHand; }
+	UFUNCTION(BlueprintCallable) AInteractableItemBase* GetItemInHand() const { return ItemInHand; }
 	void ResetItemInHand(){ ItemInHand = nullptr; }
 	
-	AInteractableItemBase* GetItemInBackHolster() const { return BackItemHolster; }
-	AMovingModel* GetMovingModel() const { return MovingModel; }
+	UFUNCTION(BlueprintCallable) AInteractableItemBase* GetItemInBackHolster() const { return BackItemHolster; }
+	UFUNCTION(BlueprintCallable) AMovingModel* GetMovingModel() const { return MovingModel; }
 	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
 	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
 	bool IsCharacterInteracting() const  { return InteractionEnabled; }

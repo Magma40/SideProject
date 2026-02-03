@@ -40,11 +40,12 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/ApplicationCore/Public/Android/AndroidInputInterface.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Containers/Set.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/include/atomic" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/SideProject.uproject" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SideProject.uproject" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -52,23 +53,23 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActionStack.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmHandToLocation.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmHandToLocation.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmWave.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -77,13 +78,13 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegJumpingMovement.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainGameMode.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainMode.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainGameMode.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainMode.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/Subsystems/AnimationCurveSubsystem.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/Subsystems/AnimationCurveSubsystem.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/BaseInteractableCharacter.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -94,9 +95,9 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Joint.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveArm.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MoveLeg.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/MovingModel.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Tools/GenericCalls.h" root0="FORCE_HIGHLIGHTING" />
@@ -104,14 +105,16 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/InteractionManager.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/InteractableItemBase.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/InteractableItemBase.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KatanaItem.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KatanaItem.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KeyItem.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KeyItem.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/Door.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/Door.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KatanaItem.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KatanaItem.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KeyItem.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ItemInteractions/KeyItem.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/InteractButton.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/InteractButton.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/InteractDoor.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldInteractions/ObjectInteractions/InteractDoor.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldObjects/PlayerCamera.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldObjects/PlayerCamera.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/WorldObjects/PlayerCamera.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
@@ -505,6 +508,11 @@
       <workItem from="1770052553457" duration="170000" />
       <workItem from="1770052746390" duration="63000" />
       <workItem from="1770052904388" duration="1241000" />
+      <workItem from="1770113899673" duration="2976000" />
+      <workItem from="1770116920777" duration="2105000" />
+      <workItem from="1770120568099" duration="3335000" />
+      <workItem from="1770124077857" duration="8950000" />
+      <workItem from="1770137286172" duration="2466000" />
     </task>
     <servers />
   </component>

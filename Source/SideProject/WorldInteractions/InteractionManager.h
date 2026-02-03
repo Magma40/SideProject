@@ -30,6 +30,7 @@ class IInteractionInterface
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void Interact();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) bool CanInteract(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetDistanceToInteraction(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void PerformInteraction(ABaseInteractableCharacter* InteractingCharacter);
@@ -81,6 +82,7 @@ protected:
 	float DistanceForInteraction;
 	
 public:
+	virtual void Interact_Implementation() override {}
 	virtual bool CanInteract_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return false; }
 	virtual float GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return 0.0f;}
 	virtual void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override {}

@@ -26,7 +26,7 @@ public:
 	void AddWaveAction();
 	void AddPointingAction();
 	void AddHandHoldingAction(UMoveArm* OtherCompanionArm);
-	void AddHandToLocation(const FVector& InToLocation);
+	void AddHandToLocation(const FVector& InToLocation, bool bWantToPickUpItem);
 
 	UMoveArm* GetArm() const { return ArmRef; }
 

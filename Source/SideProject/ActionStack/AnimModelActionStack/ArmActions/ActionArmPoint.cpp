@@ -50,16 +50,8 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
 	{
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractableItemInterface::StaticClass()))
-		{
-			ActorPointedAt = Cast<AInteractableItemBase>(HitActor);
-			RenderPointingToIndicator(Hit.ImpactPoint, ActorPointedAt);
-		}
-		else
-		{
-			RenderPointingToIndicator(Hit.ImpactPoint, nullptr);
-			ActorPointedAt = nullptr;
-		}
+		if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractableItemInterface::StaticClass())) { RenderPointingToIndicator(Hit.ImpactPoint, ActorPointedAt); }
+		else { RenderPointingToIndicator(Hit.ImpactPoint, nullptr); }
 	}
 
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
@@ -111,6 +103,7 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AI
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
 	PointingLocation = InHitLocation;
+	ActorPointedAt = InPointingAtItemActor;
 
 	constexpr float EachSpawnDistance = 25.0f;
 	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();

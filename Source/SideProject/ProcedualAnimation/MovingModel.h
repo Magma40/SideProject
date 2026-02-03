@@ -46,8 +46,8 @@ public:
 	
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;
-	USceneComponent* GetRightHand() const;
-	USceneComponent* GetLeftHand() const;
+	UFUNCTION(BlueprintCallable) USceneComponent* GetRightHand() const;
+	UFUNCTION(BlueprintCallable) USceneComponent* GetLeftHand() const;
 	UMoveArm* GetRightArm() const;
 	UMoveArm* GetLeftArm() const;
 	TArray<UMoveLeg*> GetLegs();

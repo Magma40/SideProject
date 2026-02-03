@@ -102,7 +102,7 @@ void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
 	this->PushAction(ArmsHandHolding);
 }
 
-void UArmActionStack::AddHandToLocation(const FVector& InToLocation)
+void UArmActionStack::AddHandToLocation( const FVector& InToLocation, bool bWantToPickUpItem)
 {
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
@@ -111,7 +111,7 @@ void UArmActionStack::AddHandToLocation(const FVector& InToLocation)
 		this->RemoveAction(ActionRef);
 		return;
 	}
-	UActionArmHandToLocation* HandToLocation = UActionArmHandToLocation::Create(this, ArmRef, InToLocation);
+	UActionArmHandToLocation* HandToLocation = UActionArmHandToLocation::Create(this, OwnerCharacter, ArmRef, InToLocation, bWantToPickUpItem);
 	this->PushAction(HandToLocation);
 	
 }

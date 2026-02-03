@@ -133,7 +133,7 @@ namespace GenericCalls
 	}
 
 	template<typename T>
-	T* FindChildComponentByClass(const AActor* Parent)
+	T* FindChildComponentByClass(AActor* Parent)
 	{
 		TArray<USceneComponent*> AllComponents;
 		Parent->GetComponents<USceneComponent>(AllComponents);
