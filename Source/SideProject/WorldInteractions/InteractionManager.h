@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "Debug/ReporterGraph.h"
 #include "UObject/Interface.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "Core/PublicVariables.h"
 #include "InteractionManager.generated.h"
 
 class ABaseInteractableCharacter;
@@ -30,13 +30,19 @@ class IInteractionInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void Interact();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void Interact(ABaseInteractableCharacter* InInteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) bool CanInteract(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetDistanceToInteraction(ABaseInteractableCharacter* InteractingCharacter);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void PerformInteraction(ABaseInteractableCharacter* InteractingCharacter);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) TArray<UStaticMeshComponent*>  GetAllStaticMeshesInOwner();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void EnableMaterialInterface();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void DisableMaterialInterface(); 
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetInteractionDistance();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EActionType GetInteractionType(); 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EActionType GetInteractionType();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EMaterialOverlayStatus GetNeedOutlineMaterial();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void SetNeedOutlineMaterial(const EMaterialOverlayStatus InNeedOutlineMaterial);
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -78,21 +84,32 @@ class SIDEPROJECT_API UInteractionBehaviour : public USceneComponent, public IIn
 	GENERATED_BODY()
 
 protected:
-	EActionType Type;
-	float DistanceForInteraction;
+	EMaterialOverlayStatus MaterialOverlayStatus =  EMaterialOverlayStatus::None;
+	EActionType Type = EActionType::Passive;
+	float DistanceForInteraction = 0.0f;
+	ABaseInteractableCharacter* InteractingCharacter = nullptr;
+	bool bInteracting = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionReferences") UMaterialInterface* OutlineMaterialInterface = nullptr;
+	UPROPERTY(EditAnywhere, Category="InteractionReferences") AActor* ActorToCallInteract = nullptr;
+	UPROPERTY(EditAnywhere, Category="InteractionReferences") bool bOneUse = false;
 	
 public:
-	virtual void Interact_Implementation() override {}
-	virtual bool CanInteract_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return false; }
-	virtual float GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override { return 0.0f;}
-	virtual void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override {}
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(BlueprintCallable)  virtual void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
+	virtual bool CanInteract_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
+	virtual float GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
+	virtual void PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
 
+	virtual TArray<UStaticMeshComponent*> GetAllStaticMeshesInOwner_Implementation() override;
+	virtual void EnableMaterialInterface_Implementation() override;
+	virtual void DisableMaterialInterface_Implementation() override;
+	
 	virtual float GetInteractionDistance_Implementation() override { return DistanceForInteraction; } 
 	virtual EActionType GetInteractionType_Implementation() override { return Type; }
-
-// protected:
-// 	UInteractionBehaviour() { UInteractionManager::GetMain()->AddInteraction(this); }
-// 	virtual ~UInteractionBehaviour() override { UInteractionManager::GetMain()->RemoveInteraction(this); }
+	virtual EMaterialOverlayStatus GetNeedOutlineMaterial_Implementation() override { return MaterialOverlayStatus; }
+	virtual void SetNeedOutlineMaterial_Implementation(const EMaterialOverlayStatus InNeedOutlineMaterial) override { MaterialOverlayStatus = InNeedOutlineMaterial; } 
 };
 
 template<typename T>

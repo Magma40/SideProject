@@ -24,6 +24,7 @@ public:
 	void OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator);
 	void OnAddActionPickUp();
 	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
+	void OnAddTryToInteractWithWorld();
 
 private:
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
 #include "WorldInteractions/InteractionManager.h"
 #include "InteractItemPlaceHolder.generated.h"
 
@@ -17,24 +16,16 @@ class SIDEPROJECT_API UInteractItemPlaceHolder : public UInteractionBehaviour
 
 protected:
 	UInteractItemPlaceHolder();
-	~UInteractItemPlaceHolder();
-	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
-	UFUNCTION(BlueprintCallable) void Interact_Implementation() override;
-	bool CanInteract_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
-	float GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
+	void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
 	void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
 	
 private:
-	ABaseInteractableCharacter* InteractingCharacter = nullptr;
-	bool Interacting = false;
 	AInteractableItemBase* PlacedItem = nullptr;
 	
 public:
-	UPROPERTY(EditAnywhere, Category="ItemPlaceHolderReferences") AActor* ToInteractActor = nullptr;
 	UPROPERTY(EditAnywhere, Category="ItemPlaceHolderReferences") AInteractableItemBase* ItemNeeded = nullptr;
-	UPROPERTY(EditAnywhere, Category="ItemPlaceHolderReferences") bool bOneUsePlacement = false;
 };
 

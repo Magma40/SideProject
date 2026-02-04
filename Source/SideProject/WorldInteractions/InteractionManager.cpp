@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldInteractions/InteractionManager.h"
+#include "Player/BaseInteractableCharacter.h"
+#include "Tools/GenericCalls.h"
 
-#include "Core/MainGameMode.h"
-#include "Kismet/GameplayStatics.h"
 void UInteractionManager::AddInteraction(UObject* Interaction)
 {
 	if (!IsValid(Interaction) && !IsValid(this)) return;
@@ -36,6 +36,117 @@ TSet<UObject*>  UInteractionManager::GetInteractions(ABaseInteractableCharacter*
 		}
 	}
 	return Results;
+}
+
+//UInteractionBehaviour
+
+void UInteractionBehaviour::BeginPlay()
+{
+	Super::BeginPlay();
+	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
+	if (IsValid(InteractionManager)) InteractionManager->AddInteraction(this);
+}
+
+void UInteractionBehaviour::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	switch (MaterialOverlayStatus)
+	{
+		case EMaterialOverlayStatus::None: break;
+		case EMaterialOverlayStatus::Active: { EnableMaterialInterface_Implementation(); break; }
+		case EMaterialOverlayStatus::Inactive: { DisableMaterialInterface_Implementation(); break; }
+	}
+}
+
+void UInteractionBehaviour::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
+{
+	if (IsValid(ActorToCallInteract))
+	{
+		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
+		if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InInteractingCharacter);	
+	}
+	
+	if (bOneUse)
+	{
+		UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
+		if (IsValid(InteractionManager))
+		{
+			InteractionManager->RemoveInteraction(this);
+			DestroyComponent(false);
+		}	
+	}
+	else bInteracting =  false;
+}
+
+bool UInteractionBehaviour::CanInteract_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
+{
+	if (GetDistanceToInteraction_Implementation(InInteractingCharacter) > DistanceForInteraction) return false;
+	return true;
+}
+
+float UInteractionBehaviour::GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
+{
+	FVector ToButtonLocation = this->GetComponentLocation() - InInteractingCharacter->GetActorLocation();
+	ToButtonLocation.Y = 0.0f;
+	return ToButtonLocation.Size();
+}
+
+void UInteractionBehaviour::PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
+{
+	bInteracting = true;
+	InteractingCharacter = InInteractingCharacter;
+}
+
+TArray<UStaticMeshComponent*>  UInteractionBehaviour::GetAllStaticMeshesInOwner_Implementation()
+{
+	TArray<UStaticMeshComponent*> FoundComponentsChildren;
+	
+	//Get Parent and its components
+	AActor* ParentOwner = GetAttachParentActor();
+	if (!IsValid(ParentOwner)) return FoundComponentsChildren; 
+	TArray<AActor*> FoundActorsChildren;
+	ParentOwner->GetAllChildActors(FoundActorsChildren, true);
+
+	//Check if found ActorChildren have components
+	ParentOwner->GetComponents<UStaticMeshComponent>(FoundComponentsChildren, true);
+	for (AActor* ActorChild : FoundActorsChildren)
+	{
+		TArray<UStaticMeshComponent*> MoreFoundComponentsChildren;
+		ActorChild->GetComponents<UStaticMeshComponent>(MoreFoundComponentsChildren, true);
+		for (UStaticMeshComponent* StaticMeshChild : MoreFoundComponentsChildren)
+		{
+			if (IsValid(StaticMeshChild) && !FoundComponentsChildren.Contains(StaticMeshChild)) continue;
+			FoundComponentsChildren.Add(StaticMeshChild);
+		}
+	}
+	return FoundComponentsChildren;
+}
+
+void UInteractionBehaviour::EnableMaterialInterface_Implementation()
+{
+	//Get Parent and its components
+	TArray<UStaticMeshComponent*> FoundComponentsChildren = GetAllStaticMeshesInOwner_Implementation();
+	for (UStaticMeshComponent* StaticMeshChild : FoundComponentsChildren)
+	{
+		if (IsValid(StaticMeshChild))
+		{
+			StaticMeshChild->SetOverlayMaterial(OutlineMaterialInterface);
+		}
+	}
+	MaterialOverlayStatus = EMaterialOverlayStatus::Inactive;
+}
+
+void UInteractionBehaviour::DisableMaterialInterface_Implementation()
+{
+	TArray<UStaticMeshComponent*> FoundComponentsChildren = GetAllStaticMeshesInOwner_Implementation();
+	for (UStaticMeshComponent* StaticMeshChild : FoundComponentsChildren)
+	{
+		if (IsValid(StaticMeshChild))
+		{
+			StaticMeshChild->SetOverlayMaterial(nullptr);
+		}
+	}
+	MaterialOverlayStatus = EMaterialOverlayStatus::None;
 }
 
 

@@ -6,8 +6,3 @@ AKatanaItem::AKatanaItem()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
-
-void AKatanaItem::Tick(const float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}

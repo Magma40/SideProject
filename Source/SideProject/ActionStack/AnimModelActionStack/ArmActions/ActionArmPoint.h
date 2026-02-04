@@ -23,10 +23,10 @@ public:
 	void OnBegin_Implementation(bool bFirstTime) override;
 	void OnEnd_Implementation() override;
 
-	void RenderPointingToIndicator(const FVector& InHitLocation, AInteractableItemBase* InPointingAtItemActor);
+	void RenderPointingToIndicator(const FVector& InHitLocation, AActor* InPointingAtItemActor);
 
 	FVector GetPointingLocation() const { return PointingLocation; } 
-	AInteractableItemBase* GetActorPointedAt() { return ActorPointedAt; }
+	AActor* GetActorPointedAt() { return ActorPointedAt; }
 	
 private:
 	UMoveArm* MoveArmRef = nullptr;
@@ -37,6 +37,6 @@ private:
 
 	TArray<AActor*> PointingIndicators;
 	FVector PointingLocation = FVector::ZeroVector;
-	AInteractableItemBase* ActorPointedAt = nullptr;
+	AActor* ActorPointedAt = nullptr;
 	APlayerCamera* TheMainCameraInScene = nullptr;
 };

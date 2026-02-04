@@ -12,9 +12,12 @@
 #include "ArmActions/ActionArmHandToLocation.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "ProcedualAnimation/MovingModel.h"
+#include "Tools/GenericCalls.h"
+#include "WorldInteractions/InteractionManager.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 
 
+class UInteractionBehaviour;
 UArmActionStack::UArmActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UArmActionStack::BeginPlay()
@@ -65,9 +68,14 @@ void UArmActionStack::AddWaveAction()
 		if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()) OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
 		if (UActionArmHandHolding* ActionRef = OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()) OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(ActionRef);
 		const FVector PointingLocationRef = PointAction->GetPointingLocation();
-		if (IsValid(PointAction->GetActorPointedAt()))
+		if (IsValid(PointAction->GetActorPointedAt()) && Cast<AInteractableItemBase>(PointAction->GetActorPointedAt()))
 		{
 			OwnerCompanion->GetCompanionActionStack()->OnAddActionPickUp();
+			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, false);
+		}
+		else if (IsValid(PointAction->GetActorPointedAt()) && Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())))
+		{
+			OwnerCompanion->GetCompanionActionStack()->OnAddTryToInteractWithWorld();
 			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, false);
 		}
 		else

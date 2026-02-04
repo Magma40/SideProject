@@ -12,7 +12,7 @@ void AInteractableItemBase::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 	switch (MaterialOverlayStatus)
 	{
-		case EMaterialOverlayStatus::None: break;;
+		case EMaterialOverlayStatus::None: break;
 		case EMaterialOverlayStatus::Active: { EnableMaterialInterface_Implementation(); break; }
 		case EMaterialOverlayStatus::Inactive: { DisableMaterialInterface_Implementation(); break; }
 	}

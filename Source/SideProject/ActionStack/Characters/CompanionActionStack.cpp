@@ -4,7 +4,7 @@
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "ActionStack/Actions/ActionPickUpItem.h"
 #include "ActionStack/Actions/ActionContinuousMoveTo.h"
-#include "ProcedualAnimation/MovingModel.h"
+#include "ActionStack/Actions/ActionTryToInteractWithWorld.h"
 
 UCompanionActionStack::UCompanionActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
@@ -49,5 +49,12 @@ void UCompanionActionStack::OnAddActionContinuousMove(ABaseInteractableCharacter
 {
 	if (!OwnerCharacter) return;
 	UActionContinuousMoveTo* ActionContinuousMoveTo = UActionContinuousMoveTo::Create(this, OwnerCharacter, InPlayer);
+	this->PushAction(ActionContinuousMoveTo);
+}
+
+void UCompanionActionStack::OnAddTryToInteractWithWorld()
+{
+	if (!OwnerCharacter) return;
+	UActionTryToInteractWithWorld* ActionContinuousMoveTo = UActionTryToInteractWithWorld::Create(this, OwnerCharacter);
 	this->PushAction(ActionContinuousMoveTo);
 }

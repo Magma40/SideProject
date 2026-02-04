@@ -29,7 +29,7 @@ public:
 private:
 	ABaseInteractableCharacter* CompanionCharacter = nullptr;
 	FVector TargetLocation = FVector::ZeroVector;
-	float MinDistance = 50.0f;
+	float MinDistance = 10.0f;
 	AActor* IndicatorActor = nullptr;
 	bool bNeedIndicator = true;
 	

@@ -13,6 +13,5 @@ class SIDEPROJECT_API AKatanaItem : public AInteractableItemBase
 
 protected:
 	AKatanaItem();
-	virtual void Tick(float DeltaTime) override;
 };
 

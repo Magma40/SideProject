@@ -102,6 +102,7 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 	{
 		AInteractableItemBase* InteractableItem = Cast<AInteractableItemBase>(Actor);
 		if (InteractableItem == BackItemHolster) continue;
+		if (InteractableItem->GetPersistentlyFrozen()) continue;
 		float Dist = FVector::Dist(HandLocation, InteractableItem->GetActorLocation());
 		if (Dist < Best.Distance)
 		{

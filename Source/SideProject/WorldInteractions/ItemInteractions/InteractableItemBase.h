@@ -3,15 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/PublicVariables.h"
 #include "InteractableItemBase.generated.h"
-
-UENUM()
-enum class EMaterialOverlayStatus : uint8
-{
-	Active,
-	Inactive,
-	None
-};
 
 class ABaseInteractableCharacter;
 
@@ -32,6 +25,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void DisableMaterialInterface();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) TArray<UPrimitiveComponent*>  GetPrimitiveComponentChildren();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) TArray<UStaticMeshComponent*>  GetStaticMeshChildren();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EMaterialOverlayStatus GetNeedOutlineMaterial();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void SetNeedOutlineMaterial(const EMaterialOverlayStatus InNeedOutlineMaterial);
 };
 
 
@@ -45,23 +41,27 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	
 public:
-	virtual void AttachToComponent_Implementation(USceneComponent* InAttachToComponent);
-	virtual void DetachFromComponent_Implementation();
-	virtual void EnableMaterialInterface_Implementation();
-	virtual void DisableMaterialInterface_Implementation();
+	virtual void AttachToComponent_Implementation(USceneComponent* InAttachToComponent) override;
+	virtual void DetachFromComponent_Implementation() override;
+	virtual void EnableMaterialInterface_Implementation() override;
+	virtual void DisableMaterialInterface_Implementation() override;
 	
-	virtual TArray<UPrimitiveComponent*>  GetPrimitiveComponentChildren_Implementation();
-	virtual TArray<UStaticMeshComponent*>  GetStaticMeshChildren_Implementation();
+	virtual TArray<UPrimitiveComponent*>  GetPrimitiveComponentChildren_Implementation() override;
+	virtual TArray<UStaticMeshComponent*>  GetStaticMeshChildren_Implementation() override;
 	void SetOwnerCharacter(ABaseInteractableCharacter* InOwnerCharacter) { OwnerCharacter = InOwnerCharacter;  }
 	ABaseInteractableCharacter* GetOwnerCharacter() const { return OwnerCharacter; }
-
-	EMaterialOverlayStatus GetNeedOutlineMaterial() const { return MaterialOverlayStatus; }
-	void SetNeedOutlineMaterial(const EMaterialOverlayStatus InNeedOutlineMaterial) { MaterialOverlayStatus = InNeedOutlineMaterial; }
+	bool GetPersistentlyFrozen() const { return bPersistentlyFrozen; }
+	void SetPersistentlyFrozen(const bool InPersistentlyFrozen) {  bPersistentlyFrozen = InPersistentlyFrozen; }
+	
+	virtual EMaterialOverlayStatus GetNeedOutlineMaterial_Implementation() override  { return MaterialOverlayStatus; } 
+	virtual void SetNeedOutlineMaterial_Implementation(const EMaterialOverlayStatus InNeedOutlineMaterial) override { MaterialOverlayStatus = InNeedOutlineMaterial; } 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) UMaterialInterface* OutlineMaterialInterface = nullptr;
-private:
+	
+protected:
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
 	TArray<UStaticMeshComponent*> StaticMeshComponentChildren;
-	EMaterialOverlayStatus MaterialOverlayStatus =  EMaterialOverlayStatus::None;;
+	EMaterialOverlayStatus MaterialOverlayStatus =  EMaterialOverlayStatus::None;
+	bool bPersistentlyFrozen = false;
 };
 

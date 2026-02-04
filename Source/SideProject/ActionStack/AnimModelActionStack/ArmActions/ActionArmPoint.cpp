@@ -5,8 +5,10 @@
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tools/GenericCalls.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 #include "WorldObjects/PlayerCamera.h"
+#include "WorldInteractions/InteractionManager.h"
 
 UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
 {
@@ -50,7 +52,7 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
 	{
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor && HitActor->GetClass()->ImplementsInterface(UInteractableItemInterface::StaticClass())) { RenderPointingToIndicator(Hit.ImpactPoint, ActorPointedAt); }
+		if (HitActor)  RenderPointingToIndicator(Hit.ImpactPoint, HitActor); 
 		else { RenderPointingToIndicator(Hit.ImpactPoint, nullptr); }
 	}
 
@@ -99,11 +101,29 @@ bool UActionArmPoint::IsDone_Implementation() const
 	return false;
 }
 
-void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AInteractableItemBase* InPointingAtItemActor)
+void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AActor* InPointingAtItemActor)
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
 	PointingLocation = InHitLocation;
-	ActorPointedAt = InPointingAtItemActor;
+	if (IsValid(InPointingAtItemActor))
+	{
+		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(InPointingAtItemActor);
+		if (IsValid(InteractObject))
+		{
+			InteractObject->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
+			ActorPointedAt = InPointingAtItemActor;
+		}
+		else if (AInteractableItemBase* InteractableItem = Cast<AInteractableItemBase>(InPointingAtItemActor))
+		{
+			if (!InteractableItem->GetPersistentlyFrozen())
+			{
+				ActorPointedAt = InPointingAtItemActor;
+				InteractableItem->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
+			}
+			else ActorPointedAt = nullptr;
+		}
+		else ActorPointedAt = nullptr;
+	}
 
 	constexpr float EachSpawnDistance = 25.0f;
 	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
@@ -158,6 +178,4 @@ void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AI
 			PointingIndicators[i]->SetActorLocation(NewLocation);
 		}
 	}
-
-	if (IsValid(InPointingAtItemActor)) InPointingAtItemActor->SetNeedOutlineMaterial(EMaterialOverlayStatus::Active);
 }

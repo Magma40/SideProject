@@ -16,11 +16,8 @@ UInteractDoor::UInteractDoor()
 	DistanceForInteraction = 200.0f;
 }
 
-UInteractDoor::~UInteractDoor(){}
-
 void UInteractDoor::BeginPlay()
 {
-	Super::BeginPlay();
 	TArray<AActor*> AttachedActors;
 	GetOwner()->GetAttachedActors(AttachedActors);
 	for (AActor* Child : AttachedActors)
@@ -34,63 +31,46 @@ void UInteractDoor::BeginPlay()
 	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	
-	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
-	if (IsValid(InteractionManager)) InteractionManager->AddInteraction(this);
+	Super::BeginPlay();
 }
 
 void UInteractDoor::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (Interacting)
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (bInteracting)
 	{
 		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
 		const TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
 		if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
 		{
-			Interacting = false;
+			bInteracting = false;
 			return;
 		}
 		
-		if (!IsValid(InteractingCharacter->GetItemInHand())) return;
-		if ( !Cast<AKeyItem>(InteractingCharacter->GetItemInHand())) return;
-		if (FVector::Distance(InteractingCharacter->GetItemInHand()->GetActorLocation(), Lock->GetActorLocation()) < 50.0f)
+		if (!IsValid(InteractingCharacter->GetItemInHand()) || InteractingCharacter->GetItemInHand() != ItemNeeded) return;
+		if (FVector::Distance(InteractingCharacter->GetItemInHand()->GetActorLocation(), Lock->GetActorLocation()) < DistanceForInteraction / 10)
 		{
-			Interacting = false;
-			Interact_Implementation();
+			bInteracting = false;
+			Interact_Implementation(InteractingCharacter);
 		}
 	}
-}
-
-bool UInteractDoor::CanInteract_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
-{
-	if (GetDistanceToInteraction_Implementation(InInteractingCharacter) > DistanceForInteraction) return false;
-	return true;
-}
-
-float UInteractDoor::GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
-{
-	FVector ToDoorLocation = this->GetComponentLocation() - InInteractingCharacter->GetActorLocation();
-	ToDoorLocation.Y = 0.0f;
-	return ToDoorLocation.Size();
 }
 
 void UInteractDoor::PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
 	Super::PerformInteraction_Implementation(InInteractingCharacter);
-	InteractingCharacter = InInteractingCharacter;
 	InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(Lock->GetActorLocation(), false);
-	Interacting = true;
 }
 
-void UInteractDoor::Interact_Implementation()
+void UInteractDoor::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
-	Super::Interact_Implementation();
-	if (IsValid(InteractingCharacter))
+	if (IsValid(InInteractingCharacter) && IsValid(InInteractingCharacter->GetItemInHand()))
 	{
 		TArray<UStaticMeshComponent*> Meshes;
 		Lock->GetComponents<UStaticMeshComponent>(Meshes);
-		InteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(Meshes[0]);
-		InteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
-		InteractingCharacter->ResetItemInHand();	
+		InInteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(Meshes[0]);
+		InInteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
+		InInteractingCharacter->ResetItemInHand();	
 	}
 	
 	TArray<UPrimitiveComponent*> Primitives;
@@ -109,12 +89,7 @@ void UInteractDoor::Interact_Implementation()
 	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	
-	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
-	if (IsValid(InteractionManager))
-	{
-		InteractionManager->RemoveInteraction(this);
-		DestroyComponent(false);
-	}
+	Super::Interact_Implementation(InInteractingCharacter);
 }
 
 

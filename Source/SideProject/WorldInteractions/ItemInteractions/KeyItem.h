@@ -13,6 +13,4 @@ class SIDEPROJECT_API AKeyItem : public AInteractableItemBase
 
 protected:
 	AKeyItem();
-	virtual void Tick(float DeltaTime) override;
 };
-

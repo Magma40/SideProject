@@ -6,9 +6,3 @@ AKeyItem::AKeyItem()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
-
-
-void AKeyItem::Tick(const float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
