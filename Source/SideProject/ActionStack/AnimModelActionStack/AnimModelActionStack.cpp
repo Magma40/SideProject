@@ -79,8 +79,11 @@ void UAnimModelActionStack::Init()
 	}
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseInteractableCharacter::StaticClass(),  Actors);
-	CompanionOwnerCharacter = Cast<ABaseInteractableCharacter>(Actors[0]);
-	if (CompanionOwnerCharacter == OwnerCharacter) CompanionOwnerCharacter = Cast<ABaseInteractableCharacter>(Actors[1]);
+	if (Actors.Num() > 1)
+	{
+		CompanionOwnerCharacter = Cast<ABaseInteractableCharacter>(Actors[0]);
+		if (CompanionOwnerCharacter == OwnerCharacter) CompanionOwnerCharacter = Cast<ABaseInteractableCharacter>(Actors[1]);
+	}
 
 	LegActionStackRef->Init(MovingModelRef->GetLegs(), OwnerCharacter);
 	TArray<UMoveArm*>  Arms =  MovingModelRef->GetArms();
@@ -112,6 +115,8 @@ void UAnimModelActionStack::PushJumpingActionMovement()
 	LegActionStackRef->AddJumpingAction();
 	UActionAnimModelJumpingMovement* JumpingMovement = UActionAnimModelJumpingMovement::Create(this, OwnerCharacter, CompanionOwnerCharacter);
 	this->PushAction(JumpingMovement);
+
+	if (!IsValid(CompanionOwnerCharacter)) return;
 	if (OwnerCharacter->GetCompanionActionStack()) return;
 
 	const TScriptInterface<IActionInterface> ActionInterfaceHandingHolding = GetInterfacedAction(ArmActionStack_LRef->GetAction<UActionArmHandHolding>());
@@ -141,6 +146,7 @@ void UAnimModelActionStack::PushPointingActionMovement() const
 void UAnimModelActionStack::PushHandHoldingActionMovement()
 {
 	if (OwnerCharacter->GetCompanionActionStack()) return;
+	if (!IsValid(CompanionOwnerCharacter)) return;
 	if (CompanionOwnerCharacter->GetItemInHand() != nullptr) return;
 
 	const float HandDistances = FVector::Distance(OwnerCharacter->GetMovingModel()->GetLeftHand()->GetComponentLocation(), CompanionOwnerCharacter->GetMovingModel()->GetRightHand()->GetComponentLocation());

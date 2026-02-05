@@ -10,7 +10,6 @@ UInteractWeightPlatter::UInteractWeightPlatter()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	Type = EActionType::Active;
-	DistanceForInteraction = 0.0f;
 }
 
 

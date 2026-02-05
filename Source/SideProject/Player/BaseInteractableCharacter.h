@@ -60,7 +60,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* ItemInHand = nullptr;
 	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* BackItemHolster = nullptr;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 60.0f;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 100.0f;
 	USceneComponent* BackHolster = nullptr;
 
 	TArray<FTransform> AnimTransforms;

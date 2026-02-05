@@ -29,7 +29,5 @@ private:
 	AMainCharacter* OwnerCharacter = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
 	float RotationLimit = 45.0f;
-	float MinSliderValue = -1000.0f;
-	float MaxSliderValue = 1000.0f;
 	float SliderMoveSpeed = 100.0f;
 };

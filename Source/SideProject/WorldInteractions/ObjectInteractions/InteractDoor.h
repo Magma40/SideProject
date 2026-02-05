@@ -22,7 +22,11 @@ protected:
 public:
 	void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
 	void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
+	TArray<UStaticMeshComponent*>  GetAllStaticMeshesInOwner_Implementation() override;
 
+private:
+	float CachedDoorSwing = 0.0f;
+	
 public:
 	UPROPERTY(EditAnywhere, Category="DoorReferences") AInteractableItemBase* ItemNeeded = nullptr;
 	UPROPERTY(EditAnywhere, Category="DoorReferences") AActor* Lock = nullptr;

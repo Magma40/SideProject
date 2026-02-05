@@ -12,7 +12,6 @@ UInteractItemPlaceHolder::UInteractItemPlaceHolder()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	Type = EActionType::Active;
-	DistanceForInteraction = 200.0f;
 }
 
 void UInteractItemPlaceHolder::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

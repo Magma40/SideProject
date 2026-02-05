@@ -3,6 +3,7 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/MainCharacter.h"
+#include "WorldObjects/CameraPoint.h"
 #include "WorldObjects/PlayerCamera.h"
 
 UActionCameraDefaultMovement* UActionCameraDefaultMovement::Create(UObject* Outer, AMainCharacter* InOwnerCharacter, APlayerCamera* InPlayerCamera)
@@ -26,6 +27,23 @@ void UActionCameraDefaultMovement::OnBegin_Implementation(const bool bFirstTime)
 
 	Input->BindAction(OwnerCharacter->GetMouseLookAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitLookRangeForCamera);
 	Input->BindAction(OwnerCharacter->GetMoveAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitMoveRangeForCamera);
+
+	if (!IsValid(PlayerCamera)) return;
+	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
+	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
+	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+	const FRotator CameraRot = StartTransformLocation.Rotation();
+	const FRotator YawRotation(0, CameraRot.Yaw, 0);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	float NeededDistance = FVector::Dist(StartTransformLocation, PlayerPos);
+	
+	const FVector DesiredLocation = CurrentLocation + RightDirection  * NeededDistance;
+	float Offset = FVector::DotProduct(DesiredLocation - StartTransformLocation, RightDirection);
+	Offset = FMath::Clamp(Offset,  (PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue) * -1, PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue);
+
+	const FVector NewLocation = StartTransformLocation + RightDirection * Offset;
+	PlayerCamera->SetActorLocation(NewLocation);
 }
 
 void UActionCameraDefaultMovement::OnUpdate_Implementation(const float DeltaTime) 
@@ -104,7 +122,7 @@ void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionVal
         const float DirectionSpeed = FVector::DotProduct(Velocity.GetSafeNormal(),RightDirection);
 		const FVector DesiredLocation = CurrentLocation + RightDirection * DirectionSpeed * OwnerCharacter->GetMovementComponent()->GetMaxSpeed() * GetWorld()->GetDeltaSeconds();
 		float Offset = FVector::DotProduct(DesiredLocation - StartTransformLocation, RightDirection);
-		Offset = FMath::Clamp(Offset, MinSliderValue, MaxSliderValue);
+		Offset = FMath::Clamp(Offset,  (PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue) * -1, PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue);
 
 		const FVector NewLocation = StartTransformLocation + RightDirection * Offset;
 		PlayerCamera->SetActorLocation(NewLocation);

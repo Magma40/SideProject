@@ -10,7 +10,6 @@ UInteractButton::UInteractButton()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	Type = EActionType::Active;
-	DistanceForInteraction = 200.0f;
 }
 
 void UInteractButton::PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)

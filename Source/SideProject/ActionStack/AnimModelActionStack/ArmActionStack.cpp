@@ -60,7 +60,8 @@ void UArmActionStack::AddWaveAction()
 	if (IsValid(GetAction<UActionArmWave>()) || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>()) this->RemoveAction(ActionRef);
 	if (UActionArmHandHolding* ActionRef = GetAction<UActionArmHandHolding>()) this->RemoveAction(ActionRef);
-	
+
+	if (!IsValid(OwnerCompanion)) return;
 	if (OwnerCharacter->GetItemInHand() != nullptr) return;
 	OwnerCompanion->GetCompanionActionStack()->ClearAllActions();
 	if (UActionArmPoint* PointAction = GetAction<UActionArmPoint>())

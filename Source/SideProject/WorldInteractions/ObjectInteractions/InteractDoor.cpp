@@ -13,7 +13,6 @@ UInteractDoor::UInteractDoor()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	Type = EActionType::Active;
-	DistanceForInteraction = 200.0f;
 }
 
 void UInteractDoor::BeginPlay()
@@ -27,6 +26,7 @@ void UInteractDoor::BeginPlay()
 	}
 	
 	UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
+	CachedDoorSwing = PhysicsConstraints->GetCurrentSwing1();
 	PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
@@ -62,14 +62,22 @@ void UInteractDoor::PerformInteraction_Implementation(ABaseInteractableCharacter
 	InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(Lock->GetActorLocation(), false);
 }
 
+TArray<UStaticMeshComponent*> UInteractDoor::GetAllStaticMeshesInOwner_Implementation()
+{
+	TArray<UStaticMeshComponent*> FoundComponentsChildren;
+	Lock->GetComponents<UStaticMeshComponent>(FoundComponentsChildren, true);
+	return FoundComponentsChildren;
+}
+
 void UInteractDoor::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
 	if (IsValid(InInteractingCharacter) && IsValid(InInteractingCharacter->GetItemInHand()))
 	{
 		TArray<UStaticMeshComponent*> Meshes;
 		Lock->GetComponents<UStaticMeshComponent>(Meshes);
+		//InInteractingCharacter->GetItemInHand()->SetActorLocation(Lock->GetActorLocation());
 		InInteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(Meshes[0]);
-		InInteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
+		//InInteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
 		InInteractingCharacter->ResetItemInHand();	
 	}
 	
@@ -79,13 +87,14 @@ void UInteractDoor::Interact_Implementation(ABaseInteractableCharacter* InIntera
 	for (UPrimitiveComponent* Prim : Primitives)
 	{
 		if (!IsValid(Prim)) continue;
+		if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Prim)) Mesh->SetOverlayMaterial(nullptr);
 		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Prim->SetSimulatePhysics(true);
 		Prim->SetEnableGravity(true);
 	}
 	
 	UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
-	PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 110.f);
+	PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 110);
 	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
 	

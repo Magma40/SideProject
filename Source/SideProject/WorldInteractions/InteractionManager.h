@@ -86,13 +86,13 @@ class SIDEPROJECT_API UInteractionBehaviour : public USceneComponent, public IIn
 protected:
 	EMaterialOverlayStatus MaterialOverlayStatus =  EMaterialOverlayStatus::None;
 	EActionType Type = EActionType::Passive;
-	float DistanceForInteraction = 0.0f;
 	ABaseInteractableCharacter* InteractingCharacter = nullptr;
 	bool bInteracting = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionReferences") UMaterialInterface* OutlineMaterialInterface = nullptr;
 	UPROPERTY(EditAnywhere, Category="InteractionReferences") AActor* ActorToCallInteract = nullptr;
 	UPROPERTY(EditAnywhere, Category="InteractionReferences") bool bOneUse = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionReferences") 	float DistanceForInteraction = 0.0f;
 	
 public:
 	virtual void BeginPlay() override;

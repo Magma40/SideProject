@@ -6,6 +6,8 @@
 #include "Camera/CameraActor.h"
 #include "PlayerCamera.generated.h"
 
+class ACameraPoint;
+
 UCLASS()
 class SIDEPROJECT_API APlayerCamera : public ACameraActor
 {
@@ -17,12 +19,12 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	
 public:
- 	UFUNCTION(BlueprintCallable) void SetNewCameraPoint(AActor* NewCameraPoint);
+ 	UFUNCTION(BlueprintCallable) void SetNewCameraPoint(ACameraPoint* NewCameraPoint);
 	static APlayerCamera* GetCamera(const UObject* WorldContext = nullptr);
 	FTransform GetStartCameraTransform() const { return StartTransform; }
-	AActor* GetCurrentCameraPoint() const { return CurrentCameraPoint; }
+	ACameraPoint* GetCurrentCameraPoint() const { return CurrentCameraPoint; }
 
 private:
-	AActor* CurrentCameraPoint = nullptr;
+	ACameraPoint* CurrentCameraPoint = nullptr;
 	FTransform StartTransform = FTransform::Identity;
 };
