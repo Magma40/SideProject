@@ -33,8 +33,8 @@ void UCameraActionStack::PushDefaultActionMovement()
 	PushAction(DefaultMovement);
 }
 
-void UCameraActionStack::PushToCameraPointAction()
+void UCameraActionStack::PushToCameraPointAction(ACameraPoint* InNewCameraPoint)
 {
-	UActionToCameraPoint* ToCameraPoint = UActionToCameraPoint::Create(this, PlayerCamera);
+	UActionToCameraPoint* ToCameraPoint = UActionToCameraPoint::Create(this, PlayerCamera, OwnerCharacter, InNewCameraPoint);
 	PushAction(ToCameraPoint);
 }

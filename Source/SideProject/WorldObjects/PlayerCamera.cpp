@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldObjects/PlayerCamera.h"
 
-#include "CameraPoint.h"
+#include "Public/CameraPoint.h"
 #include "Kismet/GameplayStatics.h"
 
 APlayerCamera::APlayerCamera()  { PrimaryActorTick.bCanEverTick = true; }

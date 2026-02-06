@@ -7,6 +7,8 @@
 #include "ActionToCameraPoint.generated.h"
 
 class APlayerCamera;
+class ACameraPoint;
+class AMainCharacter;
 
 UCLASS()
 class SIDEPROJECT_API UActionToCameraPoint : public UAction
@@ -14,14 +16,16 @@ class SIDEPROJECT_API UActionToCameraPoint : public UAction
 	GENERATED_BODY()
 	
 public:
-	static UActionToCameraPoint* Create(UObject* Outer, APlayerCamera* InPlayerCamera);
+	static UActionToCameraPoint* Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 	
 private:
+	AMainCharacter* OwnerCharacter = nullptr;
+	ACameraPoint* NewCameraPoint = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
 	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
-	float PlayRate = 1.0f;
+	float PlayRate = 5.0f;
 };

@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "EnhancedInputComponent.h"
+#include "ActionStack/CameraActionStack/CameraActionStack.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/MainCharacter.h"
-#include "WorldObjects/CameraPoint.h"
+#include "Public/CameraPoint.h"
 #include "WorldObjects/PlayerCamera.h"
 
 UActionCameraDefaultMovement* UActionCameraDefaultMovement::Create(UObject* Outer, AMainCharacter* InOwnerCharacter, APlayerCamera* InPlayerCamera)
@@ -27,52 +28,34 @@ void UActionCameraDefaultMovement::OnBegin_Implementation(const bool bFirstTime)
 
 	Input->BindAction(OwnerCharacter->GetMouseLookAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitLookRangeForCamera);
 	Input->BindAction(OwnerCharacter->GetMoveAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitMoveRangeForCamera);
-
-	if (!IsValid(PlayerCamera)) return;
-	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
-	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
-	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
-	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
-	const FRotator CameraRot = StartTransformLocation.Rotation();
-	const FRotator YawRotation(0, CameraRot.Yaw, 0);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	float NeededDistance = FVector::Dist(StartTransformLocation, PlayerPos);
-	
-	const FVector DesiredLocation = CurrentLocation + RightDirection  * NeededDistance;
-	float Offset = FVector::DotProduct(DesiredLocation - StartTransformLocation, RightDirection);
-	Offset = FMath::Clamp(Offset,  (PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue) * -1, PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue);
-
-	const FVector NewLocation = StartTransformLocation + RightDirection * Offset;
-	PlayerCamera->SetActorLocation(NewLocation);
 }
 
 void UActionCameraDefaultMovement::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
-	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
-	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
-	
-	const FVector GroundPos(CurrentLocation.X, CurrentLocation.Y, OwnerCharacter->GetActorLocation().Z);
-	const FRotator CameraRot = StartTransformLocation.Rotation();
-	const FRotator YawRotation(0, CameraRot.Yaw, 0);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	const FVector ForwardDirection = -FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
-	const float SideOffset = 250.f; // width of the cone/box
-	const float Distance = FVector::Dist2D(PlayerPos, CurrentLocation);
-	const FVector End = GroundPos + ForwardDirection * Distance;
-	const FVector EndRight = End + (RightDirection * SideOffset);
-	const FVector EndLeft  = End - (RightDirection * SideOffset);
-	const FVector BeginRight = GroundPos + (RightDirection * SideOffset);
-	const FVector BeginLeft  = GroundPos - (RightDirection * SideOffset);
-
-	DrawDebugLine(GetWorld(), GroundPos, End, FColor::Cyan, false, 0.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), BeginRight, EndRight, FColor::Cyan, false, 0.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), BeginLeft, EndLeft, FColor::Cyan, false, 0.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), EndLeft, End, FColor::Cyan, false, 0.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), EndRight, End, FColor::Cyan, false, 0.f, 0, 2.f);
-
+	// const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
+	// const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+	// const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+	//
+	// const FVector GroundPos(CurrentLocation.X, CurrentLocation.Y, OwnerCharacter->GetActorLocation().Z);
+	// const FRotator CameraRot = StartTransformLocation.Rotation();
+	// const FRotator YawRotation(0, CameraRot.Yaw, 0);
+	// const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	// const FVector ForwardDirection = -FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	//
+	// const float SideOffset = 250.f; // width of the cone/box
+	// const float Distance = FVector::Dist2D(PlayerPos, CurrentLocation);
+	// const FVector End = GroundPos + ForwardDirection * Distance;
+	// const FVector EndRight = End + (RightDirection * SideOffset);
+	// const FVector EndLeft  = End - (RightDirection * SideOffset);
+	// const FVector BeginRight = GroundPos + (RightDirection * SideOffset);
+	// const FVector BeginLeft  = GroundPos - (RightDirection * SideOffset);
+	//
+	// DrawDebugLine(GetWorld(), GroundPos, End, FColor::Cyan, false, 0.f, 0, 2.f);
+	// DrawDebugLine(GetWorld(), BeginRight, EndRight, FColor::Cyan, false, 0.f, 0, 2.f);
+	// DrawDebugLine(GetWorld(), BeginLeft, EndLeft, FColor::Cyan, false, 0.f, 0, 2.f);
+	// DrawDebugLine(GetWorld(), EndLeft, End, FColor::Cyan, false, 0.f, 0, 2.f);
+	// DrawDebugLine(GetWorld(), EndRight, End, FColor::Cyan, false, 0.f, 0, 2.f);
 }
 
 bool UActionCameraDefaultMovement::IsDone_Implementation() const
@@ -100,31 +83,52 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 
 void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionValue& Value)
 {
-	if (!IsValid(PlayerCamera)) return;
-	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
-	const FVector StartTransformLocation = PlayerCamera->GetStartCameraTransform().GetLocation();
-	const FVector CurrentLocation = PlayerCamera->GetActorLocation();
-	const FVector PlayerPos = OwnerCharacter->GetActorLocation();
-	
-	// Ground reference
-	const FVector GroundPos(CurrentLocation.X, CurrentLocation.Y, OwnerCharacter->GetActorLocation().Z);
-	const FRotator CameraRot = StartTransformLocation.Rotation();
-	const FRotator YawRotation(0, CameraRot.Yaw, 0);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+    if (!IsValid(PlayerCamera)) return;
 
-	const float SideOffset = 250.f; // width of the cone/box
-	const float Distance = FVector::DotProduct(PlayerPos, CurrentLocation);
-	const FVector End = GroundPos + ForwardDirection * Distance;
-	if (FMath::Abs(FVector::DotProduct(PlayerPos - End, RightDirection)) < SideOffset)
-	{
-		const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
-        const float DirectionSpeed = FVector::DotProduct(Velocity.GetSafeNormal(),RightDirection);
-		const FVector DesiredLocation = CurrentLocation + RightDirection * DirectionSpeed * OwnerCharacter->GetMovementComponent()->GetMaxSpeed() * GetWorld()->GetDeltaSeconds();
-		float Offset = FVector::DotProduct(DesiredLocation - StartTransformLocation, RightDirection);
-		Offset = FMath::Clamp(Offset,  (PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue) * -1, PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue);
+    ACameraPoint* CurrentPoint = PlayerCamera->GetCurrentCameraPoint();
+    if (!IsValid(CurrentPoint)) return;
 
-		const FVector NewLocation = StartTransformLocation + RightDirection * Offset;
-		PlayerCamera->SetActorLocation(NewLocation);
-	}
+    const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
+    const FVector BaseLocation = BaseTransform.GetLocation();
+    const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+    const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+
+    const FRotator BaseRot = BaseTransform.GetRotation().Rotator();
+    const FRotator YawRotation(0.f, BaseRot.Yaw, 0.f);
+
+    const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+    const float SliderLimit = CurrentPoint->MinMaxSliderValue;
+    const float PlayerOffset = FVector::DotProduct(PlayerPos - BaseLocation,RightDirection);
+    if (FMath::Abs(PlayerOffset) > SliderLimit) return;
+    
+	float CurrentOffset = FVector::DotProduct(CurrentLocation - BaseLocation,RightDirection);
+
+    const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
+    const float DirectionSpeed = FVector::DotProduct(Velocity, RightDirection);
+
+    const float DeltaOffset = DirectionSpeed * GetWorld()->GetDeltaSeconds();
+    float NewOffset = CurrentOffset + DeltaOffset;
+
+    if (NewOffset <= -SliderLimit)
+    {
+        if (IsValid(CurrentPoint->CameraPointLeft))
+        {
+            UCameraActionStack* CameraActionStack = Cast<UCameraActionStack>(GetOuter());
+            CameraActionStack->PushToCameraPointAction(CurrentPoint->CameraPointLeft);
+        }
+        return;
+    }
+    else if (NewOffset >= SliderLimit)
+    {
+        if (IsValid(CurrentPoint->CameraPointRight))
+        {
+            UCameraActionStack* CameraActionStack = Cast<UCameraActionStack>(GetOuter());
+            CameraActionStack->PushToCameraPointAction(CurrentPoint->CameraPointRight);
+        }
+        return;
+    }
+
+    const FVector NewLocation = BaseLocation + RightDirection * NewOffset;
+    PlayerCamera->SetActorLocation(NewLocation);
 }

@@ -8,6 +8,7 @@
 
 class APlayerCamera;
 class AMainCharacter;
+class ACameraPoint;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UCameraActionStack : public UActionStack
@@ -24,5 +25,5 @@ protected:
 	APlayerCamera* PlayerCamera = nullptr;
 public:
  	void PushDefaultActionMovement();
-	UFUNCTION(BlueprintCallable) void PushToCameraPointAction();
+	UFUNCTION(BlueprintCallable) void PushToCameraPointAction(ACameraPoint* InNewCameraPoint);
 };
