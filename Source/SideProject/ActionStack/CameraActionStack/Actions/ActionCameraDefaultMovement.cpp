@@ -89,46 +89,29 @@ void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionVal
     if (!IsValid(CurrentPoint)) return;
 
     const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
-    const FVector BaseLocation = BaseTransform.GetLocation();
-    const FVector CurrentLocation = PlayerCamera->GetActorLocation();
+	const FVector BaseLocation = BaseTransform.GetLocation();
+   // const FVector CurrentLocation = PlayerCamera->GetActorLocation();
     const FVector PlayerPos = OwnerCharacter->GetActorLocation();
 
     const FRotator BaseRot = BaseTransform.GetRotation().Rotator();
     const FRotator YawRotation(0.f, BaseRot.Yaw, 0.f);
 
-    const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
     const float SliderLimit = CurrentPoint->MinMaxSliderValue;
     const float PlayerOffset = FVector::DotProduct(PlayerPos - BaseLocation,RightDirection);
     if (FMath::Abs(PlayerOffset) > SliderLimit) return;
-    
-	float CurrentOffset = FVector::DotProduct(CurrentLocation - BaseLocation,RightDirection);
 
-    const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
-    const float DirectionSpeed = FVector::DotProduct(Velocity, RightDirection);
+	//const float CurrentOffset = FVector::DotProduct(CurrentLocation - BaseLocation,RightDirection);
 
-    const float DeltaOffset = DirectionSpeed * GetWorld()->GetDeltaSeconds();
-    float NewOffset = CurrentOffset + DeltaOffset;
+   // const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
+   // const float DirectionSpeed = FVector::DotProduct(Velocity, RightDirection);
 
-    if (NewOffset <= -SliderLimit)
-    {
-        if (IsValid(CurrentPoint->CameraPointLeft))
-        {
-            UCameraActionStack* CameraActionStack = Cast<UCameraActionStack>(GetOuter());
-            CameraActionStack->PushToCameraPointAction(CurrentPoint->CameraPointLeft);
-        }
-        return;
-    }
-    else if (NewOffset >= SliderLimit)
-    {
-        if (IsValid(CurrentPoint->CameraPointRight))
-        {
-            UCameraActionStack* CameraActionStack = Cast<UCameraActionStack>(GetOuter());
-            CameraActionStack->PushToCameraPointAction(CurrentPoint->CameraPointRight);
-        }
-        return;
-    }
+    //const float DeltaOffset = DirectionSpeed * GetWorld()->GetDeltaSeconds();
+	//float NewOffset = CurrentOffset + DeltaOffset;
+	float TargetOffset = FVector::DotProduct(OwnerCharacter->GetActorLocation() - BaseLocation, RightDirection);
+	TargetOffset = FMath::Clamp(TargetOffset,  -CurrentPoint->MinMaxSliderValue,  CurrentPoint->MinMaxSliderValue);
 
-    const FVector NewLocation = BaseLocation + RightDirection * NewOffset;
+    const FVector NewLocation = BaseLocation + RightDirection * TargetOffset;
     PlayerCamera->SetActorLocation(NewLocation);
 }

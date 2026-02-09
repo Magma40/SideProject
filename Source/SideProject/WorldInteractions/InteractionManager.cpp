@@ -63,7 +63,12 @@ void UInteractionBehaviour::Interact_Implementation(ABaseInteractableCharacter* 
 	if (IsValid(ActorToCallInteract))
 	{
 		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
-		if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InInteractingCharacter);	
+		if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InInteractingCharacter);
+
+		if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		{
+			Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InInteractingCharacter);
+		}
 	}
 	
 	if (bOneUse)
@@ -80,19 +85,20 @@ void UInteractionBehaviour::Interact_Implementation(ABaseInteractableCharacter* 
 
 bool UInteractionBehaviour::CanInteract_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
-	if (GetDistanceToInteraction_Implementation(InInteractingCharacter) > DistanceForInteraction) return false;
-	return true;
+	const float Dist = GetDistanceToInteraction_Implementation(InInteractingCharacter);
+	return Dist <= DistanceForInteraction;
 }
 
 float UInteractionBehaviour::GetDistanceToInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
-	FVector ToButtonLocation = this->GetComponentLocation() - InInteractingCharacter->GetActorLocation();
-	ToButtonLocation.Y = 0.0f;
-	return ToButtonLocation.Size();
+	FVector ToInteractionLocation = this->GetComponentLocation() - InInteractingCharacter->GetActorLocation();
+	ToInteractionLocation.Z = 0.0f; // ignore vertical difference
+	return ToInteractionLocation.Size();
 }
 
 void UInteractionBehaviour::PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
+	if (bInteracting) return;
 	bInteracting = true;
 	InteractingCharacter = InInteractingCharacter;
 }
