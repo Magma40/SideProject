@@ -2,10 +2,26 @@
 
 
 #include "Player/CompanionPawn.h"
+
+#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.h"
 #include "ActionStack/Characters/CompanionActionStack.h"
+#include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
+#include "WorldInteractions/InteractionManager.h"
 
 ACompanionPawn::ACompanionPawn() { PrimaryActorTick.bCanEverTick = true; }
+
+void ACompanionPawn::RespawnCharacter()
+{
+	GetCompanionActionStack()->ClearAllActions();
+	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()))
+	{
+		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(PlayerHandHoldingAction);
+	}
+	Super::RespawnCharacter();
+}
 
 void ACompanionPawn::BeginPlay()
 {
@@ -22,4 +38,11 @@ void ACompanionPawn::BeginPlay()
 void ACompanionPawn::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ACompanionPawn::RunLastKnowInteract() const
+{
+	if (!IsValid(LastKnownInteractionBehaviour)) return;
+	CompanionActionStack->OnAddTryToInteractWithWorld();
+	CompanionActionStack->OnAddActionMoveTo(LastKnownInteractionBehaviour->GetOwner()->GetActorLocation(), false);
 }

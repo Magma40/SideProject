@@ -19,9 +19,8 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
 	PlayerCamera->SetNewCameraPoint(NewCameraPoint);
-	TArray<AActor*> AllActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraManagerMain::StaticClass(), AllActors);
-	if (AllActors.IsEmpty()) return;
+	ACameraManagerMain* CameraManager = Cast<ACameraManagerMain>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraManagerMain::StaticClass()));
+	if (!IsValid(CameraManager)) return;
 	
 	const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();
@@ -32,22 +31,19 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 
 	float SliderLimit;
 	float EntryOffset;
-	if (ACameraManagerMain* CameraManager = Cast<ACameraManagerMain>(AllActors[0]))
+	if (IsValid(CameraManager->BaseCameraPoint))
 	{
-		if (IsValid(CameraManager->BaseCameraPoint))
-		{
-			SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
-			EntryOffset = -SliderLimit;
-			CameraManager->BaseCameraPoint = nullptr;
-		}
-		else
-		{
-			SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
-			const FVector PreviousLocation = PlayerCamera->GetActorLocation();
-			const float Side = FVector::DotProduct(PreviousLocation - BaseLocation,RightDirection);
+		SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
+		EntryOffset = -SliderLimit;
+		CameraManager->BaseCameraPoint = nullptr;
+	}
+	else
+	{
+		SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
+		const FVector PreviousLocation = PlayerCamera->GetActorLocation();
+		const float Side = FVector::DotProduct(PreviousLocation - BaseLocation,RightDirection);
 
-			EntryOffset = FMath::Clamp(Side,-SliderLimit,SliderLimit);		
-		}
+		EntryOffset = FMath::Clamp(Side,-SliderLimit,SliderLimit);		
 	}
 	
 	const FVector NewLocation = BaseLocation + RightDirection * EntryOffset;

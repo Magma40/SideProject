@@ -49,11 +49,14 @@ public:
 	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
 	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
 	bool IsCharacterInteracting() const  { return InteractionEnabled; }
-	void SetCharacterInteracting(const bool bNewCharacterInteracting){ InteractionEnabled = bNewCharacterInteracting; } ;
+	void SetCharacterInteracting(const bool bNewCharacterInteracting){ InteractionEnabled = bNewCharacterInteracting; }
+	void SetNewRespawnPoint(const FTransform& NewRespawnPoints) { RoomRespawnSpawnPoint = NewRespawnPoints;}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
+
+	virtual void RespawnCharacter();
 
 private:
 	AInteractableItemBase* ClosestObject = nullptr;
@@ -73,4 +76,5 @@ protected:
 	UPROPERTY() APlayerCamera* TheMainCameraInScene = nullptr;
 	AMovingModel* MovingModel = nullptr;
 	UCompanionActionStack* CompanionActionStack = nullptr;
+	UPROPERTY() FTransform RoomRespawnSpawnPoint  = FTransform::Identity;
 };

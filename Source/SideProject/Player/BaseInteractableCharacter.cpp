@@ -3,6 +3,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "VectorTypes.h"
+#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
@@ -196,5 +198,10 @@ void ABaseInteractableCharacter::Jump()
 	Super::Jump();
 	if (MovingModel == nullptr || GetMovementComponent()->IsFalling()) return;
 	MovingModel->SetJumpingAnim();
+}
+
+void ABaseInteractableCharacter::RespawnCharacter()
+{
+	TeleportTo(RoomRespawnSpawnPoint.GetLocation(), RoomRespawnSpawnPoint.Rotator());
 }
 

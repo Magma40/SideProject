@@ -21,9 +21,10 @@ public:
 private:
 	bool bShouldLight = false;
 	USpotLightComponent* SpotLight = nullptr;
-	UPROPERTY(EditAnywhere) float MaxIntensity = 160.f;
-	UPROPERTY(EditAnywhere) float LightSpeed = 10.f;
+
 
 public:
+	UPROPERTY(EditAnywhere, Category="LightShift")float MaxIntensity = 160.f;
+	UPROPERTY(EditAnywhere, Category="LightShift") float LightSpeed = 10.f;
 	UPROPERTY(EditAnywhere, Category="LightShift") AActor* ActorToCallInteract = nullptr;
 };

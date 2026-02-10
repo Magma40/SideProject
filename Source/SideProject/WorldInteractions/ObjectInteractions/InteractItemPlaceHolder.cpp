@@ -17,6 +17,12 @@ UInteractItemPlaceHolder::UInteractItemPlaceHolder()
 void UInteractItemPlaceHolder::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (IsValid(PlacedItem))
+	{
+		Interact_Implementation(InteractingCharacter);
+		return;
+	}
+	
 	if (bInteracting)
 	{
 		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
@@ -44,7 +50,7 @@ void UInteractItemPlaceHolder::PerformInteraction_Implementation(ABaseInteractab
 
 void UInteractItemPlaceHolder::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
-	if (IsValid(InInteractingCharacter) && IsValid(InteractingCharacter->GetItemInHand()))
+	if (IsValid(InInteractingCharacter) && IsValid(InteractingCharacter->GetItemInHand()) && InteractingCharacter->GetItemInHand() == ItemNeeded)
 	{
 		InteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(this);
 		PlacedItem = InteractingCharacter->GetItemInHand();

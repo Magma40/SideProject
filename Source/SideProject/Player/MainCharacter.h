@@ -36,6 +36,7 @@ public:
 	UInputAction* GetLookAction() const { return LookAction; }
 	UInputAction* GetMoveAction() const { return MoveAction; }
 	UInputAction* GetMouseLookAction() const { return MouseLookAction; }
+	UFUNCTION(BlueprintCallable) virtual void RespawnCharacter() override;
 
 protected: //Variables
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* JumpAction;

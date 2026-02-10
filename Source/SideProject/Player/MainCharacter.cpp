@@ -8,6 +8,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "SideProject.h"
+#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandHolding.h"
+#include "ActionStack/CameraActionStack/CameraActionStack.h"
+#include "Kismet/GameplayStatics.h"
+#include "ProcedualAnimation/MovingModel.h"
+#include "WorldObjects/CameraManagerMain.h"
 #include "WorldObjects/PlayerCamera.h"
 
 AMainCharacter::AMainCharacter()
@@ -103,6 +110,19 @@ void AMainCharacter::DoMove(float Right, float Forward)
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
+	}
+}
+
+void AMainCharacter::RespawnCharacter()
+{
+	Super::RespawnCharacter();
+	ACameraManagerMain* CameraManagerMain = Cast<ACameraManagerMain>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraManagerMain::StaticClass()));
+	if (!IsValid(CameraManagerMain)) return;
+	CameraManagerMain->BaseCameraPoint = TheMainCameraInScene->GetCurrentCameraPoint();
+	CameraManagerMain->CameraActionStack->PushToCameraPointAction(TheMainCameraInScene->GetCurrentCameraPoint());
+	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()))
+	{
+		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(PlayerHandHoldingAction);
 	}
 }
 

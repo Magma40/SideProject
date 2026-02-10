@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "CameraManagerMain.generated.h"
 
+class ABaseInteractableCharacter;
 class UCameraActionStack;
 class APlayerCamera;
 class ACameraPoint;

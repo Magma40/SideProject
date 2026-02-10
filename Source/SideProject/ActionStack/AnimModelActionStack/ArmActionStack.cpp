@@ -11,6 +11,7 @@
 #include "ArmActions/ActionArmHandHolding.h"
 #include "ArmActions/ActionArmHandToLocation.h"
 #include "Player/BaseInteractableCharacter.h"
+#include "Player/CompanionPawn.h"
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
 #include "WorldInteractions/InteractionManager.h"
@@ -78,6 +79,7 @@ void UArmActionStack::AddWaveAction()
 		{
 			OwnerCompanion->GetCompanionActionStack()->OnAddTryToInteractWithWorld();
 			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, false);
+			Cast<ACompanionPawn>(OwnerCompanion)->SetLastKnownInteractionBehaviour(Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())));
 		}
 		else
 		{

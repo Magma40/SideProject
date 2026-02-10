@@ -4,6 +4,8 @@
 #include "PlayerCamera.h"
 #include "ActionStack/CameraActionStack/CameraActionStack.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/CompanionPawn.h"
+#include "Player/MainCharacter.h"
 
 ACameraManagerMain::ACameraManagerMain()  { PrimaryActorTick.bCanEverTick = true; }
 
@@ -24,6 +26,15 @@ void ACameraManagerMain::BeginPlay()
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(PlayerCamera);
 	if (IsValid(BaseCameraPoint)) CameraActionStack->PushToCameraPointAction(BaseCameraPoint);
+
+	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
+	if (!IsValid(Player)) return;
+
+	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ACompanionPawn::StaticClass()));
+	if (!IsValid(CompanionPawn)) return;
+	
+	CompanionPawn->SetNewRespawnPoint(BaseCameraPoint->CompanionRoomSpawnPoint);
+	Player->SetNewRespawnPoint(BaseCameraPoint->PlayerRoomSpawnPoint);
 }
 
 void ACameraManagerMain::SetNewCameraPoint(ACameraPoint* NewCameraPoint) const
