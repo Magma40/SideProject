@@ -3,8 +3,11 @@
 #include "CameraPoint.h"
 #include "PlayerCamera.h"
 #include "ActionStack/CameraActionStack/CameraActionStack.h"
+#include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
+#include "ActionStack/CameraActionStack/Actions/ActionToCameraPoint.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CompanionPawn.h"
 #include "UObject/Object.h"
@@ -50,18 +53,34 @@ void ASwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedCompon
 
 	ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ACompanionPawn::StaticClass()));
 	if (!IsValid(CompanionPawn)) return;
+
+	if (TempChar->GetCharacterMovement()->IsFalling())
+	{
+		if (bDontDoIfJumping) return;
+		else
+		{
+			CameraActionStack->PushToCameraPointAction(CameraPoint_L);
+			CompanionPawn->SetNewRespawnPoint(CameraPoint_L->CompanionRoomSpawnPoint);
+			TempChar->SetNewRespawnPoint(CameraPoint_L->PlayerRoomSpawnPoint);
+			if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);
+		}
+	}
 	
+	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>()) return;
 	if (TempChar->GetCameraActor()->GetCurrentCameraPoint() == CameraPoint_L)
 	{
 		CameraActionStack->PushToCameraPointAction(CameraPoint_R);
 		CompanionPawn->SetNewRespawnPoint(CameraPoint_R->CompanionRoomSpawnPoint);
 		TempChar->SetNewRespawnPoint(CameraPoint_R->PlayerRoomSpawnPoint);
+		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_R->RotationLimit);
+
 	}
 	else if (TempChar->GetCameraActor()->GetCurrentCameraPoint() == CameraPoint_R)
 	{
 		CameraActionStack->PushToCameraPointAction(CameraPoint_L);
 		CompanionPawn->SetNewRespawnPoint(CameraPoint_L->CompanionRoomSpawnPoint);
 		TempChar->SetNewRespawnPoint(CameraPoint_L->PlayerRoomSpawnPoint);
+		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);
 	}
 }
 

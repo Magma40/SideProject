@@ -3,6 +3,7 @@
 #include "CameraPoint.h"
 #include "PlayerCamera.h"
 #include "ActionStack/CameraActionStack/CameraActionStack.h"
+#include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/CompanionPawn.h"
 #include "Player/MainCharacter.h"
@@ -26,6 +27,7 @@ void ACameraManagerMain::BeginPlay()
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(PlayerCamera);
 	if (IsValid(BaseCameraPoint)) CameraActionStack->PushToCameraPointAction(BaseCameraPoint);
+	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(BaseCameraPoint->RotationLimit);
 
 	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
 	if (!IsValid(Player)) return;

@@ -81,7 +81,7 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	PlayerCamera->SetActorRelativeRotation(LimitedRotation);
 }
 
-void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionValue& Value)
+void UActionCameraDefaultMovement::LimitMoveRangeForCamera()
 {
     if (!IsValid(PlayerCamera)) return;
 
@@ -91,16 +91,16 @@ void UActionCameraDefaultMovement::LimitMoveRangeForCamera(const FInputActionVal
     const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();
    // const FVector CurrentLocation = PlayerCamera->GetActorLocation();
-    const FVector PlayerPos = OwnerCharacter->GetActorLocation();
+   // const FVector PlayerPos = OwnerCharacter->GetActorLocation();
 
     const FRotator BaseRot = BaseTransform.GetRotation().Rotator();
     const FRotator YawRotation(0.f, BaseRot.Yaw, 0.f);
 
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-    const float SliderLimit = CurrentPoint->MinMaxSliderValue;
-    const float PlayerOffset = FVector::DotProduct(PlayerPos - BaseLocation,RightDirection);
-    if (FMath::Abs(PlayerOffset) > SliderLimit) return;
+    //const float SliderLimit = CurrentPoint->MinMaxSliderValue;
+    //const float PlayerOffset = FVector::DotProduct(PlayerPos - BaseLocation,RightDirection);
+    //if (FMath::Abs(PlayerOffset) > SliderLimit) return;
 
 	//const float CurrentOffset = FVector::DotProduct(CurrentLocation - BaseLocation,RightDirection);
 

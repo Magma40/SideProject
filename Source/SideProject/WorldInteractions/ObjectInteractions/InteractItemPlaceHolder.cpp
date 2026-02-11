@@ -22,7 +22,6 @@ void UInteractItemPlaceHolder::TickComponent(const float DeltaTime, const ELevel
 		Interact_Implementation(InteractingCharacter);
 		return;
 	}
-	
 	if (bInteracting)
 	{
 		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();

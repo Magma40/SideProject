@@ -21,9 +21,10 @@ public:
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-private:
 	void LimitLookRangeForCamera(const FInputActionValue& Value);
-	void LimitMoveRangeForCamera(const FInputActionValue& Value);
+	void LimitMoveRangeForCamera();
+
+	void SetRotationLimit(const float InRotationLimit) { RotationLimit = InRotationLimit; }
 	
 private:
 	AMainCharacter* OwnerCharacter = nullptr;

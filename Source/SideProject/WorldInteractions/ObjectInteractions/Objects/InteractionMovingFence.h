@@ -24,6 +24,8 @@ private:
 	float PlayRate = 1.0f;
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") float ZMoveTo = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") FVector VectorMoveTo = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, Category="MovingFence") FComponentReference ComponentsToMoveRef;
+	UPROPERTY(EditAnywhere, Category="MovingFence") AActor* ActorToCallInteract = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") bool bDoForever = false;
 };

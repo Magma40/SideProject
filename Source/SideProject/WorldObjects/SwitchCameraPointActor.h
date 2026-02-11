@@ -25,7 +25,7 @@ private:
 	UPROPERTY() bool bHasTriggered = false;
 
 public:
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") bool bDontDoIfJumping = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") ACameraPoint* CameraPoint_L = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") ACameraPoint* CameraPoint_R = nullptr;
 };

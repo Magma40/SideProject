@@ -13,6 +13,7 @@ class SIDEPROJECT_API ACameraPoint : public AActor
 public:
 	ACameraPoint();
 	UPROPERTY(VisibleAnywhere) UCameraPointVisualizerComponent * VisualizerRoot = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera") float RotationLimit = 45.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera") float MinMaxSliderValue = 1000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Camera") FTransform PlayerRoomSpawnPoint  = FTransform::Identity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Camera") FTransform CompanionRoomSpawnPoint  = FTransform::Identity;

@@ -1,6 +1,11 @@
 #include "InteractionMovingFence.h"
 
+#include "ActionStack/CameraActionStack/CameraActionStack.h"
+#include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Tools/GenericCalls.h"
+#include "WorldObjects/PlayerCamera.h"
 
 AInteractionMovingFence::AInteractionMovingFence() { PrimaryActorTick.bCanEverTick = true;  }
 
@@ -29,7 +34,8 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 		{
 			AnimTransforms.Empty();
 			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , ComponentsToMove->GetRelativeLocation()));
-			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , FVector::ZeroVector + FVector(0.0f, 0.0f, ZMoveTo)));
+			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , VectorMoveTo));
+			if (bDoForever) return;
 			for (UStaticMeshComponent* Mesh : GetAllStaticMeshesInOwner_Implementation())
 			{
 				Mesh->SetCanEverAffectNavigation(false);
@@ -46,12 +52,38 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 			}
 		}
 	}
+	if (bDoForever) return;
 	bShouldOpen = false;
 }
 
 void AInteractionMovingFence::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
 	bShouldOpen = true;
+	if (IsValid(ActorToCallInteract))
+	{
+		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
+		if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InInteractingCharacter);
+
+		if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		{
+			Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InInteractingCharacter);
+		}
+	}
+	
+	APlayerCamera* PlayerCamera = Cast<APlayerCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCamera::StaticClass()));
+	if (!IsValid(PlayerCamera)) return;
+
+	UCameraActionStack* CameraActionStack = nullptr;
+	TArray<UCameraActionStack* >Components;
+	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	if (!Components.IsEmpty() && IsValid(Components[0])) CameraActionStack = Components[0];
+	if (!IsValid(CameraActionStack)) return;
+	
+
+	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	{
+		ActionRef->LimitMoveRangeForCamera();
+	}
 }
 
 TArray<UStaticMeshComponent*> AInteractionMovingFence::GetAllStaticMeshesInOwner_Implementation()
