@@ -52,12 +52,26 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 			}
 		}
 	}
-	if (bDoForever) return;
+	if (bDoForever)
+	{
+		if (IsValid(ActorToCallInteract) && bShouldOpen)
+		{
+			UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
+			if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InteractingCharacter);
+
+			if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+			{
+				Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InteractingCharacter);
+			}
+		}
+		return;
+	}
 	bShouldOpen = false;
 }
 
 void AInteractionMovingFence::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
+	InteractingCharacter = InInteractingCharacter;
 	bShouldOpen = true;
 	if (IsValid(ActorToCallInteract))
 	{

@@ -71,13 +71,16 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	const FRotator StartTransformRotation = PlayerCamera->GetStartCameraTransform().GetRotation().Rotator();
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-    float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f * -1.f;
+	float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f * -1.f;
 	float DesiredYaw   = CameraRotation.Yaw   + MovementVector.X * GetWorld()->GetDeltaSeconds() * 50.0f;
 
-	DesiredPitch = FMath::Clamp(DesiredPitch, StartTransformRotation.Pitch - RotationLimit, StartTransformRotation.Pitch + RotationLimit);
-	DesiredYaw = FMath::Clamp(DesiredYaw,StartTransformRotation.Yaw - RotationLimit, StartTransformRotation.Yaw + RotationLimit);
+	float PitchDelta = FMath::FindDeltaAngleDegrees(StartTransformRotation.Pitch, DesiredPitch);
+	float YawDelta   = FMath::FindDeltaAngleDegrees(StartTransformRotation.Yaw, DesiredYaw);
 
-	const FRotator LimitedRotation(DesiredPitch, DesiredYaw, StartTransformRotation.Roll);
+	PitchDelta = FMath::Clamp(PitchDelta, -RotationLimit, RotationLimit);
+	YawDelta   = FMath::Clamp(YawDelta,   -RotationLimit, RotationLimit);
+
+	const FRotator LimitedRotation( StartTransformRotation.Pitch + PitchDelta, StartTransformRotation.Yaw   + YawDelta, StartTransformRotation.Roll);
 	PlayerCamera->SetActorRelativeRotation(LimitedRotation);
 }
 

@@ -18,6 +18,7 @@ public:
 	TArray<UStaticMeshComponent*>  GetAllStaticMeshesInOwner_Implementation() override;
 
 private:
+	ABaseInteractableCharacter* InteractingCharacter = nullptr;
 	bool bShouldOpen = false;
 	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
