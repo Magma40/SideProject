@@ -39,7 +39,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Editor/Kismet/Private/SCSEditorViewportClient.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Editor/UnrealEd/Public/ComponentVisualizer.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/ApplicationCore/Public/Android/AndroidInputInterface.h" root0="FORCE_HIGHLIGHTING" />
@@ -566,6 +567,8 @@
       <workItem from="1770827819344" duration="4992000" />
       <workItem from="1770905041923" duration="4260000" />
       <workItem from="1770920291530" duration="1663000" />
+      <workItem from="1770972190728" duration="14925000" />
+      <workItem from="1770990725708" duration="4752000" />
     </task>
     <servers />
   </component>

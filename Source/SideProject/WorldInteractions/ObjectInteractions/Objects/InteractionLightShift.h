@@ -18,6 +18,8 @@ public:
 	virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable)  virtual void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
 
+	bool GetShouldLight() const { return bShouldLight;}
+
 private:
 	bool bShouldLight = false;
 	USpotLightComponent* SpotLight = nullptr;

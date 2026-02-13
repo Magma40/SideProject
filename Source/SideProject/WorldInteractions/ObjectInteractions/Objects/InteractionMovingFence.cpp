@@ -9,6 +9,30 @@
 
 AInteractionMovingFence::AInteractionMovingFence() { PrimaryActorTick.bCanEverTick = true;  }
 
+void AInteractionMovingFence::BeginPlay()
+{
+	Super::BeginPlay();
+	if (!IsValid(ActorToCallInteract)) return;
+	if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	{
+		TScriptInterface<IInteractionInterface> ScriptInterface;
+		ScriptInterface.SetObject(ActorToCallInteract);
+		ScriptInterface.SetInterface(Cast<IInteractionInterface>(ActorToCallInteract));
+
+		InteractionToCallInteract = ScriptInterface;
+		return;
+	}
+
+	UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
+	if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	{
+		TScriptInterface<IInteractionInterface> ScriptInterface;
+		ScriptInterface.SetObject(InteractObject);
+		ScriptInterface.SetInterface(Cast<IInteractionInterface>(InteractObject));
+		InteractionToCallInteract = ScriptInterface;
+	}
+}
+
 void AInteractionMovingFence::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -54,15 +78,9 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 	}
 	if (bDoForever)
 	{
-		if (IsValid(ActorToCallInteract) && bShouldOpen)
+		if (IsValid(InteractionToCallInteract.GetObject()))
 		{
-			UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
-			if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InteractingCharacter);
-
-			if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
-			{
-				Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InteractingCharacter);
-			}
+			InteractionToCallInteract->Interact_Implementation(InteractingCharacter);
 		}
 		return;
 	}
@@ -73,15 +91,9 @@ void AInteractionMovingFence::Interact_Implementation(ABaseInteractableCharacter
 {
 	InteractingCharacter = InInteractingCharacter;
 	bShouldOpen = true;
-	if (IsValid(ActorToCallInteract))
+	if (IsValid(InteractionToCallInteract.GetObject()))
 	{
-		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
-		if (IsValid(InteractObject)) InteractObject->Interact_Implementation(InInteractingCharacter);
-
-		if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
-		{
-			Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InInteractingCharacter);
-		}
+		InteractionToCallInteract->Interact_Implementation(InteractingCharacter);
 	}
 	
 	APlayerCamera* PlayerCamera = Cast<APlayerCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCamera::StaticClass()));

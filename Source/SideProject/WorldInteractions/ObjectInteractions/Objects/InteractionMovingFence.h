@@ -13,11 +13,13 @@ class SIDEPROJECT_API AInteractionMovingFence : public AActor,  public IInteract
 	
 public:
 	AInteractionMovingFence();
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)  virtual void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
-	TArray<UStaticMeshComponent*>  GetAllStaticMeshesInOwner_Implementation() override;
+	TArray<UStaticMeshComponent*>  virtual GetAllStaticMeshesInOwner_Implementation() override;
 
-private:
+protected:
+	UPROPERTY() TScriptInterface<IInteractionInterface> InteractionToCallInteract = nullptr;
 	ABaseInteractableCharacter* InteractingCharacter = nullptr;
 	bool bShouldOpen = false;
 	TArray<FTransform> AnimTransforms;
@@ -27,6 +29,6 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") FVector VectorMoveTo = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, Category="MovingFence") FComponentReference ComponentsToMoveRef;
-	UPROPERTY(EditAnywhere, Category="MovingFence") AActor* ActorToCallInteract = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") AActor* ActorToCallInteract = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") bool bDoForever = false;
 };
