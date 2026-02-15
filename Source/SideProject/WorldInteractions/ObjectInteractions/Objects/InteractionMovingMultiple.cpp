@@ -9,7 +9,7 @@ AInteractionMovingMultiple::AInteractionMovingMultiple() { PrimaryActorTick.bCan
 void AInteractionMovingMultiple::BeginPlay()
 {
 	Super::BeginPlay();
-	if (ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	if (IsValid(ValidActorPatternCallInteract) && ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(ValidActorPatternCallInteract);
@@ -27,7 +27,7 @@ void AInteractionMovingMultiple::BeginPlay()
 		ValidInteractionPatternCallInteract = ScriptInterface;
 	}
 
-	if (InvalidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	if (IsValid(InvalidActorPatternCallInteract) && InvalidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(InvalidActorPatternCallInteract);
