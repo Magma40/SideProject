@@ -21,12 +21,12 @@ public:
 protected:
 	UPROPERTY() TScriptInterface<IInteractionInterface> InteractionToCallInteract = nullptr;
 	ABaseInteractableCharacter* InteractingCharacter = nullptr;
-	bool bShouldOpen = false;
-	TArray<FTransform> AnimTransforms;
+	UPROPERTY(BlueprintReadWrite) bool bShouldOpen = false;
+	UPROPERTY(BlueprintReadWrite) TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
-	float PlayRate = 1.0f;
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") float PlayRate = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") FVector VectorMoveTo = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, Category="MovingFence") FComponentReference ComponentsToMoveRef;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") AActor* ActorToCallInteract = nullptr;

@@ -1,7 +1,6 @@
 #include "InteractionMovingMultiple.h"
 
 #include "InteractionLightShift.h"
-#include "NNETypes.h"
 #include "Tools/GenericCalls.h"
 
 AInteractionMovingMultiple::AInteractionMovingMultiple() { PrimaryActorTick.bCanEverTick = true;  }
@@ -95,9 +94,7 @@ void AInteractionMovingMultiple::Interact_Implementation(ABaseInteractableCharac
 			{
 				if (i <= InteractionsToCallInteract.Num() - 1)
 				{
-					bool AllAreAlright = true;
-					if (CurrentPattern.Contains(false)) AllAreAlright = false;
-					if (AllAreAlright)
+					if (!CurrentPattern.Contains(false))
 					{
 						if (IsValid(ValidInteractionPatternCallInteract.GetObject()))
 						{

@@ -59,7 +59,7 @@ void ASwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedCompon
 		if (bDontDoIfJumping) return;
 		else
 		{
-			CameraActionStack->PushToCameraPointAction(CameraPoint_L);
+			CameraActionStack->PushToCameraPointAction(CameraPoint_L, PlayRate);
 			CompanionPawn->SetNewRespawnPoint(CameraPoint_L->CompanionRoomSpawnPoint);
 			TempChar->SetNewRespawnPoint(CameraPoint_L->PlayerRoomSpawnPoint);
 			if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);
@@ -69,7 +69,7 @@ void ASwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedCompon
 	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>()) return;
 	if (TempChar->GetCameraActor()->GetCurrentCameraPoint() == CameraPoint_L)
 	{
-		CameraActionStack->PushToCameraPointAction(CameraPoint_R);
+		CameraActionStack->PushToCameraPointAction(CameraPoint_R, PlayRate);
 		CompanionPawn->SetNewRespawnPoint(CameraPoint_R->CompanionRoomSpawnPoint);
 		TempChar->SetNewRespawnPoint(CameraPoint_R->PlayerRoomSpawnPoint);
 		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_R->RotationLimit);
@@ -77,7 +77,7 @@ void ASwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedCompon
 	}
 	else if (TempChar->GetCameraActor()->GetCurrentCameraPoint() == CameraPoint_R)
 	{
-		CameraActionStack->PushToCameraPointAction(CameraPoint_L);
+		CameraActionStack->PushToCameraPointAction(CameraPoint_L, PlayRate);
 		CompanionPawn->SetNewRespawnPoint(CameraPoint_L->CompanionRoomSpawnPoint);
 		TempChar->SetNewRespawnPoint(CameraPoint_L->PlayerRoomSpawnPoint);
 		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);

@@ -76,7 +76,7 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 			}
 		}
 	}
-	if (bDoForever)
+	if (bDoForever && bShouldOpen)
 	{
 		if (IsValid(InteractionToCallInteract.GetObject()))
 		{

@@ -54,6 +54,7 @@ void UInteractItemPlaceHolder::Interact_Implementation(ABaseInteractableCharacte
 		InteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(this);
 		PlacedItem = InteractingCharacter->GetItemInHand();
 		InteractingCharacter->ResetItemInHand();
+		PlacedItem->SetPersistentlyFrozen(true);
 	}
 	Super::Interact_Implementation(InInteractingCharacter);
 }

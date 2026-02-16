@@ -119,7 +119,7 @@ void AMainCharacter::RespawnCharacter()
 	ACameraManagerMain* CameraManagerMain = Cast<ACameraManagerMain>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraManagerMain::StaticClass()));
 	if (!IsValid(CameraManagerMain)) return;
 	CameraManagerMain->BaseCameraPoint = TheMainCameraInScene->GetCurrentCameraPoint();
-	CameraManagerMain->CameraActionStack->PushToCameraPointAction(TheMainCameraInScene->GetCurrentCameraPoint());
+	CameraManagerMain->CameraActionStack->PushToCameraPointAction(TheMainCameraInScene->GetCurrentCameraPoint(), 1.0f);
 	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()))
 	{
 		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(PlayerHandHoldingAction);

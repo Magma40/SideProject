@@ -25,5 +25,5 @@ protected:
 	APlayerCamera* PlayerCamera = nullptr;
 public:
  	void PushDefaultActionMovement();
-	UFUNCTION(BlueprintCallable) void PushToCameraPointAction(ACameraPoint* InNewCameraPoint);
+	UFUNCTION(BlueprintCallable) void PushToCameraPointAction(ACameraPoint* InNewCameraPoint, float InPlayRate);
 };

@@ -6,12 +6,13 @@
 #include "WorldObjects/CameraManagerMain.h"
 #include "WorldObjects/PlayerCamera.h"
 
-UActionToCameraPoint* UActionToCameraPoint::Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint)
+UActionToCameraPoint* UActionToCameraPoint::Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint, float InPlayRate)
 {
 	UActionToCameraPoint* Action = NewObject<UActionToCameraPoint>(Outer);
 	Action->PlayerCamera = InPlayerCamera;
 	Action->NewCameraPoint = InNewCameraPoint;
 	Action->OwnerCharacter = InOwnerCharacter;
+	Action->PlayRate = InPlayRate;
 	return Action;
 }
 

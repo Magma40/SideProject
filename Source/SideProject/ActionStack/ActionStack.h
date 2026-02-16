@@ -69,7 +69,7 @@ public:
 	 	return ActionInterface;
 	 }
 
-	void ClearAllActions()
+	UFUNCTION(BlueprintCallable) void ClearAllActions()
 	 {
 	 	while (ActionStack.Num() > 0)
 	 	{

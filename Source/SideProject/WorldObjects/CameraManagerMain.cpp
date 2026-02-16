@@ -26,7 +26,7 @@ void ACameraManagerMain::BeginPlay()
 	if (!IsValid(CameraActionStack)) return;
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(PlayerCamera);
-	if (IsValid(BaseCameraPoint)) CameraActionStack->PushToCameraPointAction(BaseCameraPoint);
+	if (IsValid(BaseCameraPoint)) CameraActionStack->PushToCameraPointAction(BaseCameraPoint, 1.0f);
 	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(BaseCameraPoint->RotationLimit);
 
 	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
@@ -37,9 +37,4 @@ void ACameraManagerMain::BeginPlay()
 	
 	CompanionPawn->SetNewRespawnPoint(BaseCameraPoint->CompanionRoomSpawnPoint);
 	Player->SetNewRespawnPoint(BaseCameraPoint->PlayerRoomSpawnPoint);
-}
-
-void ACameraManagerMain::SetNewCameraPoint(ACameraPoint* NewCameraPoint) const
-{
-	if (IsValid(NewCameraPoint)) CameraActionStack->PushToCameraPointAction(NewCameraPoint);
 }

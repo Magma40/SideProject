@@ -28,4 +28,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") bool bDontDoIfJumping = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") ACameraPoint* CameraPoint_L = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") ACameraPoint* CameraPoint_R = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "SwitchCameraPointActor") float PlayRate = 1.0f;
 };

@@ -39,6 +39,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void EnableMaterialInterface();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) void DisableMaterialInterface(); 
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) bool GetInteractingBool();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) float GetInteractionDistance();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EActionType GetInteractionType();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable) EMaterialOverlayStatus GetNeedOutlineMaterial();
@@ -105,7 +106,8 @@ public:
 	virtual TArray<UStaticMeshComponent*> GetAllStaticMeshesInOwner_Implementation() override;
 	virtual void EnableMaterialInterface_Implementation() override;
 	virtual void DisableMaterialInterface_Implementation() override;
-	
+
+	virtual bool GetInteractingBool_Implementation() override { return bInteracting; }
 	virtual float GetInteractionDistance_Implementation() override { return DistanceForInteraction; } 
 	virtual EActionType GetInteractionType_Implementation() override { return Type; }
 	virtual EMaterialOverlayStatus GetNeedOutlineMaterial_Implementation() override { return MaterialOverlayStatus; }

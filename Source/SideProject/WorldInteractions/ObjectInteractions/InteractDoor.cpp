@@ -24,12 +24,15 @@ void UInteractDoor::BeginPlay()
 		if (!Child) continue;
 		Lock = Child;
 	}
-	
-	UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
-	CachedDoorSwing = PhysicsConstraints->GetCurrentSwing1();
-	PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
-	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
-	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
+
+	if (PhysicsConstraintsRef.ComponentProperty != "None")
+	{
+		UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
+		CachedDoorSwing = PhysicsConstraints->GetCurrentSwing1();
+		PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
+		PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
+		PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);	
+	}
 	
 	Super::BeginPlay();
 }
@@ -75,10 +78,9 @@ void UInteractDoor::Interact_Implementation(ABaseInteractableCharacter* InIntera
 	{
 		TArray<UStaticMeshComponent*> Meshes;
 		Lock->GetComponents<UStaticMeshComponent>(Meshes);
-		//InInteractingCharacter->GetItemInHand()->SetActorLocation(Lock->GetActorLocation());
 		InInteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(Meshes[0]);
-		//InInteractingCharacter->GetItemInHand()->AddActorLocalOffset(FVector(0.0f, -250.0f, 0.0f));
-		InInteractingCharacter->ResetItemInHand();	
+		InInteractingCharacter->GetItemInHand()->SetPersistentlyFrozen(true);
+		InInteractingCharacter->ResetItemInHand();
 	}
 	
 	TArray<UPrimitiveComponent*> Primitives;
@@ -92,11 +94,13 @@ void UInteractDoor::Interact_Implementation(ABaseInteractableCharacter* InIntera
 		Prim->SetSimulatePhysics(true);
 		Prim->SetEnableGravity(true);
 	}
-	
-	UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
-	PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 110);
-	PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
-	PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
+	if (PhysicsConstraintsRef.ComponentProperty != "None")
+	{
+		UPhysicsConstraintComponent* PhysicsConstraints = Cast<UPhysicsConstraintComponent>(PhysicsConstraintsRef.GetComponent(GetOwner()));
+		PhysicsConstraints->SetAngularSwing1Limit(EAngularConstraintMotion::ACM_Limited, 110);
+		PhysicsConstraints->SetAngularSwing2Limit(EAngularConstraintMotion::ACM_Locked, 0.f);
+		PhysicsConstraints->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);	
+	}
 	
 	Super::Interact_Implementation(InInteractingCharacter);
 }

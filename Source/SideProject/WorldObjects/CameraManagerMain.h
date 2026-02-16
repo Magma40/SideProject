@@ -17,7 +17,6 @@ class SIDEPROJECT_API ACameraManagerMain : public AActor
 protected:
 	ACameraManagerMain();
 	virtual void BeginPlay() override;
-	void SetNewCameraPoint(ACameraPoint* NewCameraPoint) const;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") APlayerCamera* PlayerCamera = nullptr;

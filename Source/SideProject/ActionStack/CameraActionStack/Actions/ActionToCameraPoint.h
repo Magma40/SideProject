@@ -16,7 +16,7 @@ class SIDEPROJECT_API UActionToCameraPoint : public UAction
 	GENERATED_BODY()
 	
 public:
-	static UActionToCameraPoint* Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint);
+	static UActionToCameraPoint* Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint, float InPlayRate);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
