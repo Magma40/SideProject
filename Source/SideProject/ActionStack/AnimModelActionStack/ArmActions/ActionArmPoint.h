@@ -23,7 +23,8 @@ public:
 	void OnBegin_Implementation(bool bFirstTime) override;
 	void OnEnd_Implementation() override;
 
-	void RenderPointingToIndicator(const FVector& InHitLocation, AActor* InPointingAtItemActor);
+	void RenderPointingToIndicator();
+	void GetGameObjectPointedAt();
 
 	FVector GetPointingLocation() const { return PointingLocation; } 
 	AActor* GetActorPointedAt() { return ActorPointedAt; }

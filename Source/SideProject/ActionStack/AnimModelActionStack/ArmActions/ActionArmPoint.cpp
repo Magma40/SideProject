@@ -27,7 +27,7 @@ void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 void UActionArmPoint::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
-	RenderPointingToIndicator(PointingLocation,  nullptr);
+	RenderPointingToIndicator();
 	while (PointingIndicators.Num() > 0)
 	{
 		AActor* Extra = PointingIndicators.Pop();
@@ -38,23 +38,8 @@ void UActionArmPoint::OnEnd_Implementation()
 void UActionArmPoint::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-
-	FHitResult Hit;
-	const FVector Start = TheMainCameraInScene->GetActorLocation();
-	const FVector End = Start + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
-
-	FCollisionQueryParams Params;
-	TArray<AActor*> ActorsToIgnore;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InvisibleWall", ActorsToIgnore);
-	Params.AddIgnoredActor(OwnerCharacter);
-	Params.AddIgnoredActor(TheMainCameraInScene);
-	Params.AddIgnoredActors(ActorsToIgnore);
-	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params ))
-	{
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor)  RenderPointingToIndicator(Hit.ImpactPoint, HitActor); 
-		else { RenderPointingToIndicator(Hit.ImpactPoint, nullptr); }
-	}
+	RenderPointingToIndicator();
+	GetGameObjectPointedAt();
 
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	FQuat RelativeQuat;
@@ -101,81 +86,112 @@ bool UActionArmPoint::IsDone_Implementation() const
 	return false;
 }
 
-void UActionArmPoint::RenderPointingToIndicator(const FVector& InHitLocation, AActor* InPointingAtItemActor)
+void UActionArmPoint::RenderPointingToIndicator()
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
-	PointingLocation = InHitLocation;
-	if (IsValid(InPointingAtItemActor))
+	FHitResult Hit;
+	const FVector StartCamera = TheMainCameraInScene->GetActorLocation();
+	const FVector End = StartCamera + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
+
+	FCollisionQueryParams Params;
+	TArray<AActor*> ActorsToIgnore;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InvisibleWall", ActorsToIgnore);
+	Params.AddIgnoredActor(OwnerCharacter);
+	Params.AddIgnoredActor(TheMainCameraInScene);
+	Params.AddIgnoredActors(ActorsToIgnore);
+	if (GetWorld()->LineTraceSingleByChannel(Hit,StartCamera,End,ECC_Visibility,Params ))
 	{
-		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(InPointingAtItemActor);
-		if (IsValid(InteractObject))
+		PointingLocation = Hit.ImpactPoint;
+		constexpr float EachSpawnDistance = 25.0f;
+		const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
+
+		const float TotalDistance = FVector::Distance(Hit.ImpactPoint, Start);
+		const int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
+	
+		// Spawn new indicators if we need more
+		while (PointingIndicators.Num() < RequiredCount)
 		{
-			InteractObject->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
-			ActorPointedAt = InPointingAtItemActor;
-		}
-		else if (AInteractableItemBase* InteractableItem = Cast<AInteractableItemBase>(InPointingAtItemActor))
-		{
-			if (!InteractableItem->GetPersistentlyFrozen())
+			AActor* NewIndicator = GetWorld()->SpawnActor<AActor>();
+			NewIndicator->SetActorLabel("PointingIndicator");
+			USceneComponent* Root = NewObject<USceneComponent>(NewIndicator);
+			Root->RegisterComponent();
+			NewIndicator->SetRootComponent(Root);
+		
+			// Inside the spawned actor class (or dynamically added component)
+			UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(NewIndicator);
+			Mesh->SetupAttachment(Root);
+			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Mesh->SetHiddenInGame(false);
+	
+			static UStaticMesh* SphereMesh = nullptr;
+			if (!SphereMesh)
 			{
-				ActorPointedAt = InPointingAtItemActor;
-				InteractableItem->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
+				SphereMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+			}
+		
+			Mesh->SetStaticMesh(SphereMesh);
+			Mesh->SetWorldScale3D(FVector(0.1f));
+			Mesh->RegisterComponent();
+		
+			UMaterialInterface* OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
+			Mesh->SetMaterial(0,  OutlineSeeThrough);
+		
+			PointingIndicators.Add(NewIndicator);
+		}
+	
+		// Destroy extra indicators if we need fewer
+		while (PointingIndicators.Num() > RequiredCount)
+		{
+			AActor* Extra = PointingIndicators.Pop();
+			if (Extra) Extra->Destroy();
+		}
+	
+		// Move indicators and draw debug spheres for visualization
+		for (int32 i = 0; i < PointingIndicators.Num(); i++)
+		{
+			FVector NewLocation = Start + MoveArmRef->ArmParts[2]->GetUpVector() * EachSpawnDistance * (i + 1);
+			if (PointingIndicators[i])
+			{
+				PointingIndicators[i]->SetActorLocation(NewLocation);
+			}
+		}
+	}
+}
+
+void UActionArmPoint::GetGameObjectPointedAt()
+{
+	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
+	
+	FHitResult Hit;
+	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
+	FVector End = Start + MoveArmRef->ArmParts[2]->GetUpVector() * MAX_FLT;
+	
+	FCollisionQueryParams Params;
+	TArray<AActor*> ChildActors;
+	OwnerCharacter->GetAllChildActors(ChildActors);
+	Params.AddIgnoredActor(OwnerCharacter);
+	Params.AddIgnoredActors(ChildActors);
+	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params))
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (IsValid(HitActor))
+		{
+			UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(HitActor);
+			if (IsValid(InteractObject))
+			{
+				InteractObject->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
+				ActorPointedAt = HitActor;
+			}
+			else if (AInteractableItemBase* InteractableItem = Cast<AInteractableItemBase>(HitActor))
+			{
+				if (!InteractableItem->GetPersistentlyFrozen())
+				{
+					ActorPointedAt = HitActor;
+					InteractableItem->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
+				}
+				else ActorPointedAt = nullptr;
 			}
 			else ActorPointedAt = nullptr;
-		}
-		else ActorPointedAt = nullptr;
-	}
-
-	constexpr float EachSpawnDistance = 25.0f;
-	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
-
-	const float TotalDistance = FVector::Distance(InHitLocation, Start);
-	const int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
-	
-	// Spawn new indicators if we need more
-	while (PointingIndicators.Num() < RequiredCount)
-	{
-		AActor* NewIndicator = GetWorld()->SpawnActor<AActor>();
-		NewIndicator->SetActorLabel("PointingIndicator");
-		USceneComponent* Root = NewObject<USceneComponent>(NewIndicator);
-		Root->RegisterComponent();
-		NewIndicator->SetRootComponent(Root);
-		
-		// Inside the spawned actor class (or dynamically added component)
-		UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(NewIndicator);
-		Mesh->SetupAttachment(Root);
-		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Mesh->SetHiddenInGame(false);
-	
-		static UStaticMesh* SphereMesh = nullptr;
-		if (!SphereMesh)
-		{
-			SphereMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-		}
-		
-		Mesh->SetStaticMesh(SphereMesh);
-		Mesh->SetWorldScale3D(FVector(0.1f));
-		Mesh->RegisterComponent();
-		
-		UMaterialInterface* OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
-		Mesh->SetMaterial(0,  OutlineSeeThrough);
-		
-		PointingIndicators.Add(NewIndicator);
-	}
-	
-	// Destroy extra indicators if we need fewer
-	while (PointingIndicators.Num() > RequiredCount)
-	{
-		AActor* Extra = PointingIndicators.Pop();
-		if (Extra) Extra->Destroy();
-	}
-	
-	// Move indicators and draw debug spheres for visualization
-	for (int32 i = 0; i < PointingIndicators.Num(); i++)
-	{
-		FVector NewLocation = Start + MoveArmRef->ArmParts[2]->GetUpVector() * EachSpawnDistance * (i + 1);
-		if (PointingIndicators[i])
-		{
-			PointingIndicators[i]->SetActorLocation(NewLocation);
 		}
 	}
 }
