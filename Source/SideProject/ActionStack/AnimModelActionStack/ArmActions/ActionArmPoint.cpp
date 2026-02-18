@@ -4,6 +4,7 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "Evaluation/IMovieSceneEvaluationHook.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tools/GenericCalls.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
@@ -164,7 +165,7 @@ void UActionArmPoint::GetGameObjectPointedAt()
 	
 	FHitResult Hit;
 	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
-	FVector End = Start + MoveArmRef->ArmParts[2]->GetUpVector() * MAX_FLT;
+	FVector End = Start + MoveArmRef->ArmParts[2]->GetUpVector() * 10000.0f;
 	
 	FCollisionQueryParams Params;
 	TArray<AActor*> ChildActors;

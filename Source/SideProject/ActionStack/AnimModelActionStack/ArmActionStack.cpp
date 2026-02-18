@@ -72,13 +72,15 @@ void UArmActionStack::AddWaveAction()
 		const FVector PointingLocationRef = PointAction->GetPointingLocation();
 		if (IsValid(PointAction->GetActorPointedAt()) && Cast<AInteractableItemBase>(PointAction->GetActorPointedAt()))
 		{
+			AInteractableItemBase* Interaction = Cast<AInteractableItemBase>(PointAction->GetActorPointedAt());
 			OwnerCompanion->GetCompanionActionStack()->OnAddActionPickUp();
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, false);
+			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetActorLocation(), false);
 		}
 		else if (IsValid(PointAction->GetActorPointedAt()) && Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())))
 		{
+			UInteractionBehaviour* Interaction = Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt()));
 			OwnerCompanion->GetCompanionActionStack()->OnAddTryToInteractWithWorld();
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, false);
+			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetComponentLocation(), false);
 			Cast<ACompanionPawn>(OwnerCompanion)->SetLastKnownInteractionBehaviour(Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())));
 		}
 		else

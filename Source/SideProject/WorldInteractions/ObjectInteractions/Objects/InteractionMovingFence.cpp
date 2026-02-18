@@ -60,20 +60,20 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , ComponentsToMove->GetRelativeLocation()));
 			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , VectorMoveTo));
 			if (bDoForever) return;
-			for (UStaticMeshComponent* Mesh : GetAllStaticMeshesInOwner_Implementation())
-			{
-				Mesh->SetCanEverAffectNavigation(false);
-			}
+			// for (UStaticMeshComponent* Mesh : GetAllStaticMeshesInOwner_Implementation())
+			// {
+			// 	Mesh->SetCanEverAffectNavigation(false);
+			// }
 		}
 		else
 		{
 			AnimTransforms.Empty();
 			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , ComponentsToMove->GetRelativeLocation()));
 			AnimTransforms.Add(FTransform(ComponentsToMove->GetComponentRotation().Quaternion() , FVector::ZeroVector));
-			for (UStaticMeshComponent* Mesh : GetAllStaticMeshesInOwner_Implementation())
-			{
-				Mesh->SetCanEverAffectNavigation(true);
-			}
+			// for (UStaticMeshComponent* Mesh : GetAllStaticMeshesInOwner_Implementation())
+			// {
+			// 	Mesh->SetCanEverAffectNavigation(true);
+			// }
 		}
 	}
 	if (bDoForever && bShouldOpen)
