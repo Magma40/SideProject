@@ -17,6 +17,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)  virtual void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
 	TArray<UStaticMeshComponent*>  virtual GetAllStaticMeshesInOwner_Implementation() override;
+	void ResetDoForever() { bDoForever = false; }
 
 protected:
 	UPROPERTY() TScriptInterface<IInteractionInterface> InteractionToCallInteract = nullptr;
@@ -24,6 +25,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite) bool bShouldOpen = false;
 	UPROPERTY(BlueprintReadWrite) TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
+	FTimerHandle MyTimerHandle;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") float PlayRate = 1.0f;
@@ -31,4 +33,5 @@ public:
 	UPROPERTY(EditAnywhere, Category="MovingFence") FComponentReference ComponentsToMoveRef;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") AActor* ActorToCallInteract = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") bool bDoForever = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence")  float InterwallTimer = 0.0f;
 };

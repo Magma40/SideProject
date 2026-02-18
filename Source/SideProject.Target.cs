@@ -11,11 +11,11 @@ public class SideProjectTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("SideProject");
-		RegisterModulesCreatedByRider();
+		//RegisterModulesCreatedByRider();
 	}
 
-	private void RegisterModulesCreatedByRider()
-	{
-		ExtraModuleNames.AddRange(new string[] { "SideProjectEditor" });
-	}
+	// private void RegisterModulesCreatedByRider()
+	// {
+	// 	ExtraModuleNames.AddRange(new string[] { "SideProjectEditor" });
+	// }
 }

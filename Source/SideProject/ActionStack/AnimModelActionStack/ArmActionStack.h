@@ -8,6 +8,7 @@
 
 class UMoveArm;
 class ABaseInteractableCharacter;
+class UInteractionBehaviour;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UArmActionStack : public UActionStack

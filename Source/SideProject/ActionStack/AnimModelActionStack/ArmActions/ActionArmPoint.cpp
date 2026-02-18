@@ -4,12 +4,12 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
-#include "Evaluation/IMovieSceneEvaluationHook.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tools/GenericCalls.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 #include "WorldObjects/PlayerCamera.h"
 #include "WorldInteractions/InteractionManager.h"
+#include "WorldObjects/PointingIndicator.h"
 
 UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
 {
@@ -28,7 +28,6 @@ void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 void UActionArmPoint::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
-	RenderPointingToIndicator();
 	while (PointingIndicators.Num() > 0)
 	{
 		AActor* Extra = PointingIndicators.Pop();
@@ -112,32 +111,17 @@ void UActionArmPoint::RenderPointingToIndicator()
 		// Spawn new indicators if we need more
 		while (PointingIndicators.Num() < RequiredCount)
 		{
-			AActor* NewIndicator = GetWorld()->SpawnActor<AActor>();
-			NewIndicator->SetActorLabel("PointingIndicator");
-			USceneComponent* Root = NewObject<USceneComponent>(NewIndicator);
-			Root->RegisterComponent();
-			NewIndicator->SetRootComponent(Root);
-		
-			// Inside the spawned actor class (or dynamically added component)
-			UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(NewIndicator);
-			Mesh->SetupAttachment(Root);
-			Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Mesh->SetHiddenInGame(false);
-	
-			static UStaticMesh* SphereMesh = nullptr;
-			if (!SphereMesh)
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = OwnerCharacter;
+			SpawnParams.Instigator = OwnerCharacter;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			APointingIndicator* Indicator = GetWorld()->SpawnActor<APointingIndicator>(APointingIndicator::StaticClass(), OwnerCharacter->GetActorLocation(), FRotator::ZeroRotator, SpawnParams);
+
+			if (IsValid(Indicator))
 			{
-				SphereMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+				PointingIndicators.Add(Indicator);
 			}
-		
-			Mesh->SetStaticMesh(SphereMesh);
-			Mesh->SetWorldScale3D(FVector(0.1f));
-			Mesh->RegisterComponent();
-		
-			UMaterialInterface* OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
-			Mesh->SetMaterial(0,  OutlineSeeThrough);
-		
-			PointingIndicators.Add(NewIndicator);
 		}
 	
 		// Destroy extra indicators if we need fewer

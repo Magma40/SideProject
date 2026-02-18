@@ -75,7 +75,7 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 	}
 	CurrentAction = nullptr;
 	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-	ActionStack.RemoveAt(0);
+	ActionStack.Remove(Action);
 }
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)

@@ -1,6 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldInteractions/InteractionManager.h"
+
+#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
+#include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 #include "Player/BaseInteractableCharacter.h"
+#include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
 
 void UInteractionManager::AddInteraction(UObject* Interaction)
@@ -99,6 +103,10 @@ float UInteractionBehaviour::GetDistanceToInteraction_Implementation(ABaseIntera
 void UInteractionBehaviour::PerformInteraction_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
 	if (bInteracting) return;
+	if (IsValid(InInteractingCharacter))
+	{
+		InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->ClearAllActionsExceptIndex(1);
+	}
 	bInteracting = true;
 	InteractingCharacter = InInteractingCharacter;
 }

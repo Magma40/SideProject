@@ -24,7 +24,7 @@ private:
 	FTimerHandle MyTimerHandle;
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") AActor* ValidActorPatternCallInteract = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence") TArray<AActor*> ActorsToCallInteract;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MovingFence")  float InterwallTimer = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionMultiple") AActor* ValidActorPatternCallInteract = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionMultiple") TArray<AActor*> ActorsToCallInteract;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InteractionMultiple")  float InterwallTimer = 0.0f;
 };

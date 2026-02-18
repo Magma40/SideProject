@@ -6,6 +6,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmPoint.generated.h"
 
+class APointingIndicator;
 class APlayerCamera;
 class UMoveArm;
 class ABaseInteractableCharacter;
@@ -36,7 +37,7 @@ private:
 	float ElapsedTime = 0.0f;
 	float PlayRate = 1.0f;
 
-	TArray<AActor*> PointingIndicators;
+	UPROPERTY() TArray<APointingIndicator*> PointingIndicators;
 	FVector PointingLocation = FVector::ZeroVector;
 	AActor* ActorPointedAt = nullptr;
 	APlayerCamera* TheMainCameraInScene = nullptr;

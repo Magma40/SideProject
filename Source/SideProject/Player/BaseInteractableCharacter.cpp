@@ -3,8 +3,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "VectorTypes.h"
-#include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
-#include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"

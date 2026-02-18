@@ -50,7 +50,7 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 	
 	//SpawnIndicator
 	IndicatorActor = GetWorld()->SpawnActor<AActor>();
-	IndicatorActor->SetActorLabel("MoveToIndicator");
+	//IndicatorActor->SetActorLabel("MoveToIndicator");
 	USceneComponent* Root = NewObject<USceneComponent>(IndicatorActor);
 	Root->RegisterComponent();
 	IndicatorActor->SetRootComponent(Root);

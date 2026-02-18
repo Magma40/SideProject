@@ -15,7 +15,7 @@ ACompanionPawn::ACompanionPawn() { PrimaryActorTick.bCanEverTick = true; }
 
 void ACompanionPawn::RespawnCharacter()
 {
-	GetCompanionActionStack()->ClearAllActions();
+	GetCompanionActionStack()->ClearAllActionsExceptIndex(0);
 	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()))
 	{
 		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(PlayerHandHoldingAction);

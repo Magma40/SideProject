@@ -29,11 +29,8 @@ void UCompanionActionStack::Init()
 void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator)
 {
 	if (!OwnerCharacter) return;
-	if (UActionContinuousMoveTo* ContinuousMoveTo = GetAction<UActionContinuousMoveTo>())
-	{
-		const TScriptInterface<IActionInterface> ActionInterfaceContinuousMoveTo = GetInterfacedAction(ContinuousMoveTo);
-		RemoveAction(ActionInterfaceContinuousMoveTo);
-	}
+	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())  this->RemoveAction(ActionRef);
+	if (UActionMoveTo* ActionRef = GetAction<UActionMoveTo>())  this->RemoveAction(ActionRef);
 	UActionMoveTo* ActionMoveTo = UActionMoveTo::Create(this, OwnerCharacter, InMoveToLocation, InNeedIndicator);
 	this->PushAction(ActionMoveTo);
 }
@@ -41,6 +38,8 @@ void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation, b
 void UCompanionActionStack::OnAddActionPickUp()
 {
 	if (!OwnerCharacter) return;
+	if (UActionPickUpItem* ActionRef = GetAction<UActionPickUpItem>())  this->RemoveAction(ActionRef);
+	if (UActionTryToInteractWithWorld* ActionRef = GetAction<UActionTryToInteractWithWorld>())  this->RemoveAction(ActionRef);
 	UActionPickUpItem* ActionPickUpItem = UActionPickUpItem::Create(this, OwnerCharacter);
 	this->PushAction(ActionPickUpItem);
 }
@@ -48,6 +47,8 @@ void UCompanionActionStack::OnAddActionPickUp()
 void UCompanionActionStack::OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer)
 {
 	if (!OwnerCharacter) return;
+	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())  this->RemoveAction(ActionRef);
+	if (UActionMoveTo* ActionRef = GetAction<UActionMoveTo>())  this->RemoveAction(ActionRef);
 	UActionContinuousMoveTo* ActionContinuousMoveTo = UActionContinuousMoveTo::Create(this, OwnerCharacter, InPlayer);
 	this->PushAction(ActionContinuousMoveTo);
 }
@@ -55,6 +56,9 @@ void UCompanionActionStack::OnAddActionContinuousMove(ABaseInteractableCharacter
 void UCompanionActionStack::OnAddTryToInteractWithWorld()
 {
 	if (!OwnerCharacter) return;
+	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())  this->RemoveAction(ActionRef);
+	if (UActionPickUpItem* ActionRef = GetAction<UActionPickUpItem>())  this->RemoveAction(ActionRef);
+	if (UActionTryToInteractWithWorld* ActionRef = GetAction<UActionTryToInteractWithWorld>())  this->RemoveAction(ActionRef);
 	UActionTryToInteractWithWorld* ActionContinuousMoveTo = UActionTryToInteractWithWorld::Create(this, OwnerCharacter);
 	this->PushAction(ActionContinuousMoveTo);
 }

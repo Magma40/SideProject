@@ -90,6 +90,12 @@ void AInteractionMovingFence::Tick(float DeltaTime)
 void AInteractionMovingFence::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
 	InteractingCharacter = InInteractingCharacter;
+	if (InterwallTimer != 0.0f)
+	{
+		bDoForever = true;
+		GetWorld()->GetTimerManager().SetTimer(MyTimerHandle, this, &AInteractionMovingFence::ResetDoForever, InterwallTimer, false);
+	}
+	
 	bShouldOpen = true;
 	if (IsValid(InteractionToCallInteract.GetObject()))
 	{

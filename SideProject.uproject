@@ -13,11 +13,6 @@
 				"AIModule",
 				"UMG"
 			]
-		},
-		{
-			"Name": "SideProjectEditor",
-			"Type": "Editor",
-			"LoadingPhase": "PostEngineInit"
 		}
 	],
 	"Plugins": [

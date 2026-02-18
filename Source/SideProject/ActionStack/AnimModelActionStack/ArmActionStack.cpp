@@ -18,7 +18,6 @@
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 
 
-class UInteractionBehaviour;
 UArmActionStack::UArmActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
 void UArmActionStack::BeginPlay()
@@ -42,13 +41,18 @@ void UArmActionStack::AddMovingAction()
 }
 void UArmActionStack::AddJumpingAction()
 {
+	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())  this->RemoveAction(ActionRef);
+	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>()) this->RemoveAction(ActionRef);
+	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
+	if (UActionArmHandToLocation* ActionRef = GetAction<UActionArmHandToLocation>()) this->RemoveAction(ActionRef);
+	
 	UActionArmJumpingMovement* ArmsJumpingMovement = UActionArmJumpingMovement::Create(this, ArmRef);
 	this->PushAction(ArmsJumpingMovement);
 }
 
 void UArmActionStack::AddHolsterAction()
 {
-	if (IsValid(GetAction<UActionArmToHolster>())) return;
+	if (IsValid(GetAction<UActionArmToHolster>()) || GetAction<UActionArmJumpingMovement>() || GetAction<UActionArmHandToLocation>()) return;
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())  this->RemoveAction(ActionRef);
 	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>()) this->RemoveAction(ActionRef);
 
@@ -58,13 +62,13 @@ void UArmActionStack::AddHolsterAction()
 
 void UArmActionStack::AddWaveAction()
 {
-	if (IsValid(GetAction<UActionArmWave>()) || OwnerCharacter->GetItemInHand() != nullptr) return;
+	if (GetAction<UActionArmJumpingMovement>() || IsValid(GetAction<UActionArmWave>()) || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>()) this->RemoveAction(ActionRef);
 	if (UActionArmHandHolding* ActionRef = GetAction<UActionArmHandHolding>()) this->RemoveAction(ActionRef);
 
 	if (!IsValid(OwnerCompanion)) return;
 	if (OwnerCharacter->GetItemInHand() != nullptr) return;
-	OwnerCompanion->GetCompanionActionStack()->ClearAllActions();
+	OwnerCompanion->GetCompanionActionStack()->ClearAllActionsExceptIndex(1);
 	if (UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
 	{
 		if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()) OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
@@ -85,7 +89,7 @@ void UArmActionStack::AddWaveAction()
 		}
 		else
 		{
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, true);
+				OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, true);
 		}
 		return;
 	}
@@ -97,7 +101,7 @@ void UArmActionStack::AddWaveAction()
 
 void UArmActionStack::AddPointingAction()
 {
-	if (OwnerCharacter->GetItemInHand() != nullptr) return;
+	if (GetAction<UActionArmJumpingMovement>() || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
 	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
@@ -111,14 +115,17 @@ void UArmActionStack::AddPointingAction()
 
 void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
 {
+	if (GetAction<UActionArmJumpingMovement>()) return;
 	UActionArmHandHolding* ArmsHandHolding = UActionArmHandHolding::Create(this, ArmRef, OtherCompanionArm, OwnerCharacter, OwnerCompanion);
 	this->PushAction(ArmsHandHolding);
 }
 
 void UArmActionStack::AddHandToLocation( const FVector& InToLocation, bool bWantToPickUpItem)
 {
+	if (GetAction<UActionArmJumpingMovement>()) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
+	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>()) this->RemoveAction(ActionRef);
 	if (UActionArmHandToLocation* ActionRef = GetAction<UActionArmHandToLocation>())
 	{
 		this->RemoveAction(ActionRef);
