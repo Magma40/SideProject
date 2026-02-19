@@ -90,11 +90,6 @@ void AMainCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	DoMove(MovementVector.X, MovementVector.Y);
-	if (EnabledInput)
-	{
-		LastOldRightValue = MovementVector.X;
-		LastOldForwardValue = MovementVector.Y;	
-	}
 }
 
 void AMainCharacter::DoMove(float Right, float Forward)
@@ -124,36 +119,6 @@ void AMainCharacter::RespawnCharacter()
 	{
 		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(PlayerHandHoldingAction);
 	}
-}
-
-void AMainCharacter::ContinuousFalling(float Right, float Forward)
-{
-		EnabledInput = false;
-		const FRotator Rotation = TheMainCameraInScene->GetActorRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		
-		AddMovementInput(ForwardDirection, Forward);
-		AddMovementInput(RightDirection, Right);
-}
-
-
-void AMainCharacter::Falling() 
-{
-	Super::Falling();
-	if (MovingModel == nullptr) return;
-	//MovingModel->SetLegsJumpingAnim();
-}
-
-void AMainCharacter::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-	if (MovingModel == nullptr) return;
 }
 
 

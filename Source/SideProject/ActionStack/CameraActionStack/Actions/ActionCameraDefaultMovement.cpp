@@ -26,7 +26,7 @@ void UActionCameraDefaultMovement::OnBegin_Implementation(const bool bFirstTime)
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PC->InputComponent);
 	if (!Input) return;
 
-	Input->BindAction(OwnerCharacter->GetMouseLookAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitLookRangeForCamera);
+	Input->BindAction(OwnerCharacter->GetLookAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitLookRangeForCamera);
 	Input->BindAction(OwnerCharacter->GetMoveAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitMoveRangeForCamera);
 }
 

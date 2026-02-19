@@ -26,8 +26,6 @@ protected: //Functions
 
 	//Movement
 	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void ContinuousFalling(float Right, float Forward);
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoMove(float Right, float Forward);
@@ -35,23 +33,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input") virtual void DoJumpEnd() { StopJumping(); }
 	UInputAction* GetLookAction() const { return LookAction; }
 	UInputAction* GetMoveAction() const { return MoveAction; }
-	UInputAction* GetMouseLookAction() const { return MouseLookAction; }
 	UFUNCTION(BlueprintCallable) virtual void RespawnCharacter() override;
 
 protected: //Variables
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* JumpAction;
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, Category="Input") UInputAction* LookAction;
-	UPROPERTY(EditAnywhere, Category="Input") UInputAction* MouseLookAction;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool EnabledInput = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float JumpSpeedForceChange = 100.0f;
-
-	virtual void Landed(const FHitResult& Hit) override;
-	virtual void Falling() override;
-	
-	float LastOldForwardValue = 0.0f;
-	float LastOldRightValue = 0.0f;
 	float DefaultMaxSprintSpeed = 1.0f;
 };
 
