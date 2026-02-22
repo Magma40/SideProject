@@ -10,8 +10,6 @@ class ABaseInteractableCharacter;
 class UArmActionStack;
 class ULegActionStack;
 class AMovingModel;
-class UActionArmHandHolding;
-class UActionContinuousMoveTo;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -19,7 +17,7 @@ class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
-protected:
+private:
 	UAnimModelActionStack();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -43,7 +41,7 @@ public:
 	void PushPointingActionMovement() const;
 	void PushHandHoldingActionMovement();
 
-	UArmActionStack* GetArmActionStack_R() { return ArmActionStack_RRef; }
-	UArmActionStack* GetArmActionStack_L() { return ArmActionStack_LRef; }
-	ULegActionStack* GetLegsActionStack() { return LegActionStackRef;}
+	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_R() const { return ArmActionStack_RRef; }
+	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_L() const { return ArmActionStack_LRef; }
+	UFUNCTION(BlueprintCallable) ULegActionStack* GetLegsActionStack() const { return LegActionStackRef;}
 };

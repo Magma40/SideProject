@@ -1,5 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "AnimModelActionStack.h"
+
+#include "ActionStack/Actions/ActionContinuousMoveTo.h"
 #include "ProcedualAnimation/MovingModel.h" 
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelMovingMovement.h"
 #include "ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.h"
@@ -8,6 +10,7 @@
 #include "ActionStack/Characters/CompanionActionStack.h"
 #include "ActionStack/AnimModelActionStack/LegActionStack.h"
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
+#include "ArmActions/ActionArmHandHolding.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MoveArm.h"
 

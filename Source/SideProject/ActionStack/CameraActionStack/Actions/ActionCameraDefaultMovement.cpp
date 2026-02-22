@@ -71,7 +71,7 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	const FRotator StartTransformRotation = PlayerCamera->GetStartCameraTransform().GetRotation().Rotator();
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-	float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f * -1.f;
+	float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f;
 	float DesiredYaw   = CameraRotation.Yaw   + MovementVector.X * GetWorld()->GetDeltaSeconds() * 50.0f;
 
 	float PitchDelta = FMath::FindDeltaAngleDegrees(StartTransformRotation.Pitch, DesiredPitch);

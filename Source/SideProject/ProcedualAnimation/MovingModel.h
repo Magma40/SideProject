@@ -52,7 +52,7 @@ public:
 	UMoveArm* GetLeftArm() const;
 	TArray<UMoveLeg*> GetLegs();
 	TArray<UMoveArm*> GetArms();
-	UAnimModelActionStack* GetAnimModelActionStack() const { return AnimModelActionStack; }
+	UFUNCTION(BlueprintCallable) UAnimModelActionStack* GetAnimModelActionStack() const { return AnimModelActionStack; }
 	
 	void SetAnimModelActionStack(UAnimModelActionStack* InAnimModelActionStack) { AnimModelActionStack = InAnimModelActionStack; } 
 

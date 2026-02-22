@@ -44,23 +44,23 @@ private:
 	
 public:
 	static UActionStack* Main;
-	TArray<TScriptInterface<IActionInterface>> GetActionStack() { return ActionStack; }
-	TScriptInterface<IActionInterface> GetCurrentAction() const { return CurrentAction; }
+	UFUNCTION(BlueprintCallable) TArray<TScriptInterface<IActionInterface>> GetActionStack() { return ActionStack; }
+	UFUNCTION(BlueprintCallable) TScriptInterface<IActionInterface> GetCurrentAction() const { return CurrentAction; }
 	
 	static UActionStack* GetMain(UObject* WorldContext = nullptr);
-	void PushAction(const TScriptInterface<IActionInterface>& Action);
-	void RemoveAction(const TScriptInterface<IActionInterface>& Action);	
+	UFUNCTION(BlueprintCallable) void PushAction(const TScriptInterface<IActionInterface>& Action);
+	UFUNCTION(BlueprintCallable) void RemoveAction(const TScriptInterface<IActionInterface>& Action);	
 	
 	 template<typename T>
-	 T* GetAction();
-	 bool Contains(const TScriptInterface<IActionInterface>& Action) const
+	 UFUNCTION(BlueprintCallable) T* GetAction();
+	 UFUNCTION(BlueprintCallable) bool Contains(const TScriptInterface<IActionInterface>& Action) const
 	 {
 		 return Action  != nullptr && ActionStack.Contains(Action);
 	 }
 
 	template<typename T>
-	TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction)
-	 {
+	UFUNCTION(BlueprintCallable) TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction)
+	{
 	 	TScriptInterface<IActionInterface> ActionInterface;
 	 	UObject* ActionObject = Cast<UObject>(InAction);
 	 	if (!ActionObject) return ActionInterface;
@@ -71,6 +71,7 @@ public:
 
 	UFUNCTION(BlueprintCallable) void ClearAllActionsExceptIndex(const int SaveIndex)
 	 {
+	 	if (ActionStack.Num() < 2) return;
 	 	while (ActionStack.Num() > SaveIndex)
 	 	{
 	 		RemoveAction(ActionStack[0]);
