@@ -68,7 +68,7 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 
 void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
 {
-	if (!Action) return;
+	if (!Action || ActionStack.Num() == 1) return;
 	if (IsValid(Action.GetObject()))
 	{
 		Action->Execute_OnEnd(Action.GetObject());
@@ -76,6 +76,22 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 	CurrentAction = nullptr;
 	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
 	ActionStack.Remove(Action);
+}
+
+void UActionStack::ClearAllActionsExceptIndex(const int SaveIndex)
+{
+	while (ActionStack.Num() > SaveIndex)
+	{
+		TScriptInterface<IActionInterface> Action = ActionStack[0];
+		if (!Action) continue;
+		if (IsValid(Action.GetObject()))
+		{
+			Action->Execute_OnEnd(Action.GetObject());
+		}
+		CurrentAction = nullptr;
+		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+		ActionStack.Remove(Action);
+	}
 }
 
 UActionStack* UActionStack::GetMain(UObject* WorldContext)

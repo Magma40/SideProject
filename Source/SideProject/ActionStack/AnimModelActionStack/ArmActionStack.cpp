@@ -64,15 +64,14 @@ void UArmActionStack::AddWaveAction()
 {
 	if (GetAction<UActionArmJumpingMovement>() || IsValid(GetAction<UActionArmWave>()) || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>()) this->RemoveAction(ActionRef);
-	if (UActionArmHandHolding* ActionRef = GetAction<UActionArmHandHolding>()) this->RemoveAction(ActionRef);
+	if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()) OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
+	if (UActionArmHandHolding* ActionRef = OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()) OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(ActionRef);
 
 	if (!IsValid(OwnerCompanion)) return;
 	if (OwnerCharacter->GetItemInHand() != nullptr) return;
-	OwnerCompanion->GetCompanionActionStack()->ClearAllActionsExceptIndex(1);
+	OwnerCompanion->GetCompanionActionStack()->ClearAllActionsExceptIndex(0);
 	if (UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
 	{
-		if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()) OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
-		if (UActionArmHandHolding* ActionRef = OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>()) OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(ActionRef);
 		const FVector PointingLocationRef = PointAction->GetPointingLocation();
 		if (IsValid(PointAction->GetActorPointedAt()) && Cast<AInteractableItemBase>(PointAction->GetActorPointedAt()))
 		{
@@ -101,14 +100,9 @@ void UArmActionStack::AddWaveAction()
 
 void UArmActionStack::AddPointingAction()
 {
-	if (GetAction<UActionArmJumpingMovement>() || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
+	if (GetAction<UActionArmPoint>() || GetAction<UActionArmJumpingMovement>() || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
-	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
-	{
-		this->RemoveAction(ActionRef);
-		return;
-	}
 	UActionArmPoint* ArmsPoint = UActionArmPoint::Create(this, ArmRef, OwnerCharacter);
 	this->PushAction(ArmsPoint);
 }

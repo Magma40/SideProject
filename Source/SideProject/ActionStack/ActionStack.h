@@ -69,14 +69,7 @@ public:
 	 	return ActionInterface;
 	 }
 
-	UFUNCTION(BlueprintCallable) void ClearAllActionsExceptIndex(const int SaveIndex)
-	 {
-	 	if (ActionStack.Num() < 2) return;
-	 	while (ActionStack.Num() > SaveIndex)
-	 	{
-	 		RemoveAction(ActionStack[0]);
-	 	}
-	 }
+	UFUNCTION(BlueprintCallable) void ClearAllActionsExceptIndex(const int SaveIndex);
 };
 
 UCLASS(Abstract, Blueprintable) 

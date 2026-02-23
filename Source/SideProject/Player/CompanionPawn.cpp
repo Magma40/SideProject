@@ -43,6 +43,7 @@ void ACompanionPawn::Tick(const float DeltaTime)
 void ACompanionPawn::RunLastKnowInteract() const
 {
 	if (!IsValid(LastKnownInteractionBehaviour)) return;
+	CompanionActionStack->ClearAllActionsExceptIndex(0);
 	CompanionActionStack->OnAddTryToInteractWithWorld();
 	CompanionActionStack->OnAddActionMoveTo(LastKnownInteractionBehaviour->GetOwner()->GetActorLocation(), false);
 }

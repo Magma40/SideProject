@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedPlayerInput.h"
 #include "ActionStack/CameraActionStack/CameraActionStack.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/InputDeviceSubsystem.h"
+#include "GameFramework/InputSettings.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/MainCharacter.h"
 #include "Public/CameraPoint.h"
 #include "WorldObjects/PlayerCamera.h"
@@ -69,7 +72,17 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
 	const FRotator CameraRotation = PlayerCamera->GetActorRotation();
 	const FRotator StartTransformRotation = PlayerCamera->GetStartCameraTransform().GetRotation().Rotator();
-	const FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if(APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+	{
+		if (UInputDeviceSubsystem* InputDeviceSubsystem = GEngine->GetEngineSubsystem<UInputDeviceSubsystem>())
+    	{
+    		const FPlatformUserId UserId = PlayerController->GetPlatformUserId();
+    		FHardwareDeviceIdentifier DeviceIdentifier = InputDeviceSubsystem->GetMostRecentlyUsedHardwareDevice(UserId);
+    		if (DeviceIdentifier.PrimaryDeviceType == EHardwareDevicePrimaryType::Gamepad) MovementVector.Y *= -1.f;
+    	}
+	}
 
 	float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f;
 	float DesiredYaw   = CameraRotation.Yaw   + MovementVector.X * GetWorld()->GetDeltaSeconds() * 50.0f;
