@@ -41,6 +41,8 @@ public:
 	void PushPointingActionMovement() const;
 	void PushHandHoldingActionMovement();
 
+	void RemovePointingActionMovement() const;
+
 	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_R() const { return ArmActionStack_RRef; }
 	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_L() const { return ArmActionStack_LRef; }
 	UFUNCTION(BlueprintCallable) ULegActionStack* GetLegsActionStack() const { return LegActionStackRef;}

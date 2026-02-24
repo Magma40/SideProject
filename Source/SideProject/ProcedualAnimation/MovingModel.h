@@ -38,11 +38,12 @@ public:
 	void UpdateHips();
 	float GetHipSway();
 
-	UFUNCTION(BlueprintCallable) void SetJumpingAnim();
-	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim();
-	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim();
-	UFUNCTION(BlueprintCallable) void SetArmsPointingAnim();
-	UFUNCTION(BlueprintCallable) void SetArmsHoldingHandsAnim();
+	UFUNCTION(BlueprintCallable) void SetJumpingAnim() const;
+	UFUNCTION(BlueprintCallable) void SetArmsWaveAnim() const;
+	UFUNCTION(BlueprintCallable) void SetArmsBackHolsterAnim() const;
+	UFUNCTION(BlueprintCallable) void SetArmsPointingAnim() const;
+	UFUNCTION(BlueprintCallable) void SetArmsHoldingHandsAnim() const;
+	UFUNCTION(BlueprintCallable) void RemoveArmsPointingAnim() const;
 	
 	template<typename TUpperClass>
 	TArray<FLimbChain> BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const;

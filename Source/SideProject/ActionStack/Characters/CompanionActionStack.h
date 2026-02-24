@@ -25,6 +25,7 @@ public:
 	void OnAddActionPickUp();
 	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
 	void OnAddTryToInteractWithWorld();
+	ABaseInteractableCharacter* GetInteractableCharacter() const { return OwnerCharacter; }
 
 private:
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;

@@ -68,7 +68,7 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 
 void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
 {
-	if (!Action || ActionStack.Num() == 1) return;
+	if (!Action) return;
 	if (IsValid(Action.GetObject()))
 	{
 		Action->Execute_OnEnd(Action.GetObject());

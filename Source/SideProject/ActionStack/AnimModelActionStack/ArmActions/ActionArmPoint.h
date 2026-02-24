@@ -18,7 +18,7 @@ class SIDEPROJECT_API UActionArmPoint : public UAction
 	GENERATED_BODY()
 	
 public:
-	static UActionArmPoint* Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter);
+	static UActionArmPoint* Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InOwnerCompanion);
 	void OnUpdate_Implementation(float DeltaTime) override;
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
@@ -33,6 +33,7 @@ public:
 private:
 	UMoveArm* MoveArmRef = nullptr;
 	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	ABaseInteractableCharacter* OwnerCompanion = nullptr;
 	TArray<FTransform> AnimTransforms;
 	float ElapsedTime = 0.0f;
 	float PlayRate = 1.0f;

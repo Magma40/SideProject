@@ -3,6 +3,8 @@
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Player//BaseInteractableCharacter.h"
+#include "Player/CompanionPawn.h"
+#include "WorldObjects/CompanionUIIndicator.h"
 
 UActionMoveTo* UActionMoveTo::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, const FVector& InTargetLocation, bool InNeedIndicator)
 {
@@ -42,8 +44,19 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 		UE_LOG(LogTemp, Warning, TEXT(" - Controller: %s"), *AIController->GetName());
 		UE_LOG(LogTemp, Warning, TEXT(" - Pawn has NavAgentProperties? %s"), CompanionCharacter->GetNavAgentPropertiesRef().IsValid() ? TEXT("YES") : TEXT("NO"));
 		UE_LOG(LogTemp, Warning, TEXT(" - PathFollowingComponent Valid: %s"),PathComp ? TEXT("YES") : TEXT("NO"));
+
+		if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
+		{
+			CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::Failed);
+		}
 		
 		bMoveCompleted = true;
+		return;
+	}
+
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
 	}
 
 	if (!bNeedIndicator) return;
@@ -81,7 +94,12 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 void UActionMoveTo::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	if (!bNeedIndicator) return;
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
+	}
+	
+	if (!bNeedIndicator || !IsValid(IndicatorActor)) return;
 	const float UpAndDown = TargetLocation.Z + FMath::Sin(GetWorld()->GetTimeSeconds() * 5.0f) * 25.0f;
 	IndicatorActor->SetActorLocation(FVector(IndicatorActor->GetActorLocation().X, IndicatorActor->GetActorLocation().Y, UpAndDown));
 }
@@ -98,7 +116,12 @@ bool UActionMoveTo::IsDone_Implementation() const
 void UActionMoveTo::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
-	if (!bNeedIndicator) return;
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
+	}
+	
+	if (!bNeedIndicator || !IsValid(IndicatorActor)) return;
 	IndicatorActor->Destroy();
 }
 

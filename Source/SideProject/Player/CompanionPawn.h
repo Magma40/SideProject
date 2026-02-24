@@ -6,6 +6,7 @@
 #include "Player/BaseInteractableCharacter.h"
 #include "CompanionPawn.generated.h"
 
+class UCompanionWidgetIndicator;
 class UInteractionBehaviour;
 
 UCLASS()
@@ -17,11 +18,14 @@ public:
 	ACompanionPawn();
 	 void SetLastKnownInteractionBehaviour(UInteractionBehaviour* InLastKnownInteractionBehaviour) { LastKnownInteractionBehaviour = InLastKnownInteractionBehaviour; }
 	UFUNCTION(BlueprintCallable) virtual void RespawnCharacter() override;
+	UCompanionWidgetIndicator* GetCompanionWidgetIndicator() const { return CompanionWidgetIndicator; }
+	void SetCompanionWidgetIndicator(UCompanionWidgetIndicator* InNewWidgetIndicator) { CompanionWidgetIndicator = InNewWidgetIndicator; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY() UCompanionWidgetIndicator* CompanionWidgetIndicator = nullptr;
 	UPROPERTY() UInteractionBehaviour* LastKnownInteractionBehaviour = nullptr;
 	UFUNCTION(BlueprintCallable) void RunLastKnowInteract() const;
 };

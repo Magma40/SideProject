@@ -79,30 +79,36 @@ float AMovingModel::GetHipSway()
 	return HipSway;
 }
 
-void AMovingModel::SetJumpingAnim()
+void AMovingModel::SetJumpingAnim() const
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushJumpingActionMovement();
 }
 
-void AMovingModel::SetArmsWaveAnim()
+void AMovingModel::SetArmsWaveAnim() const
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushWaveActionMovement();
 }
-void AMovingModel::SetArmsBackHolsterAnim()
+void AMovingModel::SetArmsBackHolsterAnim() const
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushHolsterActionMovement();
 }
 
-void AMovingModel::SetArmsPointingAnim()
+void AMovingModel::SetArmsPointingAnim() const
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushPointingActionMovement();
 }
 
-void AMovingModel::SetArmsHoldingHandsAnim()
+void AMovingModel::RemoveArmsPointingAnim() const
+{
+	if (!IsValid(AnimModelActionStack)) return;
+	AnimModelActionStack->RemovePointingActionMovement();
+}
+
+void AMovingModel::SetArmsHoldingHandsAnim() const
 {
 	if (!IsValid(AnimModelActionStack)) return;
 	AnimModelActionStack->PushHandHoldingActionMovement();

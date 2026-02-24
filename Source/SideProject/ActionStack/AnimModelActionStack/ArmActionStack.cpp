@@ -103,8 +103,13 @@ void UArmActionStack::AddPointingAction()
 	if (GetAction<UActionArmPoint>() || GetAction<UActionArmJumpingMovement>() || GetAction<UActionArmHandToLocation>() || OwnerCharacter->GetItemInHand() != nullptr) return;
 	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())  this->RemoveAction(ActionRef);
 	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>()) this->RemoveAction(ActionRef);
-	UActionArmPoint* ArmsPoint = UActionArmPoint::Create(this, ArmRef, OwnerCharacter);
+	UActionArmPoint* ArmsPoint = UActionArmPoint::Create(this, ArmRef, OwnerCharacter, OwnerCompanion);
 	this->PushAction(ArmsPoint);
+}
+
+void UArmActionStack::RemovePointingAction()
+{
+	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>()) this->RemoveAction(ActionRef);
 }
 
 void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)

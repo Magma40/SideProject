@@ -2,7 +2,9 @@
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandToLocation.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "Player/BaseInteractableCharacter.h"
+#include "Player/CompanionPawn.h"
 #include "ProcedualAnimation/MoveArm.h"
+#include "WorldObjects/CompanionUIIndicator.h"
 
 UActionArmHandToLocation* UActionArmHandToLocation::Create(UObject* Outer, ABaseInteractableCharacter* InOwnerCharacter, UMoveArm* InMoveArm, const FVector& InToLocation, bool bWantToPickUpItem)
 {
@@ -25,6 +27,19 @@ void UActionArmHandToLocation::OnBegin_Implementation(const bool bFirstTime)
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, ToLocationPos));
 
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCharacter))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
+	}
+}
+
+void UActionArmHandToLocation::OnEnd_Implementation()
+{
+	Super::OnEnd_Implementation();
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCharacter))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
+	}
 }
 
 void UActionArmHandToLocation::OnUpdate_Implementation(const float DeltaTime) 

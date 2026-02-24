@@ -29,6 +29,8 @@ public:
 	void AddHandHoldingAction(UMoveArm* OtherCompanionArm);
 	void AddHandToLocation(const FVector& InToLocation, bool bWantToPickUpItem);
 
+	void RemovePointingAction();
+
 	UMoveArm* GetArm() const { return ArmRef; }
 
 private:

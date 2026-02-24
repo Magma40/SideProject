@@ -5,17 +5,20 @@
 #include "Player/BaseInteractableCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/CompanionPawn.h"
 #include "Tools/GenericCalls.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 #include "WorldObjects/PlayerCamera.h"
 #include "WorldInteractions/InteractionManager.h"
+#include "WorldObjects/CompanionUIIndicator.h"
 #include "WorldObjects/PointingIndicator.h"
 
-UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
+UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InCompanion )
 {
 	UActionArmPoint* Action = NewObject<UActionArmPoint>(Outer);
 	Action->MoveArmRef = InMoveArm;
 	Action->OwnerCharacter = InCharacter;
+	Action->OwnerCompanion = InCompanion;
 	Action->TheMainCameraInScene = APlayerCamera::GetCamera(InCharacter->GetWorld());
 	return Action;
 }
@@ -23,6 +26,10 @@ UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, AB
 void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::QuestionMark);
+	}
 }
 
 void UActionArmPoint::OnEnd_Implementation()
@@ -32,6 +39,10 @@ void UActionArmPoint::OnEnd_Implementation()
 	{
 		AActor* Extra = PointingIndicators.Pop();
 		if (Extra) Extra->Destroy();
+	}
+	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion))
+	{
+		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
 	}
 }
 

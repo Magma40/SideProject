@@ -1,5 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Player/BaseInteractableCharacter.h"
+
+#include "CompanionPawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "VectorTypes.h"
@@ -10,6 +12,7 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "WorldInteractions/InteractionManager.h"
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
+#include "WorldObjects/CompanionUIIndicator.h"
 
 ABaseInteractableCharacter::ABaseInteractableCharacter() { PrimaryActorTick.bCanEverTick = true; }
 
@@ -59,7 +62,14 @@ void ABaseInteractableCharacter::Tick(const float DeltaTime)
 		if (IsValid(ItemInHand)) DropItemInHand();
 		else PickUpItemToHand(ClosestObject);
 	}
-	else if (AnimTransforms.Num() < 2) 	AnimTransforms.Empty();
+	else if (AnimTransforms.Num() < 2)
+	{
+		AnimTransforms.Empty();
+		if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(this))
+		{
+			CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
+		}
+	}
 }
 
 void ABaseInteractableCharacter::TryToPickUpItem()
@@ -128,6 +138,11 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		FVector ObjectLocalPos = Xform.InverseTransformPosition(ClosestObject->GetActorLocation());
 		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, ObjectLocalPos));
 		AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, LastKnowHandLocation));
+
+		if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(this))
+		{
+			CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
+		}
 	}
 }
 

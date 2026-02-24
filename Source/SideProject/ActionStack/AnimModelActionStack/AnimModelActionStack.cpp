@@ -145,6 +145,11 @@ void UAnimModelActionStack::PushPointingActionMovement() const
 	ArmActionStack_RRef->AddPointingAction();
 }
 
+void UAnimModelActionStack::RemovePointingActionMovement() const
+{
+	ArmActionStack_RRef->RemovePointingAction();
+}
+
 void UAnimModelActionStack::PushHandHoldingActionMovement()
 {
 	if (OwnerCharacter->GetCompanionActionStack()) return;
