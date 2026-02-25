@@ -12,8 +12,8 @@ UCompanionWidgetIndicator::UCompanionWidgetIndicator()
 {
 	SetWidgetClass(UCompanionWidget::StaticClass());
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> QuestionMarkTextureFinder(TEXT("/Engine/EngineDebugMaterials/TargetIcon.TargetIcon"));
-	static ConstructorHelpers::FObjectFinder<UTexture2D> ExclamationMarkTextureFinder(TEXT("/Game/Characters/Mannequins/Textures/Shared/T_UE_Logo_M.T_UE_Logo_M"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> QuestionMarkTextureFinder(TEXT("/Game/Characters/CharacterBlueprints/AI/QuestionMarkOutlined.QuestionMarkOutlined"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ExclamationMarkTextureFinder(TEXT("/Game/Characters/CharacterBlueprints/AI/ExclamationMarkOutlined.ExclamationMarkOutlined"));
 	static ConstructorHelpers::FObjectFinder<UTexture2D> FailedMarkTextureFinder(TEXT("/Engine/EditorMaterials/Cross.Cross"));
 
 	if (QuestionMarkTextureFinder.Succeeded() && ExclamationMarkTextureFinder.Succeeded() && FailedMarkTextureFinder.Succeeded())
@@ -66,22 +66,24 @@ void UCompanionWidgetIndicator::TickComponent(float DeltaTime, enum ELevelTick T
 		bDoOnce = false;
 	}
 
-	if (IsValid(PanelSlot))
+	if (IsValid(CompanionWidget) && IsValid(CompanionWidget->GetImageIndicator()) && CurrentIndicatorImage != ECompanionIndicatorImage::None)
 	{
-		if (PanelSlot->GetSize() != BaseSize && CurrentIndicatorImage != ECompanionIndicatorImage::None)
+		const UImage* Image = CompanionWidget->GetImageIndicator();
+		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image->Slot))
 		{
-			PanelSlot->SetSize(PanelSlot->GetSize() + IndicatorShowSpeed);
+			FVector2D CurrentSize = CanvasSlot->GetSize();
+			if (CurrentSize.X < BaseSize.X)
+			{
+				const FVector2D NewSize = CurrentSize + IndicatorShowSpeed;
+				CanvasSlot->SetSize(NewSize);
+			}
 		}
 	}
 }
 
 void UCompanionWidgetIndicator::SetNewIndicatorImage(const ECompanionIndicatorImage NewImageType)
 {
-	if (CurrentIndicatorImage != NewImageType)
-	{
-		if (!IsValid(PanelSlot)) PanelSlot = Cast<UCanvasPanelSlot>(CompanionWidget->GetCanvasPanel()->GetChildAt(0)); // This needs to change
-		PanelSlot->SetSize(FVector2D::Zero());
-	}
+	if (CurrentIndicatorImage != NewImageType) CompanionWidget->SetIndicatorSize(FVector2D::Zero());
 	
 	UImage* IndicatorImage = CompanionWidget->GetImageIndicator();
 	if (!IsValid(IndicatorImage)) return;
@@ -122,4 +124,12 @@ TSharedRef<SWidget> UCompanionWidget::RebuildWidget()
 	CanvasSlot->SetSize(FVector2D(32.f, 32.f));
 
 	return Super::RebuildWidget();
+}
+
+void UCompanionWidget::SetIndicatorSize(const FVector2D NewSize) const
+{
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(IndicatorImage->Slot))
+	{
+		CanvasSlot->SetSize(NewSize);
+	}
 }

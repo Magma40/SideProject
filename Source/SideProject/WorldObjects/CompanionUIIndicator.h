@@ -23,7 +23,9 @@ public:
 	void BeginPlay() override;
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void SetNewIndicatorImage(ECompanionIndicatorImage NewImageType);
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CompanionWidgetIndicator") float IndicatorShowSpeed = 0.5f;
+
 private:
 	ECompanionIndicatorImage CurrentIndicatorImage = ECompanionIndicatorImage::None;
 	UCompanionWidget* CompanionWidget = nullptr;
@@ -31,9 +33,7 @@ private:
 	UTexture2D* ExclamationMarkTexture = nullptr;
 	UTexture2D* FailedTexture = nullptr;
 	APlayerCamera* PlayerCamera = nullptr;
-	UCanvasPanelSlot*  PanelSlot = nullptr;
 	FVector2D BaseSize = FVector2D(32.f, 32.f);
-	float IndicatorShowSpeed = 0.5f;
 	bool bDoOnce = true;
 };
 
@@ -45,6 +45,7 @@ class SIDEPROJECT_API UCompanionWidget : public UUserWidget
 public:
 	UImage* GetImageIndicator() const { return IndicatorImage; }
 	UCanvasPanel* GetCanvasPanel() const { return CanvasPanel; }
+	void SetIndicatorSize(FVector2D NewSize) const;
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 
