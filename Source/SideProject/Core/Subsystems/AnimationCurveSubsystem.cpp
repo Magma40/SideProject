@@ -74,13 +74,17 @@ TStatId UAnimationCurveSubsystem::GetStatId() const
 
 TTuple<TTuple<TArray<FTransform>, float>,FTransform> UAnimationCurveSubsystem::CustomAnim(float DeltaTime, TArray<FTransform> TheTransforms, float ElapsedTime, float PlayRate)
 {
+	//Try to equal out the speed based on how many position animation should iterate through
 	PlayRate = PlayRate / TheTransforms.Num();
 	ElapsedTime += DeltaTime;
+
+	//Calculate new position and rotation smoothly
 	const float Alpha = FMath::Clamp(ElapsedTime / PlayRate, 0.f, 1.f);
 	const FVector NewLocation = FMath::Lerp(TheTransforms[0].GetLocation(), TheTransforms[1].GetLocation(), Alpha);
 	const FQuat NewRotation = FQuat::Slerp(TheTransforms[0].GetRotation(), TheTransforms[1].GetRotation(), Alpha);
 	FTransform NewTransform = FTransform(NewRotation, NewLocation);
-	
+
+	//If animation has reached an animation point, remove it and continue to next
 	if (Alpha >= 1.f - KINDA_SMALL_NUMBER)
 	{
 		TheTransforms.RemoveAt(0);

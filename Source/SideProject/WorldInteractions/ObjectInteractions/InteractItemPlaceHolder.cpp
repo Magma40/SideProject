@@ -49,6 +49,7 @@ void UInteractItemPlaceHolder::PerformInteraction_Implementation(ABaseInteractab
 
 void UInteractItemPlaceHolder::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
+	//If the desired item is in place, place down item and make so player cant interact with item anymore
 	if (IsValid(InInteractingCharacter) && IsValid(InteractingCharacter->GetItemInHand()) && InteractingCharacter->GetItemInHand() == ItemNeeded)
 	{
 		InteractingCharacter->GetItemInHand()->AttachToComponent_Implementation(this);

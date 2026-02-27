@@ -66,7 +66,7 @@ bool UActionCameraDefaultMovement::IsDone_Implementation() const
 	return false;
 }
 
-void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value) // Const function :)
+void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value) const // Const function :)
 {
 	if (!IsValid(PlayerCamera)) return;
 	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
@@ -74,6 +74,7 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	const FRotator StartTransformRotation = PlayerCamera->GetStartCameraTransform().GetRotation().Rotator();
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
+	//If Player using is a gamepad, invert Y 
 	if(APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
 		if (UInputDeviceSubsystem* InputDeviceSubsystem = GEngine->GetEngineSubsystem<UInputDeviceSubsystem>())
@@ -84,20 +85,23 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
     	}
 	}
 
-	float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f;
-	float DesiredYaw   = CameraRotation.Yaw   + MovementVector.X * GetWorld()->GetDeltaSeconds() * 50.0f;
+	//Calculate new rotation for camera
+	const float DesiredPitch = CameraRotation.Pitch + MovementVector.Y * GetWorld()->GetDeltaSeconds() * 50.0f;
+	const float DesiredYaw   = CameraRotation.Yaw   + MovementVector.X * GetWorld()->GetDeltaSeconds() * 50.0f;
 
 	float PitchDelta = FMath::FindDeltaAngleDegrees(StartTransformRotation.Pitch, DesiredPitch);
 	float YawDelta   = FMath::FindDeltaAngleDegrees(StartTransformRotation.Yaw, DesiredYaw);
 
+	//Clamp rotation so camera has limited range
 	PitchDelta = FMath::Clamp(PitchDelta, -RotationLimit, RotationLimit);
 	YawDelta   = FMath::Clamp(YawDelta,   -RotationLimit, RotationLimit);
 
+	//Apply new rotation
 	const FRotator LimitedRotation( StartTransformRotation.Pitch + PitchDelta, StartTransformRotation.Yaw   + YawDelta, StartTransformRotation.Roll);
 	PlayerCamera->SetActorRelativeRotation(LimitedRotation);
 }
 
-void UActionCameraDefaultMovement::LimitMoveRangeForCamera()
+void UActionCameraDefaultMovement::LimitMoveRangeForCamera() const
 {
     if (!IsValid(PlayerCamera)) return;
 
@@ -106,28 +110,19 @@ void UActionCameraDefaultMovement::LimitMoveRangeForCamera()
 
     const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();
-   // const FVector CurrentLocation = PlayerCamera->GetActorLocation();
-   // const FVector PlayerPos = OwnerCharacter->GetActorLocation();
 
+	//Get the forward of the current camera point
     const FRotator BaseRot = BaseTransform.GetRotation().Rotator();
     const FRotator YawRotation(0.f, BaseRot.Yaw, 0.f);
 
+	//Get the right of the current camera point
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-    //const float SliderLimit = CurrentPoint->MinMaxSliderValue;
-    //const float PlayerOffset = FVector::DotProduct(PlayerPos - BaseLocation,RightDirection);
-    //if (FMath::Abs(PlayerOffset) > SliderLimit) return;
-
-	//const float CurrentOffset = FVector::DotProduct(CurrentLocation - BaseLocation,RightDirection);
-
-   // const FVector Velocity = OwnerCharacter->GetCharacterMovement()->GetLastUpdateVelocity();
-   // const float DirectionSpeed = FVector::DotProduct(Velocity, RightDirection);
-
-    //const float DeltaOffset = DirectionSpeed * GetWorld()->GetDeltaSeconds();
-	//float NewOffset = CurrentOffset + DeltaOffset;
+	//Calculate if player is in range within camera and is not over camera slider range
 	float TargetOffset = FVector::DotProduct(OwnerCharacter->GetActorLocation() - BaseLocation, RightDirection);
 	TargetOffset = FMath::Clamp(TargetOffset,  -CurrentPoint->MinMaxSliderValue,  CurrentPoint->MinMaxSliderValue);
 
+	//Apply new position
     const FVector NewLocation = BaseLocation + RightDirection * TargetOffset;
     PlayerCamera->SetActorLocation(NewLocation);
 }

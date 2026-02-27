@@ -29,7 +29,7 @@ void UMoveArm::Init()
 	}
 }
 
-void UMoveArm::BeginPlay() //And now my heart is beating like saddest metronome!!
+void UMoveArm::BeginPlay() //And now my heart is beating like the saddest metronome!!
 {
 	Super::BeginPlay();
 	Init();

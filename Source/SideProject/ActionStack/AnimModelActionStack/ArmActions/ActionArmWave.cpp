@@ -14,13 +14,15 @@ UActionArmWave* UActionArmWave::Create(UObject* Outer, UMoveArm* InMoveArm, ABas
 void UActionArmWave::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+
+	//Calculate each animation point
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	const FVector MidOffset = HandLocationPos + FVector(-30.f, -25.f, 125.f); // offset
 	const FVector MidOffset2 = HandLocationPos + FVector(+20.f, -25.f, 125.f); // offset
 	const FVector MidOffset3 = HandLocationPos + FVector(0.0f, 0.0f, 125.f); // offset
 
-
+	//Add each animation point to construct desired animation
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset));
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset2));
@@ -45,6 +47,7 @@ void UActionArmWave::OnUpdate_Implementation(const float DeltaTime)
 		return;
 	}
 
+	//Do smooth custom animation 
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();

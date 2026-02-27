@@ -20,24 +20,30 @@ void AInteractableItemBase::Tick(const float DeltaTime)
 
 void AInteractableItemBase::AttachToComponent_Implementation(USceneComponent* InAttachToComponent)
 {
+	//Disable the collision on every static mesh child component 
 	for (UPrimitiveComponent* Prim : GetPrimitiveComponentChildren_Implementation())
 	{
 		if (!IsValid(Prim)) continue;
 		Prim->SetSimulatePhysics(false);
 		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+	//Remove all overlay material and attach this item onto desired component
 	DisableMaterialInterface_Implementation();
 	GetRootComponent()->AttachToComponent(InAttachToComponent ,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
 void AInteractableItemBase::DetachFromComponent_Implementation()
 {
+	//Deattach from current component 
 	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+	//Reenable the collision on every static mesh child component 
 	for (UPrimitiveComponent* Prim : GetPrimitiveComponentChildren_Implementation())
 	{
 		if (!IsValid(Prim)) continue;
 		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+	//Remove all overlay material just in case
 	DisableMaterialInterface_Implementation();
 }
 

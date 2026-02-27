@@ -64,6 +64,7 @@ void UInteractionBehaviour::TickComponent(float DeltaTime, enum ELevelTick TickT
 
 void UInteractionBehaviour::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
+	//If there is an actor to try to call interact on, try to call it
 	if (IsValid(ActorToCallInteract))
 	{
 		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
@@ -74,7 +75,8 @@ void UInteractionBehaviour::Interact_Implementation(ABaseInteractableCharacter* 
 			Cast<IInteractionInterface>(ActorToCallInteract)->Interact_Implementation(InInteractingCharacter);
 		}
 	}
-	
+
+	//If the interaction only had one use, destroy itself
 	if (bOneUse)
 	{
 		UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
