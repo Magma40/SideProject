@@ -37,7 +37,8 @@ void ABaseInteractableCharacter::BeginPlay()
 	}
 }
 
-// Called every frame
+// TODO: Need to find better way to update pick up animations, tick is not optimized
+// This will update an animation if a character tries to pick up item or drop an item
 void ABaseInteractableCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -50,6 +51,8 @@ void ABaseInteractableCharacter::Tick(const float DeltaTime)
 		UE_LOG(LogTemp, Error,TEXT("%s - Tick - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
+	
+	//Update pick up or drop animation
 	const int BeforeMoveNum = AnimTransforms.Num();
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
 	MovingModel->GetRightArm()->TargetPose.Position = NewValues.Value.GetLocation();
@@ -57,12 +60,13 @@ void ABaseInteractableCharacter::Tick(const float DeltaTime)
 	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 
+	//If character have finished the animation either pick up item or drop item in hand
 	if (AnimTransforms.Num() % 2 == 0 && BeforeMoveNum != AnimTransforms.Num()) // Hard coding ):
 	{
 		if (IsValid(ItemInHand)) DropItemInHand();
 		else PickUpItemToHand(ClosestObject);
 	}
-	else if (AnimTransforms.Num() < 2)
+	else if (AnimTransforms.Num() < 2) // If there is nothing to animate, finish up
 	{
 		AnimTransforms.Empty();
 		if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(this))
@@ -72,8 +76,10 @@ void ABaseInteractableCharacter::Tick(const float DeltaTime)
 	}
 }
 
+//Will try to find the closest item to pick up or drop current item in hand
 void ABaseInteractableCharacter::TryToPickUpItem()
 {
+	//If character has item in hand, see if character can drop it without getting blocked
 	if (IsValid(ItemInHand))
 	{
 		if (GetCharacterMovement()->IsFalling()) return;
@@ -90,6 +96,7 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility,  CollisionParams );
 		if (!bHit) // Only drop if nothing was hit
 		{
+			//Setup drop animation
 			const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
 			FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
 			AnimTransforms.Add(FTransform(MovingModel->GetRightArm()->TargetPose.Rotation, HandLocationPos));
@@ -102,7 +109,8 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 		}
 		return; 
 	}
-	
+
+	//Try to the closest item
 	FVector HandLocation = MovingModel->GetRightHand()->GetComponentLocation();
 	FPickupCandidate Best;
 	
@@ -120,15 +128,18 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 			Best.Distance = Dist;
 		}
 	}
-	
+
+	//If we are able to pick up item
 	if (Best.Object && Best.Distance <= MinDistanceToPickUpItem)
 	{
+		//Safety check to not pick up already referenced item
 		if (ABaseInteractableCharacter* OwnerCharacter = Best.Object->GetOwnerCharacter())
 		{
 			if (Best.Object == OwnerCharacter->ItemInHand) OwnerCharacter->ItemInHand = nullptr;
 			else if (Best.Object == OwnerCharacter->BackItemHolster) OwnerCharacter->BackItemHolster = nullptr;
 		}
-		
+
+		//Setup of pick up animation
 		ClosestObject = Best.Object;
 		const FTransform Xform = Cast<USceneComponent>(MovingModel->GetRightArm())->GetComponentTransform();
 		FVector HandLocationPos = Xform.InverseTransformPosition(MovingModel->GetRightHand()->GetComponentLocation());
@@ -146,6 +157,7 @@ void ABaseInteractableCharacter::TryToPickUpItem()
 	}
 }
 
+//Drop current item in hand
 void ABaseInteractableCharacter::DropItemInHand()
 {
 	if (!IsValid(ItemInHand)) return;
@@ -153,7 +165,8 @@ void ABaseInteractableCharacter::DropItemInHand()
 	ItemInHand->SetOwnerCharacter(nullptr);
 	ItemInHand = nullptr;
 }
-	
+
+//Pick up closest item
 void ABaseInteractableCharacter::PickUpItemToHand(AInteractableItemBase* InSpecificPickUpItem)
 {
 	if (IsValid(InSpecificPickUpItem)) ClosestObject = InSpecificPickUpItem;
@@ -164,7 +177,8 @@ void ABaseInteractableCharacter::PickUpItemToHand(AInteractableItemBase* InSpeci
 	ClosestObject = nullptr;
 }
 
-void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this too fast will break it, resulting mostly with BackItemHolster being valid
+//If the hand to holster distance is acceptable, try to either attach to back holster or deattach item from back holster
+void ABaseInteractableCharacter::TryToInteractWithBackHolster()
 {
 	const float Distance =	UE::Geometry::Distance(MovingModel->GetRightHand()->GetComponentLocation(), BackHolster->GetComponentLocation());
 	if (Distance > 50) return;
@@ -178,6 +192,7 @@ void ABaseInteractableCharacter::TryToInteractWithBackHolster() // Doing this to
 	}
 }
 
+//Attach item in hand to back holster
 void ABaseInteractableCharacter::AttachToBackHolster()
 {
 	if (!IsValid(ItemInHand)) return;
@@ -185,18 +200,22 @@ void ABaseInteractableCharacter::AttachToBackHolster()
 	BackItemHolster = ItemInHand;
 	ItemInHand = nullptr;
 }
+
+//Detach item from back holster to hand
 void ABaseInteractableCharacter::DeattachFromBackHolster()
 {
 	PickUpItemToHand(BackItemHolster);
 	BackItemHolster = nullptr;
 }
 
+//The character tries to interact with every interactable object in world
 void ABaseInteractableCharacter::TryToInteractWithWorld()
 {
 	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
 	if (!IsValid(InteractionManager)) return;
 
-	for (auto Interaction : InteractionManager->GetInteractions(this))
+	//If character is close enough to interact with any interactable in world
+	for (const auto Interaction : InteractionManager->GetInteractions(this))
 	{
 		UInteractionBehaviour* ActionRef = Cast<UInteractionBehaviour>(Interaction);
 		if (ActionRef->CanInteract_Implementation(this))
@@ -213,6 +232,7 @@ void ABaseInteractableCharacter::Jump()
 	MovingModel->SetJumpingAnim();
 }
 
+//Respawns the character based on the current room spawn point
 void ABaseInteractableCharacter::RespawnCharacter()
 {
 	TeleportTo(RoomRespawnSpawnPoint.GetLocation(), RoomRespawnSpawnPoint.Rotator());

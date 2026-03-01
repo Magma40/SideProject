@@ -12,6 +12,9 @@ class UInputAction;
 struct FInputActionValue;
 class AMovingModel;
 
+/**
+ Class for the player
+ */
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 UCLASS(abstract)
 class AMainCharacter : public ABaseInteractableCharacter

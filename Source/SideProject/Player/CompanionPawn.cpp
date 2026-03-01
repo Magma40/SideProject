@@ -26,6 +26,7 @@ void ACompanionPawn::RespawnCharacter()
 void ACompanionPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	// Get CompanionActionStack
 	CompanionActionStack = Cast<UCompanionActionStack>(GenericCalls::FindChildByExactName(this, TEXT("CompanionActionStack")));
 	if (!CompanionActionStack)
@@ -35,11 +36,7 @@ void ACompanionPawn::BeginPlay()
 	}
 }
 
-void ACompanionPawn::Tick(const float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
+//The Companion AI tries to run last known interaction
 void ACompanionPawn::RunLastKnowInteract() const
 {
 	if (!IsValid(LastKnownInteractionBehaviour)) return;

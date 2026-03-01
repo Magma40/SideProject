@@ -18,6 +18,10 @@ struct FLegsPose
 	FQuat Rotation = FQuat::Identity;
 };
 
+/**
+ The class for the legs in procedural animation
+ */
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UMoveLeg : public USceneComponent
 {

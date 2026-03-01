@@ -20,6 +20,10 @@ class UAnimModelActionStack;
 class UMoveLeg;
 class UMoveArm;
 
+
+/**
+ The class for the hips in procedural animation
+ */
 UCLASS()
 class SIDEPROJECT_API AMovingModel : public AActor
 {

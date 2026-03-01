@@ -35,6 +35,8 @@ void AMovingModel::InitSceneComponents() // This one is called through UAnimMode
 void AMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Setup base hip height reference 
 	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
 	const float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
 	const float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
@@ -52,14 +54,18 @@ void AMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 || !IsValid(Hips)) return;
 	const float HipSway =  GetHipSway();
-	
-	//Apply New Hip Location
+
+	//Simulate a constant vertical hip sway
 	const float DesiredHipHeight = BaseHipHeight;
 	const float HipHeight = DesiredHipHeight + FMath::Sin(GetWorld()->GetTimeSeconds() * 2.0f) * 0.5f;
 	const FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSway;
+
+	//Apply New Hip Location
 	Hips->SetRelativeLocation(NewHipLocalPos);
 }
 
+
+//Get if the legs are stepping, return hip sway, else don't 
 float AMovingModel::GetHipSway()
 {
 	float HipSway = 0.0f;
@@ -114,6 +120,7 @@ void AMovingModel::SetArmsHoldingHandsAnim() const
 	AnimModelActionStack->PushHandHoldingActionMovement();
 }
 
+//Debug draw line the procedural animation joints
 void AMovingModel::DrawDebugJoints()
 {
 	FVector Pos_Hips = Hips->GetComponentLocation();
@@ -178,6 +185,8 @@ void AMovingModel::DrawDebugJoints()
 	DrawDebugSphere(GetWorld(), Pos_Elbow_L, 8.f, 12, FColor::Orange);
 	DrawDebugSphere(GetWorld(), Pos_Hand_L, 8.f, 12, FColor::Red);
 }
+
+//Debug draw line the procedural animation limbs
 void AMovingModel::DrawDebugLimbs()
 {
 	FVector Pos_Hips = Hips->GetComponentLocation();
@@ -244,6 +253,7 @@ void AMovingModel::DrawDebugLimbs()
 	DrawDebugLine(GetWorld(), Pos_Elbow_L, Pos_Hand_L, FColor::Red);
 }
 
+//Builds a limb reference to store arms or legs references
 template<typename TUpperClass>
 TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const
 {

@@ -18,6 +18,7 @@ void AInteractableItemBase::Tick(const float DeltaTime)
 	}
 }
 
+//Attaches the item to the input component
 void AInteractableItemBase::AttachToComponent_Implementation(USceneComponent* InAttachToComponent)
 {
 	//Disable the collision on every static mesh child component 
@@ -32,6 +33,7 @@ void AInteractableItemBase::AttachToComponent_Implementation(USceneComponent* In
 	GetRootComponent()->AttachToComponent(InAttachToComponent ,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+//Deattaches the item to the input component
 void AInteractableItemBase::DetachFromComponent_Implementation()
 {
 	//Deattach from current component 
@@ -47,6 +49,7 @@ void AInteractableItemBase::DetachFromComponent_Implementation()
 	DisableMaterialInterface_Implementation();
 }
 
+//Enables the selected overlay material on the item
 void AInteractableItemBase::EnableMaterialInterface_Implementation()
 {
 	const TArray<UStaticMeshComponent*> StaticMeshes = GetStaticMeshChildren_Implementation();
@@ -61,6 +64,7 @@ void AInteractableItemBase::EnableMaterialInterface_Implementation()
 	MaterialOverlayStatus = EMaterialOverlayStatus::Inactive;
 }
 
+//Disables the selected overlay material on the item
 void AInteractableItemBase::DisableMaterialInterface_Implementation()
 {
 	const TArray<UStaticMeshComponent*> StaticMeshes = GetStaticMeshChildren_Implementation();
@@ -75,7 +79,7 @@ void AInteractableItemBase::DisableMaterialInterface_Implementation()
 	MaterialOverlayStatus = EMaterialOverlayStatus::None;
 }
 
-TArray<UPrimitiveComponent*>  AInteractableItemBase::GetPrimitiveComponentChildren_Implementation()
+TArray<UPrimitiveComponent*> AInteractableItemBase::GetPrimitiveComponentChildren_Implementation()
 {
 	TArray<UPrimitiveComponent*> Primitives;
 	GetComponents<UPrimitiveComponent>(Primitives);

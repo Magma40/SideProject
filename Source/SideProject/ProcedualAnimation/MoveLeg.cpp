@@ -50,8 +50,10 @@ void UMoveLeg::TickComponent(const float DeltaTime, const ELevelTick TickType, F
 	UpdateIK(DeltaTime);
 }
 
+//Update the step animation
 void UMoveLeg::UpdateStepping(const float DeltaTime)
 {
+	//Move from A to B this current frame
 	StepElapsed += DeltaTime;
 	const float Alpha = FMath::Clamp(StepElapsed / StepTime, 0.f, 1.f);
 	LiftAmount = FMath::Sin(Alpha * PI) * StepHeight;
@@ -59,7 +61,8 @@ void UMoveLeg::UpdateStepping(const float DeltaTime)
 	TargetPose.Position = FMath::Lerp(SourcePose.Position, StepTargetPose.Position, Alpha) + FVector(0, 0, LiftAmount);
 	TargetPose.Rotation = FQuat::Slerp(SourcePose.Rotation, StepTargetPose.Rotation, Alpha);
 	TargetLocal = TargetPose.Position;
-	
+
+	//If leg has completed a step, reset animation 
 	if (Alpha >= 1.f - KINDA_SMALL_NUMBER) // wtf?
 	{
 		bIsStepping = false;
@@ -71,15 +74,18 @@ void UMoveLeg::UpdateStepping(const float DeltaTime)
 	}
 }
 
+//Checks if the leg is able to step and wont affect anyhting else 
 bool UMoveLeg::ShouldStep() const
 {
 	if (bIsJumping || bIsStepping) return false;
 	if (GetWorld()->TimeSeconds - LastStepEndTime < StepCooldown) return false;
 
+	//If there is enough distance to perform a nice step animation
 	const FVector LocalLockedFootPos = LegParts[0]->GetComponentTransform().InverseTransformPosition(LockedFootPosition.Position);
 	const float Dist = FVector::Dist(GetGroundPose().Position, LocalLockedFootPos);
 	if (Dist < StepTrigger) return false;
-	
+
+	//If other legs are stepping, this leg should wait
 	for (const UMoveLeg* L : OtherLegs)
 	{
 		if (L && L->IsStepping())
@@ -109,6 +115,7 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
+	//Setup offset between left and right leg
 	if (UpperLeg->GetName().EndsWith(TEXT("_R"))) UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
 	else UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
 	
@@ -146,7 +153,7 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 	//If the vectors are almost parallel, use world up as the plane normal.
 	if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
 
-	//Assemble a new position where knee should be to be
+	//Assemble a new position where knee should be
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
 	FVector NewKneePos = UpperLegPos + RotatedDir * UpperLen;
 
@@ -157,13 +164,15 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 	//Make sure LowerLegLimb stays the same length
 	FVector KneeToFoot = (TargetPos - FixedKneePos).GetSafeNormal() * LowerLen;
 	FVector FixedFootPos = FixedKneePos + KneeToFoot;
-	
+
+	//Apply new animation locations
 	Knee->SetRelativeLocation(FixedKneePos);
 	FVector FootWorldPos = UpperLeg->GetComponentTransform().TransformPosition(FixedFootPos);
 	FVector FootLocalToKnee = Knee->GetComponentTransform().InverseTransformPosition(FootWorldPos);
 	Foot->SetRelativeLocation(FootLocalToKnee);
 }
 
+//Try to find height difference to ground
 FLegsPose UMoveLeg::GetGroundPose() const
 {
 	FTransform UpperLegWorld = GetComponentTransform();
@@ -175,6 +184,7 @@ FLegsPose UMoveLeg::GetGroundPose() const
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
+	//If leg is able to extend and reach the ground, else leg is flying
 	if (GetWorld()->LineTraceSingleByChannel(Hit, StartWorld, EndWorld, ECC_Visibility, Params))
 	{
 		FVector LocalPoint = UpperLegWorld.InverseTransformPosition(Hit.ImpactPoint + Hit.ImpactNormal * GroundOffset);

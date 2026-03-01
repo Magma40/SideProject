@@ -6,11 +6,6 @@ UActionStack* UActionStack::Main = nullptr;
 // Sets default values for this component's properties
 UActionStack::UActionStack() { PrimaryComponentTick.bCanEverTick = true; }
 
-void UActionStack::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void UActionStack::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -69,6 +64,7 @@ void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
 {
 	if (!Action) return;
+	//Call On End on actions before destroying it
 	if (IsValid(Action.GetObject()))
 	{
 		Action->Execute_OnEnd(Action.GetObject());
@@ -78,6 +74,8 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 	ActionStack.Remove(Action);
 }
 
+//TODO: This function needs a better name, too lazy to fix it
+//Removes all actions from the to until it hits the input int
 void UActionStack::ClearAllActionsExceptIndex(const int SaveIndex)
 {
 	while (ActionStack.Num() > SaveIndex)

@@ -9,6 +9,10 @@
 class UCompanionWidgetIndicator;
 class UInteractionBehaviour;
 
+/**
+ Class for the companion AI
+*/
+
 UCLASS()
 class SIDEPROJECT_API ACompanionPawn : public ABaseInteractableCharacter
 {
@@ -23,7 +27,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY() UCompanionWidgetIndicator* CompanionWidgetIndicator = nullptr;
 	UPROPERTY() UInteractionBehaviour* LastKnownInteractionBehaviour = nullptr;

@@ -31,7 +31,6 @@ class SIDEPROJECT_API UActionStack : public USceneComponent
 
 protected:
 	UActionStack();
-	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void UpdateActions(float DeltaTime);
 	bool IsEmpty() const;

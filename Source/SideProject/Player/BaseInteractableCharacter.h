@@ -17,6 +17,9 @@ struct FPickupCandidate
 	float Distance = FLT_MAX;
 };
 
+/**
+ Base class for characters, used for picking items up and interacting with world
+*/
 UCLASS()
 class SIDEPROJECT_API ABaseInteractableCharacter : public ACharacter
 {

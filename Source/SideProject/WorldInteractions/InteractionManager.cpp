@@ -7,6 +7,7 @@
 #include "ProcedualAnimation/MovingModel.h"
 #include "Tools/GenericCalls.h"
 
+//Adds an interaction into the interaction manager
 void UInteractionManager::AddInteraction(UObject* Interaction)
 {
 	if (!IsValid(Interaction) && !IsValid(this)) return;
@@ -15,6 +16,7 @@ void UInteractionManager::AddInteraction(UObject* Interaction)
 	Interactions.Add(Interaction);
 }
 
+//Removes an interaction from the interaction manager
 void UInteractionManager::RemoveInteraction(const UObject* Interaction)
 {
 	if (!IsValid(Interaction) && !IsValid(this)) return;
@@ -23,7 +25,8 @@ void UInteractionManager::RemoveInteraction(const UObject* Interaction)
 	Interactions.Remove(Interaction);
 }
 
-TSet<UObject*>  UInteractionManager::GetInteractions(ABaseInteractableCharacter* InteractingCharacter)
+//Gets all interactions which are in an acceptable radius
+TSet<UObject*> UInteractionManager::GetInteractions(ABaseInteractableCharacter* InteractingCharacter)
 {
     TSet<UObject*> Results;
 	for (UObject* Obj : Interactions)
@@ -47,6 +50,7 @@ TSet<UObject*>  UInteractionManager::GetInteractions(ABaseInteractableCharacter*
 void UInteractionBehaviour::BeginPlay()
 {
 	Super::BeginPlay();
+	//Add this interaction into the interaction manager
 	UInteractionManager* InteractionManager =  GetWorld()->GetSubsystem<UInteractionManager>();
 	if (IsValid(InteractionManager)) InteractionManager->AddInteraction(this);
 }

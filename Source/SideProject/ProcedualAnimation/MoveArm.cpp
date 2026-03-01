@@ -58,7 +58,8 @@ void UMoveArm::UpdateIK()
 	FVector HandPos     = Xform.InverseTransformPosition(Hand->GetComponentLocation());
 	FVector Target = TargetPose.Position;
 
-	if (bEnableArmConstraints) 	// Optional swing constraint
+	// Optional swing constraint, this stops arm from going into body
+	if (bEnableArmConstraints)
 	{
 		FVector TargetWorld = Xform.TransformPosition(TargetPose.Position);
 		FVector RestDirWS = (-UpperArm->GetForwardVector() + UpperArm->GetRightVector()).GetSafeNormal() ; // rest pose direction
@@ -79,31 +80,37 @@ void UMoveArm::UpdateIK()
 	float TargetLen  = RootToEff.Size();
 	TargetLen  = FMath::Clamp(TargetLen ,FMath::Abs(UpperLen - LowerLen) + 1e-3f,UpperLen + LowerLen - 1e-3f);
 	
-	// Law of cosines for knee angle
+	// Clamp arm positions so it cant extend to outside arm length
 	float A = (UpperLen * UpperLen + TargetLen  * TargetLen  - LowerLen * LowerLen) / (2.0f * UpperLen * TargetLen);
 	A = FMath::Clamp(A, -1.f, 1.f);
 	float ElbowAngle = FMath::Acos(A);
 
+	//Get which direction the elbow should face
 	FVector PoleDirWS = -UpperArm->GetRightVector();
 	FVector PoleDirLS = Xform.InverseTransformVector(PoleDirWS).GetSafeNormal();
 
+	//Build a plane normal that defines the arm's bending plane so elbows bends consistently and does not twist unpredictably
 	FVector DirToTarget = RootToEff.GetSafeNormal();
 	FVector PlaneNormal = FVector::CrossProduct(DirToTarget, PoleDirLS).GetSafeNormal();
 	
+	//Assemble a new position where elbow and hand should be
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(ElbowAngle), PlaneNormal);
-	
 	FVector NewElbowPos = UpperArmPos + RotatedDir * UpperLen;
 	FVector FixedHandPos  = NewElbowPos + (Target - NewElbowPos).GetSafeNormal() * LowerLen;
-	
+
+	//Apply new positions
 	Elbow->SetRelativeLocation(NewElbowPos);
 	FVector HandWorldPos = Xform.TransformPosition(FixedHandPos);
 	FVector HandLocalToElbow = Elbow->GetComponentTransform().InverseTransformPosition(HandWorldPos);
 	Hand->SetRelativeLocation(HandLocalToElbow);
-	
+
+
+	//Assemble a new rotations where elbow and hand should be
 	FVector ElbowToHandLS  = (FixedHandPos  - NewElbowPos).GetSafeNormal();
 	FVector PlaneNormalLS = FVector::CrossProduct(ElbowToHandLS, PoleDirLS).GetSafeNormal();
 	FQuat ElbowRotation = FRotationMatrix::MakeFromXZ(ElbowToHandLS, PlaneNormalLS).ToQuat();
 
+	//Apply new rotations
 	//Elbow->SetRelativeRotation(ElbowRotation);
 	Hand->SetRelativeRotation(TargetPose.Rotation);
 }

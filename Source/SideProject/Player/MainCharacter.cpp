@@ -51,7 +51,6 @@ void AMainCharacter::BeginPlay()
 void AMainCharacter::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow,FString::Printf(TEXT("bWasJumping = %d"), bWasJumping));	uint8 bIsFallingNow = GetCharacterMovement()->IsFalling();
 	
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -108,13 +107,18 @@ void AMainCharacter::DoMove(float Right, float Forward)
 	}
 }
 
+//Resetting what's needed if the player needs to respawn
 void AMainCharacter::RespawnCharacter()
 {
 	Super::RespawnCharacter();
 	ACameraManagerMain* CameraManagerMain = Cast<ACameraManagerMain>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraManagerMain::StaticClass()));
 	if (!IsValid(CameraManagerMain)) return;
+
+	//Do camera move transition to player respawn 
 	CameraManagerMain->BaseCameraPoint = TheMainCameraInScene->GetCurrentCameraPoint();
 	CameraManagerMain->CameraActionStack->PushToCameraPointAction(TheMainCameraInScene->GetCurrentCameraPoint(), 1.0f);
+
+	//If Player is hand holding with AI companion, break it up
 	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()))
 	{
 		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(PlayerHandHoldingAction);
