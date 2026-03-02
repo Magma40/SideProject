@@ -16,11 +16,6 @@ void UCompanionActionStack::BeginPlay()
 	Init();
 }
 
-void UCompanionActionStack::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
 void UCompanionActionStack::Init()
 {
 	OwnerCharacter = Cast<ABaseInteractableCharacter>(GetOwner());

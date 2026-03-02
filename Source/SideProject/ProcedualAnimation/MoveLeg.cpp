@@ -144,6 +144,7 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 	//Get which direction the knee should face
 	FVector ForwardPoleDirWS = UpperLeg->GetRightVector() - UpperLeg->GetUpVector();
 	FVector ForwardPoleDir = UpperLegXform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
+	
 	//If the computed direction is degenerate, use default
 	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, -1, 0); 
 

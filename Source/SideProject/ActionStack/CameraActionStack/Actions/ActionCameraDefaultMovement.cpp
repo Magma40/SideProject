@@ -66,7 +66,7 @@ bool UActionCameraDefaultMovement::IsDone_Implementation() const
 	return false;
 }
 
-void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value) const // Const function :)
+void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value) // Const function :)
 {
 	if (!IsValid(PlayerCamera)) return;
 	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
@@ -101,7 +101,7 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	PlayerCamera->SetActorRelativeRotation(LimitedRotation);
 }
 
-void UActionCameraDefaultMovement::LimitMoveRangeForCamera() const
+void UActionCameraDefaultMovement::LimitMoveRangeForCamera()
 {
     if (!IsValid(PlayerCamera)) return;
 

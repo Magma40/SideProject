@@ -52,21 +52,10 @@ public:
 	
 	 template<typename T>
 	 UFUNCTION(BlueprintCallable) T* GetAction();
-	 UFUNCTION(BlueprintCallable) bool Contains(const TScriptInterface<IActionInterface>& Action) const
-	 {
-		 return Action  != nullptr && ActionStack.Contains(Action);
-	 }
+	 UFUNCTION(BlueprintCallable) bool Contains(const TScriptInterface<IActionInterface>& Action) const;
 
 	template<typename T>
-	UFUNCTION(BlueprintCallable) TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction)
-	{
-	 	TScriptInterface<IActionInterface> ActionInterface;
-	 	UObject* ActionObject = Cast<UObject>(InAction);
-	 	if (!ActionObject) return ActionInterface;
-	 	ActionInterface.SetObject(ActionObject);
-	 	ActionInterface.SetInterface(Cast<IActionInterface>(ActionObject));
-	 	return ActionInterface;
-	 }
+	UFUNCTION(BlueprintCallable) TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction);
 
 	UFUNCTION(BlueprintCallable) void ClearAllActionsExceptIndex(const int SaveIndex);
 };

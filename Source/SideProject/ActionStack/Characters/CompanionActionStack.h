@@ -16,7 +16,6 @@ class SIDEPROJECT_API UCompanionActionStack : public UActionStack
 protected:
 	UCompanionActionStack();
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void Init();
 
 public:

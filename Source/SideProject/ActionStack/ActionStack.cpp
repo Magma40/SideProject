@@ -74,6 +74,11 @@ void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action
 	ActionStack.Remove(Action);
 }
 
+bool UActionStack::Contains(const TScriptInterface<IActionInterface>& Action) const
+{
+		return Action  != nullptr && ActionStack.Contains(Action);
+}
+
 //TODO: This function needs a better name, too lazy to fix it
 //Removes all actions from the to until it hits the input int
 void UActionStack::ClearAllActionsExceptIndex(const int SaveIndex)
@@ -117,4 +122,15 @@ UActionStack* UActionStack::GetMain(UObject* WorldContext)
 	// // return Main;
 	//
 	// return GM->ActionStack;
+}
+
+template<typename T>
+TScriptInterface<IActionInterface> UActionStack::GetInterfacedAction(T* InAction)
+{
+	TScriptInterface<IActionInterface> ActionInterface;
+	UObject* ActionObject = Cast<UObject>(InAction);
+	if (!ActionObject) return ActionInterface;
+	ActionInterface.SetObject(ActionObject);
+	ActionInterface.SetInterface(Cast<IActionInterface>(ActionObject));
+	return ActionInterface;
 }

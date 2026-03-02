@@ -29,14 +29,18 @@ void UActionLegMovingMovement::OnBegin_Implementation(bool bFirstTime)
 void UActionLegMovingMovement::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+
+	//Update each leg
 	 for (UMoveLeg* Leg : MoveLegsRef)
 	 {
+	 	//If another leg is not stepping and current leg is able to step
 	 	if (Leg->ShouldStep())
 	 	{
 	 		Leg->StartStep();
 	 	}
 	 	else
 	 	{
+	 		//Foot stays put while another leg steps
 	 		const FTransform UpperLegXForm = Leg->LegParts[0]->GetComponentTransform();
 	 		Leg->TargetLocal = UpperLegXForm.InverseTransformPosition(Leg->LockedFootPosition.Position);
 	 	}

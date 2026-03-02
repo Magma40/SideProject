@@ -49,14 +49,20 @@ void UActionArmPoint::OnEnd_Implementation()
 void UActionArmPoint::OnUpdate_Implementation(float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+
+	//Render indicator points from hand to pointing position
 	RenderPointingToIndicator();
-	GetGameObjectPointedAt();
+
+	//If a character is pointing at an interactable object, get that actor
+	GetActorPointingAt();
 
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	FQuat RelativeQuat;
 
 	FVector LocationA = MoveArmRef->ArmParts[1]->GetComponentLocation();
 	FVector LocationB = MoveArmRef->ArmParts[2]->GetComponentLocation();
+
+	//Calculate which direction the arm should point at
 	FVector Direction = LocationB - LocationA;
 	Direction.Normalize();
 	FVector NewZAxis = Direction;
@@ -68,11 +74,13 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		NewXAxis = FVector::CrossProduct(WorldRightVector, NewZAxis).GetSafeNormal();
 	}
 
+	//Make it so the "top" of hand is facing the direction of the pointing location
 	FVector NewYAxis = FVector::CrossProduct(NewZAxis, NewXAxis).GetSafeNormal();
 	FMatrix Matrix( FPlane(NewXAxis, 0.f), FPlane(NewYAxis, 0.f), FPlane(NewZAxis, 0.f), FPlane(0.f, 0.f, 0.f, 1.f));
 	FRotator NewRotation = Matrix.Rotator();
 	RelativeQuat = Xform.InverseTransformRotation(NewRotation.Quaternion());
-	
+
+	//Construct animation points to point arm at pointing location
 	AnimTransforms.Empty();
 	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	AnimTransforms.Add(FTransform(RelativeQuat, HandLocationPos));
@@ -86,7 +94,8 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
 		return;
 	}
-	
+
+	//Update arm pointing animation 
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
@@ -154,7 +163,7 @@ void UActionArmPoint::RenderPointingToIndicator()
 	}
 }
 
-void UActionArmPoint::GetGameObjectPointedAt()
+void UActionArmPoint::GetActorPointingAt()
 {
 	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
 	

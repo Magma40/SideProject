@@ -21,8 +21,8 @@ public:
 	bool IsDone_Implementation() const override;
 	void OnBegin_Implementation(bool bFirstTime) override;
 
-	void LimitLookRangeForCamera(const FInputActionValue& Value) const;
-	void LimitMoveRangeForCamera() const;
+	void LimitLookRangeForCamera(const FInputActionValue& Value);
+	void LimitMoveRangeForCamera();
 
 	void SetRotationLimit(const float InRotationLimit) { RotationLimit = InRotationLimit; }
 	

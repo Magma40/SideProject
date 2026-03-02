@@ -25,7 +25,7 @@ public:
 	void OnEnd_Implementation() override;
 
 	void RenderPointingToIndicator();
-	void GetGameObjectPointedAt();
+	void GetActorPointingAt();
 
 	FVector GetPointingLocation() const { return PointingLocation; } 
 	AActor* GetActorPointedAt() { return ActorPointedAt; }
