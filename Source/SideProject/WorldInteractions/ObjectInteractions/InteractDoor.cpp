@@ -43,12 +43,12 @@ void UInteractDoor::TickComponent(const float DeltaTime, const ELevelTick TickTy
 	if (bInteracting)
 	{
 		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
-		const TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
-		if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
-		{
-			bInteracting = false;
-			return;
-		}
+		TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
+		 if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
+		 {
+		 	bInteracting = false;
+		 	return;
+		 }
 		
 		if (!IsValid(InteractingCharacter->GetItemInHand()) || InteractingCharacter->GetItemInHand() != ItemNeeded) return;
 		if (FVector::Distance(InteractingCharacter->GetItemInHand()->GetActorLocation(), Lock->GetActorLocation()) < DistanceForInteraction / 10)

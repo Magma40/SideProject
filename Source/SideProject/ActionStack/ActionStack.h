@@ -119,3 +119,14 @@ T* UActionStack::GetAction()
 	return nullptr;
 }
 
+template<typename T>
+TScriptInterface<IActionInterface> UActionStack::GetInterfacedAction(T* InAction)
+{
+	TScriptInterface<IActionInterface> ActionInterface;
+	UObject* ActionObject = Cast<UObject>(InAction);
+	if (!ActionObject) return ActionInterface;
+	ActionInterface.SetObject(ActionObject);
+	ActionInterface.SetInterface(Cast<IActionInterface>(ActionObject));
+	return ActionInterface;
+}
+

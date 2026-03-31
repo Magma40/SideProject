@@ -8,6 +8,7 @@
 
 class ABaseInteractableCharacter;
 class AInteractableItemBase;
+class UActionArmHandToLocation;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIDEPROJECT_API UInteractItemPlaceHolder : public UInteractionBehaviour

@@ -43,8 +43,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/Engine/Classes/GameFramework/Character.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../../Program Files/Epic Games/UE_5.6/Engine/Source/Runtime/UMG/Public/Blueprint/UserWidget.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SideProject.uproject" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -695,6 +695,16 @@
       <workItem from="1772446040616" duration="1472000" />
       <workItem from="1772450709383" duration="1138000" />
       <workItem from="1772452014892" duration="8748000" />
+      <workItem from="1772804792486" duration="4148000" />
+      <workItem from="1773305546484" duration="1920000" />
+      <workItem from="1773310590455" duration="1643000" />
+      <workItem from="1773323629416" duration="7658000" />
+      <workItem from="1773666353330" duration="700000" />
+      <workItem from="1773670031952" duration="13000" />
+      <workItem from="1773757050563" duration="6409000" />
+      <workItem from="1773850675113" duration="2390000" />
+      <workItem from="1773926755044" duration="4270000" />
+      <workItem from="1774632865605" duration="4814000" />
     </task>
     <servers />
   </component>
