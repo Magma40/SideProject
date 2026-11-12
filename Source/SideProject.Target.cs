@@ -5,17 +5,10 @@ using System.Collections.Generic;
 
 public class SideProjectTarget : TargetRules
 {
-	public SideProjectTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
-		ExtraModuleNames.Add("SideProject");
-		//RegisterModulesCreatedByRider();
-	}
-
-	// private void RegisterModulesCreatedByRider()
-	// {
-	// 	ExtraModuleNames.AddRange(new string[] { "SideProjectEditor" });
-	// }
+    public SideProjectTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Game;
+        DefaultBuildSettings = BuildSettingsVersion.V8;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_9;
+    }
 }
