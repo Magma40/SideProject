@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,17 +13,35 @@ class SIDEPROJECT_API UActionToCameraPoint : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionToCameraPoint* Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint, float InPlayRate);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionToCameraPoint* Create(UObject* Outer, 
+		APlayerCamera* InPlayerCamera, 
+		AMainCharacter* InOwnerCharacter, 
+		ACameraPoint* InNewCameraPoint, 
+		float InPlayRate);
 	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	
+	//FIELDS:
 private:
-	AMainCharacter* OwnerCharacter = nullptr;
-	ACameraPoint* NewCameraPoint = nullptr;
-	APlayerCamera* PlayerCamera = nullptr;
+	UPROPERTY()
+	TObjectPtr<AMainCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ACameraPoint> NewCameraPoint = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY()
 	TArray<FTransform> AnimTransforms;
+	
 	float ElapsedTime = 0.0f;
+	
 	float PlayRate = 5.0f;
 };

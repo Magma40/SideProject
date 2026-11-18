@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,60 +22,143 @@ UCLASS()
 class SIDEPROJECT_API ABaseInteractableCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-protected:
-	ABaseInteractableCharacter();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
-
+	
+	//FUNCTIONS:
 public:
+	ABaseInteractableCharacter();
+	
 	//PickUpAndDrop
-	UFUNCTION(BlueprintCallable) virtual void TryToPickUpItem();   //Looks around to see if anything can be picked up
-	UFUNCTION(BlueprintCallable) virtual void DropItemInHand();	 //Should drop item in hand infront of character
-	UFUNCTION(BlueprintCallable) virtual void PickUpItemToHand(AInteractableItemBase* InSpecificPickUpItem); //Should pick up item into hand
+	//Looks around to see if anything can be picked up
+	UFUNCTION(BlueprintCallable) 
+	virtual void TryToPickUpItem();
+	
+	//Should drop item in hand in front of character
+	UFUNCTION(BlueprintCallable) 
+	virtual void DropItemInHand();
+	
+	//Should pick up item into hand
+	UFUNCTION(BlueprintCallable) 
+	virtual void PickUpItemToHand(AInteractableItemBase* InSpecificPickUpItem);
 
-	UFUNCTION(BlueprintCallable) void TryToInteractWithBackHolster(); //Checks if you can either add or remove item from holster
-	UFUNCTION(BlueprintCallable) void AttachToBackHolster(); //Should attach the ItemInHand into the holster
-	UFUNCTION(BlueprintCallable) void DeattachFromBackHolster(); //Should deattach the item in the holster into the hand
+	//Checks if you can either add or remove item from holster
+	UFUNCTION(BlueprintCallable) 
+	void TryToInteractWithBackHolster();
+	
+	//Should attach the ItemInHand into the holster
+	UFUNCTION(BlueprintCallable) 
+	void AttachToBackHolster();
+	
+	//Should deattach the item in the holster into the hand
+	UFUNCTION(BlueprintCallable) 
+	void DeattachFromBackHolster();
 
-	UFUNCTION(BlueprintCallable) void TryToInteractWithWorld();
+	UFUNCTION(BlueprintCallable) 
+	void TryToInteractWithWorld();
 	
 	virtual void Jump() override;
 	
-	UFUNCTION(BlueprintCallable) AInteractableItemBase* GetItemInHand() const { return ItemInHand; }
-	void ResetItemInHand(){ ItemInHand = nullptr; }
-	
-	UFUNCTION(BlueprintCallable) AInteractableItemBase* GetItemInBackHolster() const { return BackItemHolster; }
-	UFUNCTION(BlueprintCallable) AMovingModel* GetMovingModel() const { return MovingModel; }
-	UCompanionActionStack* GetCompanionActionStack() const { return CompanionActionStack; }
-	APlayerCamera* GetCameraActor() const  { return TheMainCameraInScene; }
-	bool IsCharacterInteracting() const  { return InteractionEnabled; }
-	void SetCharacterInteracting(const bool bNewCharacterInteracting){ InteractionEnabled = bNewCharacterInteracting; }
-	void SetNewRespawnPoint(const FTransform& NewRespawnPoints) { RoomRespawnSpawnPoint = NewRespawnPoints;}
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") bool Sprinting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float MaxSprintSpeed = 500.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") float WalkSpeed = 200.0f;
-
 	virtual void RespawnCharacter();
+	
+	//~ Begin Getters & Setters
+	UFUNCTION(BlueprintPure) 
+	FORCEINLINE AInteractableItemBase* GetItemInHand() const
+	{
+		return ItemInHand;
+	}
+	
+	FORCEINLINE void ResetItemInHand()
+	{
+		ItemInHand = nullptr; 
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE AInteractableItemBase* GetItemInBackHolster() const
+	{
+		return BackItemHolster;
+	}
+	
+	UFUNCTION(BlueprintCallable) 
+	FORCEINLINE AMovingModel* GetMovingModel() const
+	{
+		return MovingModel;
+	}
+	
+	FORCEINLINE UCompanionActionStack* GetCompanionActionStack() const
+	{
+		return CompanionActionStack;
+	}
+	
+	FORCEINLINE APlayerCamera* GetCameraActor() const
+	{
+		return TheMainCameraInScene;
+	}
+	
+	FORCEINLINE bool IsCharacterInteracting() const
+	{
+		return InteractionEnabled;
+	}
+	
+	FORCEINLINE void SetCharacterInteracting(const bool bNewCharacterInteracting)
+	{
+		InteractionEnabled = bNewCharacterInteracting;
+	}
+	
+	FORCEINLINE void SetNewRespawnPoint(const FTransform& NewRespawnPoints)
+	{
+		RoomRespawnSpawnPoint = NewRespawnPoints;
+	}
+	//~ End Getters & Setters
+	
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	
+	//FIELDS:
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") 
+	bool Sprinting = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") 
+	float MaxSprintSpeed = 500.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement") 
+	float WalkSpeed = 200.0f;
+	
+protected:
+	UPROPERTY() 
+	TObjectPtr<APlayerCamera> TheMainCameraInScene = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<AMovingModel> MovingModel = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<UCompanionActionStack> CompanionActionStack = nullptr;
+	
+	UPROPERTY() 
+	FTransform RoomRespawnSpawnPoint  = FTransform::Identity;
 
 private:
-	AInteractableItemBase* ClosestObject = nullptr;
+	UPROPERTY()
+	TObjectPtr<AInteractableItemBase> ClosestObject = nullptr;
 
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* ItemInHand = nullptr;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") AInteractableItemBase* BackItemHolster = nullptr;
-	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") float MinDistanceToPickUpItem = 100.0f;
-	USceneComponent* BackHolster = nullptr;
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") 
+	TObjectPtr<AInteractableItemBase> ItemInHand = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop")
+	TObjectPtr<AInteractableItemBase> BackItemHolster = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category="PickUpAndDrop") 
+	float MinDistanceToPickUpItem = 100.0f;
+	
+	UPROPERTY()
+	TObjectPtr<USceneComponent> BackHolster = nullptr;
 
+	UPROPERTY() 
 	TArray<FTransform> AnimTransforms;
+	
 	float ElapsedTime = 0.0f;
+	
 	float PlayRate = 1.0f;
 
 	bool InteractionEnabled = false;
-
-protected:
-	UPROPERTY() APlayerCamera* TheMainCameraInScene = nullptr;
-	AMovingModel* MovingModel = nullptr;
-	UCompanionActionStack* CompanionActionStack = nullptr;
-	UPROPERTY() FTransform RoomRespawnSpawnPoint  = FTransform::Identity;
 };

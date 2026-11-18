@@ -1,7 +1,9 @@
 <Solution>
   <Configurations>
     <BuildType Name="DebugGame" />
+    <BuildType Name="DebugGame Editor" />
     <BuildType Name="Development" />
+    <BuildType Name="Development Editor" />
     <BuildType Name="Shipping" />
     <Platform Name="Win64" />
     <Platform Name="Win64-arm64" />
@@ -16,8 +18,14 @@
   </Folder>
   <Folder Name="/Games/">
     <Project Path="Intermediate/ProjectFiles/SideProject.vcxproj" Id="7422b5dd-1669-3d2f-ac65-65804ced4380">
+      <BuildType Solution="DebugGame Editor|Win64" Project="DebugGame_Editor" />
+      <BuildType Solution="DebugGame Editor|Win64-arm64" Project="Win64_arm64_DebugGame_Editor" />
+      <BuildType Solution="DebugGame Editor|Win64-arm64ec" Project="Win64_arm64ec_DebugGame_Editor" />
       <BuildType Solution="DebugGame|Win64-arm64" Project="Win64_arm64_DebugGame" />
       <BuildType Solution="DebugGame|Win64-arm64ec" Project="Win64_arm64ec_DebugGame" />
+      <BuildType Solution="Development Editor|Win64" Project="Development_Editor" />
+      <BuildType Solution="Development Editor|Win64-arm64" Project="Win64_arm64_Development_Editor" />
+      <BuildType Solution="Development Editor|Win64-arm64ec" Project="Win64_arm64ec_Development_Editor" />
       <BuildType Solution="Development|Win64-arm64" Project="Win64_arm64_Development" />
       <BuildType Solution="Development|Win64-arm64ec" Project="Win64_arm64ec_Development" />
       <BuildType Solution="Shipping|Win64-arm64" Project="Win64_arm64_Shipping" />

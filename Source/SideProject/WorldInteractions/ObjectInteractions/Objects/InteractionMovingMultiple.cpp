@@ -1,14 +1,18 @@
 #include "InteractionMovingMultiple.h"
-
 #include "InteractionLightShift.h"
 #include "Tools/GenericCalls.h"
 
-AInteractionMovingMultiple::AInteractionMovingMultiple() { PrimaryActorTick.bCanEverTick = true;  }
+AInteractionMovingMultiple::AInteractionMovingMultiple()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
 
 void AInteractionMovingMultiple::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(ValidActorPatternCallInteract) && ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	
+	if (IsValid(ValidActorPatternCallInteract) && 
+		ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(ValidActorPatternCallInteract);
@@ -17,7 +21,9 @@ void AInteractionMovingMultiple::BeginPlay()
 		ValidInteractionPatternCallInteract = ScriptInterface;
 	}
 	UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ValidActorPatternCallInteract);
-	if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	
+	if (IsValid(InteractObject) && 
+		InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(InteractObject);
@@ -26,7 +32,8 @@ void AInteractionMovingMultiple::BeginPlay()
 		ValidInteractionPatternCallInteract = ScriptInterface;
 	}
 
-	if (IsValid(InvalidActorPatternCallInteract) && InvalidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	if (IsValid(InvalidActorPatternCallInteract) && 
+		InvalidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(InvalidActorPatternCallInteract);
@@ -35,7 +42,9 @@ void AInteractionMovingMultiple::BeginPlay()
 		InvalidInteractionPatternCallInteract = ScriptInterface;
 	}
 	InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(InvalidActorPatternCallInteract);
-	if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	
+	if (IsValid(InteractObject) && 
+		InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(InteractObject);
@@ -44,10 +53,18 @@ void AInteractionMovingMultiple::BeginPlay()
 		InvalidInteractionPatternCallInteract = ScriptInterface;
 	}
 	
-	if (ActorsToCallInteract.IsEmpty()) return;
+	if (ActorsToCallInteract.IsEmpty())
+	{
+		return;
+	}
+	
 	for (AActor* ActorToCallInteract : ActorsToCallInteract)
 	{
-		if (!IsValid(ActorToCallInteract)) continue;
+		if (!IsValid(ActorToCallInteract))
+		{
+			continue;
+		}
+		
 		if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			TScriptInterface<IInteractionInterface> ScriptInterface;
@@ -57,10 +74,10 @@ void AInteractionMovingMultiple::BeginPlay()
 			InteractionsToCallInteract.Add(ScriptInterface);
 		}
 
-		// Case 2: Check for component implementing interface
 		InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
 
-		if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		if (IsValid(InteractObject) &&
+			InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			TScriptInterface<IInteractionInterface> ScriptInterface;
 			ScriptInterface.SetObject(InteractObject);
@@ -69,18 +86,29 @@ void AInteractionMovingMultiple::BeginPlay()
 			InteractionsToCallInteract.Add(ScriptInterface);
 		}
 	}
+	
 	CurrentPattern.SetNum(InteractionsToCallInteract.Num());
 }
 
 void AInteractionMovingMultiple::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)
 {
-	AInteractionLightShift* LightShift = nullptr;
+	const AInteractionLightShift* LightShift = nullptr;
+	
 	for (TScriptInterface<IInteractionInterface> ScriptInterface : InteractionsToCallInteract)
 	{
-		if (!IsValid(ScriptInterface.GetObject())) continue;
-		if (Cast<AInteractionLightShift>(ScriptInterface.GetObject()) && Cast<AInteractionLightShift>(ScriptInterface.GetObject())->GetShouldLight())
+		if (!IsValid(ScriptInterface.GetObject()))
 		{
-			if (IsValid(LightShift)) { LightShift = nullptr; return; }
+			continue;
+		}
+		
+		if (Cast<AInteractionLightShift>(ScriptInterface.GetObject()) && 
+			Cast<AInteractionLightShift>(ScriptInterface.GetObject())->GetShouldLight())
+		{
+			if (IsValid(LightShift))
+			{
+				LightShift = nullptr; return;
+			}
+			
 			LightShift = Cast<AInteractionLightShift>(ScriptInterface.GetObject());
 		}
 	}
@@ -89,7 +117,12 @@ void AInteractionMovingMultiple::Interact_Implementation(ABaseInteractableCharac
 		for (int i = 0; i < InteractionsToCallInteract.Num(); i++)
 		{
 			TScriptInterface<IInteractionInterface> ScriptInterface = InteractionsToCallInteract[i];
-			if (!IsValid(ScriptInterface.GetObject())) continue;
+			
+			if (!IsValid(ScriptInterface.GetObject()))
+			{
+				continue;
+			}
+			
 			if (ScriptInterface.GetObject() == LightShift)
 			{
 				if (i <= InteractionsToCallInteract.Num() - 1)
@@ -103,15 +136,29 @@ void AInteractionMovingMultiple::Interact_Implementation(ABaseInteractableCharac
 					}
 				}
 				
-				if (CurrentPattern[i] == true) continue;
-				if (i == 0 && CurrentPattern[0] == false) CurrentPattern[0] = true;
-				else if (i != 0 && CurrentPattern[i - 1] == true && CurrentPattern[i] == false) CurrentPattern[i] = true;
+				if (CurrentPattern[i] == true)
+				{
+					continue;
+				}
+				
+				if (i == 0 && 
+					CurrentPattern[0] == false)
+				{
+					CurrentPattern[0] = true;
+				}
+				else if (i != 0 && 
+						CurrentPattern[i - 1] == true && 
+						CurrentPattern[i] == false)
+				{
+					CurrentPattern[i] = true;
+				}
 				else
 				{
 					if (IsValid(InvalidInteractionPatternCallInteract.GetObject()))
 					{
 						InvalidInteractionPatternCallInteract->Interact_Implementation(InInteractingCharacter);
 					}
+					
 					for (int y = 0; y < CurrentPattern.Num(); y++)
 					{
 						CurrentPattern[y] = false;

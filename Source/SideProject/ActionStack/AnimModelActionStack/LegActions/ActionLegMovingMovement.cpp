@@ -1,11 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/LegActions/ActionLegMovingMovement.h"
 #include "ProcedualAnimation/MoveLeg.h"
 
-UActionLegMovingMovement* UActionLegMovingMovement::Create(UObject* Outer, const TArray<UMoveLeg*>& InMoveLegs)
+UActionLegMovingMovement* UActionLegMovingMovement::Create(UObject* Outer, 
+	const TArray<UMoveLeg*>& InMoveLegs)
 {
 	UActionLegMovingMovement* Action = NewObject<UActionLegMovingMovement>(Outer);
+	
 	Action->MoveLegsRef = InMoveLegs;
+	
 	return Action;
 }
 
@@ -13,6 +15,7 @@ UActionLegMovingMovement* UActionLegMovingMovement::Create(UObject* Outer, const
 void UActionLegMovingMovement::OnBegin_Implementation(bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+	
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
 		Leg->bIsJumping = false;
@@ -42,6 +45,7 @@ void UActionLegMovingMovement::OnUpdate_Implementation(float DeltaTime)
 	 	{
 	 		//Foot stays put while another leg steps
 	 		const FTransform UpperLegXForm = Leg->LegParts[0]->GetComponentTransform();
+	 		
 	 		Leg->TargetLocal = UpperLegXForm.InverseTransformPosition(Leg->LockedFootPosition.Position);
 	 	}
 	 }

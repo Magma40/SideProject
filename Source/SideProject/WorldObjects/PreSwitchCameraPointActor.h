@@ -12,24 +12,54 @@ UCLASS()
 class SIDEPROJECT_API APreSwitchCameraPointActor : public AActor
 {
 	GENERATED_BODY()
-	
-protected:
+
 	APreSwitchCameraPointActor();
+
+	//FUNCTIONS:
+protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION() void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	UFUNCTION() void OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION() 
+	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex, 
+		bool bFromSweep, 
+		const FHitResult & SweepResult);
+	
+	UFUNCTION() 
+	void OverlapEnd(UPrimitiveComponent* OverlappedComponent, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex);
+	
+	//FIELDS:
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") 
+	bool bDontDoIfJumping = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") 
+	TObjectPtr<ACameraPoint> InsideAreaCameraPoint = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") 
+	TObjectPtr<ACameraPoint> OutsideAreaCameraPoint = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") 
+	TArray<TObjectPtr<ACameraPoint>>  ExceptionalCameraPoints;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor")
+	float PlayRate = 1.0f;
 
 private:
-	APlayerCamera* PlayerCamera = nullptr;
-	UBoxComponent* BoxComponent = nullptr;
-	UCameraActionStack* CameraActionStack = nullptr;
-	UPROPERTY() bool bHasTriggered = false;
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") bool bDontDoIfJumping = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") ACameraPoint* InsideAreaCameraPoint = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") ACameraPoint* OutsideAreaCameraPoint = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") TArray<ACameraPoint*>  ExceptionalCameraPoints;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "PreSwitchCameraPointActor") float PlayRate = 1.0f;
+	UPROPERTY()
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UBoxComponent> BoxComponent = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UCameraActionStack> CameraActionStack = nullptr;
+	
+	UPROPERTY() 
+	bool bHasTriggered = false;
 };

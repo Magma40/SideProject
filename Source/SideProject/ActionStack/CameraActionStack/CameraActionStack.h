@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,20 +8,32 @@ class APlayerCamera;
 class AMainCharacter;
 class ACameraPoint;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UCameraActionStack : public UActionStack
 {
 	GENERATED_BODY()
+	
+	//FUNCTIONS:
+public:
+	void PushDefaultActionMovement();
+	
+	UFUNCTION(BlueprintCallable)
+	void PushToCameraPointAction(ACameraPoint* InNewCameraPoint, float InPlayRate);
 
 protected:
-	UCameraActionStack();
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	virtual void TickComponent(float DeltaTime, 
+		ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;
+	
 	void Init();
 	
-	AMainCharacter* OwnerCharacter = nullptr;
-	APlayerCamera* PlayerCamera = nullptr;
-public:
- 	void PushDefaultActionMovement();
-	UFUNCTION(BlueprintCallable) void PushToCameraPointAction(ACameraPoint* InNewCameraPoint, float InPlayRate);
+	//FIELDS:
+private:
+	UPROPERTY()
+	TObjectPtr<AMainCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
 };

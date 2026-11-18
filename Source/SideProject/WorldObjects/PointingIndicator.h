@@ -7,6 +7,6 @@ UCLASS()
 class SIDEPROJECT_API APointingIndicator : public AActor
 {
 	GENERATED_BODY()
-public:
+
 	APointingIndicator();
 };

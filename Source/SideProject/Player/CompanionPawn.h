@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -17,18 +15,39 @@ UCLASS()
 class SIDEPROJECT_API ACompanionPawn : public ABaseInteractableCharacter
 {
 	GENERATED_BODY()
-
+	
+	//FUNCTIONS:
 public:
-	ACompanionPawn();
-	 void SetLastKnownInteractionBehaviour(UInteractionBehaviour* InLastKnownInteractionBehaviour) { LastKnownInteractionBehaviour = InLastKnownInteractionBehaviour; }
-	UFUNCTION(BlueprintCallable) virtual void RespawnCharacter() override;
-	UCompanionWidgetIndicator* GetCompanionWidgetIndicator() const { return CompanionWidgetIndicator; }
-	void SetCompanionWidgetIndicator(UCompanionWidgetIndicator* InNewWidgetIndicator) { CompanionWidgetIndicator = InNewWidgetIndicator; }
-
-protected:
+	UFUNCTION(BlueprintCallable) 
+	virtual void RespawnCharacter() override;
+	
+	UFUNCTION(BlueprintCallable) 
+	void RunLastKnowInteract() const;
+	
 	virtual void BeginPlay() override;
+	
+	//~ Begin Getters & Setters
+	FORCEINLINE void SetLastKnownInteractionBehaviour(UInteractionBehaviour* InLastKnownInteractionBehaviour)
+	{
+		LastKnownInteractionBehaviour = InLastKnownInteractionBehaviour;
+	}
+	
+	FORCEINLINE UCompanionWidgetIndicator* GetCompanionWidgetIndicator() const
+	{
+		return CompanionWidgetIndicator;
+	}
+	
+	FORCEINLINE void SetCompanionWidgetIndicator(UCompanionWidgetIndicator* InNewWidgetIndicator)
+	{
+		CompanionWidgetIndicator = InNewWidgetIndicator;
+	}
+	//~ End Getters & Setters
 
-	UPROPERTY() UCompanionWidgetIndicator* CompanionWidgetIndicator = nullptr;
-	UPROPERTY() UInteractionBehaviour* LastKnownInteractionBehaviour = nullptr;
-	UFUNCTION(BlueprintCallable) void RunLastKnowInteract() const;
+	//FIELDS:
+protected:
+	UPROPERTY() 
+	TObjectPtr<UCompanionWidgetIndicator> CompanionWidgetIndicator = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<UInteractionBehaviour> LastKnownInteractionBehaviour = nullptr;
 };

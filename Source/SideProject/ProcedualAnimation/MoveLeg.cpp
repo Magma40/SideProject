@@ -1,34 +1,39 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ProcedualAnimation/MoveLeg.h"
 #include "Tools/GenericCalls.h"
 
-UMoveLeg::UMoveLeg() { PrimaryComponentTick.bCanEverTick = true; }
+UMoveLeg::UMoveLeg()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
 
 void UMoveLeg::Init()
 {
 	LegParts.Empty();
 	OtherLegs.Empty();
+	
 	LegParts.Add(this);
 
-	// Get Knee
+	//Get Knee
 	LegParts.Add(GenericCalls::FindChildByPrefix(this, TEXT("Knee_")));
+	
 	if (!IsValid(LegParts.Last()))
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s:Init - Knee_ not found or wrong type"),  *StaticClass()->GetName());
 		return;
 	}
 
-	// Get Foot
+	//Get Foot
 	LegParts.Add(GenericCalls::FindChildByPrefix(LegParts.Last(), TEXT("Foot_")));
+	
 	if (!IsValid(LegParts.Last()))
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s:Init - Foot_ not found or wrong type"),  *StaticClass()->GetName());
 		return;
 	}
 
-	// Get Other Leg
-	TArray<USceneComponent*> OtherComponents = GenericCalls::FindChildrenByPrefix(GetOwner(), TEXT("UpperLeg_"));
+	//Get Other Leg
+	const TArray<USceneComponent*> OtherComponents = GenericCalls::FindChildrenByPrefix(GetOwner(), TEXT("UpperLeg_"));
+	
 	for (USceneComponent* Child : OtherComponents)
 	{
 		if (UMoveLeg* Other = Cast<UMoveLeg>(Child))
@@ -41,12 +46,16 @@ void UMoveLeg::Init()
 void UMoveLeg::BeginPlay() // Please come home, because I miss you Gary!!
 {
 	Super::BeginPlay();
+	
 	Init();
 }
 
-void UMoveLeg::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UMoveLeg::TickComponent(const float DeltaTime, 
+	const ELevelTick TickType, 
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
 	UpdateIK(DeltaTime);
 }
 
@@ -74,7 +83,7 @@ void UMoveLeg::UpdateStepping(const float DeltaTime)
 	}
 }
 
-//Checks if the leg is able to step and wont affect anyhting else 
+//Checks if the leg is able to step and won't affect anything else 
 bool UMoveLeg::ShouldStep() const
 {
 	if (bIsJumping || bIsStepping) return false;
@@ -107,17 +116,36 @@ void UMoveLeg::StartStep() //Reset Step variables
 
 void UMoveLeg::UpdateIK(float DeltaTime)
 {
-	if (LegParts.Num() != 3) return;
-	if (!IsValid(LegParts[0]) || !IsValid(LegParts[1]) || !IsValid(LegParts[2])) return;
-	if (bIsStepping) UpdateStepping(DeltaTime);
+	if (LegParts.Num() != 3)
+	{
+		return;
+	}
+	
+	if (!IsValid(LegParts[0]) || 
+		!IsValid(LegParts[1]) || 
+		!IsValid(LegParts[2]))
+	{
+		return;
+	}
+	
+	if (bIsStepping)
+	{
+		UpdateStepping(DeltaTime);
+	}
 	
 	USceneComponent* UpperLeg = LegParts[0];
 	USceneComponent* Knee = LegParts[1];
 	USceneComponent* Foot = LegParts[2];
 
 	//Setup offset between left and right leg
-	if (UpperLeg->GetName().EndsWith(TEXT("_R"))) UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
-	else UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
+	if (UpperLeg->GetName().EndsWith(TEXT("_R")))
+	{
+		UpperLeg->SetRelativeLocation(FVector(20, 0, -10));
+	}
+	else
+	{
+		UpperLeg->SetRelativeLocation(FVector(-20, 0, -10));
+	}
 	
 	Knee->SetRelativeLocation(FVector(0, 0, -50)); 
 	Foot->SetRelativeLocation(FVector(0, 0, -50)); 
@@ -146,13 +174,19 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 	FVector ForwardPoleDir = UpperLegXform.InverseTransformVector(ForwardPoleDirWS).GetSafeNormal();
 	
 	//If the computed direction is degenerate, use default
-	if (ForwardPoleDir.IsNearlyZero()) ForwardPoleDir = FVector(0, -1, 0); 
+	if (ForwardPoleDir.IsNearlyZero())
+	{
+		ForwardPoleDir = FVector(0, -1, 0);
+	}
 
 	//Build a plane normal that defines the leg's bending plane so knee bends consistently and does not twist unpredictably
 	FVector DirToTarget = RootToEff.GetSafeNormal();
 	FVector PlaneNormal = FVector::CrossProduct(DirToTarget,  ForwardPoleDir).GetSafeNormal();
 	//If the vectors are almost parallel, use world up as the plane normal.
-	if (PlaneNormal.IsNearlyZero()) PlaneNormal = FVector::UpVector;
+	if (PlaneNormal.IsNearlyZero())
+	{
+		PlaneNormal = FVector::UpVector;
+	}
 
 	//Assemble a new position where knee should be
 	FVector RotatedDir = DirToTarget.RotateAngleAxis(FMath::RadiansToDegrees(KneeAngle), PlaneNormal);
@@ -168,8 +202,10 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 
 	//Apply new animation locations
 	Knee->SetRelativeLocation(FixedKneePos);
+	
 	FVector FootWorldPos = UpperLeg->GetComponentTransform().TransformPosition(FixedFootPos);
 	FVector FootLocalToKnee = Knee->GetComponentTransform().InverseTransformPosition(FootWorldPos);
+	
 	Foot->SetRelativeLocation(FootLocalToKnee);
 }
 
@@ -177,7 +213,9 @@ void UMoveLeg::UpdateIK(float DeltaTime)
 FLegsPose UMoveLeg::GetGroundPose() const
 {
 	FTransform UpperLegWorld = GetComponentTransform();
+	
 	FLegsPose Pose = TargetPose;
+	
 	FVector StartWorld = UpperLegWorld.GetLocation() + FVector(0,0,50.f);
 	FVector EndWorld   = UpperLegWorld.GetLocation() + FVector(0, 0, -200.f) + LegParts[0]->GetRightVector() * FootRangeStepForward;
 

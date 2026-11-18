@@ -8,7 +8,8 @@ namespace GenericCalls
 		{
 			USceneComponent* Comp = *It;
 
-			if (Comp->GetWorld() == World && Comp->ComponentTags.Contains(Tag))
+			if (Comp->GetWorld() == World && 
+				Comp->ComponentTags.Contains(Tag))
 			{
 				OutComponents.Add(Comp);
 			}
@@ -18,17 +19,22 @@ namespace GenericCalls
 	inline TArray<USceneComponent*> FindChildrenByPrefix(const USceneComponent* Parent, const FString& Prefix)
 	{
 		TArray<USceneComponent*> Matches;
+		
 		if (!IsValid(Parent))
 		{
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildrenByPrefix - Parent was not found or is wrong"), "GenericCalls");
 			return Matches;
 		}
+		
 		TArray<USceneComponent*> FindChildren;
 		Parent->GetChildrenComponents(false, FindChildren);
 
 		for (USceneComponent* Child : FindChildren)
 		{
-			if (Child->GetName().StartsWith(Prefix)) Matches.Add(Child);	
+			if (Child->GetName().StartsWith(Prefix))
+			{
+				Matches.Add(Child);
+			}
 		}
 
 		return Matches;
@@ -37,17 +43,22 @@ namespace GenericCalls
 	inline TArray<USceneComponent*> FindChildrenByPrefix(const AActor* Parent, const FString& Prefix)
 	{
 		TArray<USceneComponent*> Matches;
+		
 		if (!IsValid(Parent))
 		{
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildrenByPrefix - Parent was not found or is wrong"), "GenericCalls");
 			return Matches;
 		}
+		
 		TArray<USceneComponent*> FindChildren;
 		Parent->GetComponents<USceneComponent>(FindChildren);
 
 		for (USceneComponent* Child : FindChildren)
 		{
-			if (Child->GetName().StartsWith(Prefix)) Matches.Add(Child);	
+			if (Child->GetName().StartsWith(Prefix))
+			{
+				Matches.Add(Child);
+			}
 		}
 
 		return Matches;
@@ -66,7 +77,10 @@ namespace GenericCalls
 
 		for (USceneComponent* Child : FindChildren)
 		{
-			if (Child->GetName().StartsWith(Prefix)) return Child;
+			if (Child->GetName().StartsWith(Prefix))
+			{
+				return Child;
+			}
 		}
 
 		return nullptr;
@@ -85,7 +99,10 @@ namespace GenericCalls
 
 		for (USceneComponent* Child : FindChildren)
 		{
-			if (Child->GetName().EndsWith(Prefix)) return Child;
+			if (Child->GetName().EndsWith(Prefix))
+			{
+				return Child;
+			}
 		}
 
 		return nullptr;
@@ -104,7 +121,10 @@ namespace GenericCalls
 
 		for (USceneComponent* Child : FindChildren)
 		{
-			if (Child->GetName() == Target)return Child;
+			if (Child->GetName() == Target)
+			{
+				return Child;
+			}
 		}
 
 		return nullptr;
@@ -120,16 +140,26 @@ namespace GenericCalls
 		
 		TArray<USceneComponent*> AllComponents;
 		Parent->GetComponents<USceneComponent>(AllComponents);
+		
 		if (AllComponents.IsEmpty())
 		{
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildByExactName - No children was found"), "GenericCalls");
 			return nullptr;;
 		}
+		
 		for (USceneComponent* Comp : AllComponents)
 		{
-			if (!Comp) continue;
-			if (Comp->GetName() == Name) return Comp;
+			if (!Comp)
+			{
+				continue;
+			}
+			
+			if (Comp->GetName() == Name)
+			{
+				return Comp;
+			}
 		}
+		
 		return nullptr;
 	}
 
@@ -140,13 +170,21 @@ namespace GenericCalls
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildActorByExactName - Parent was not found or is wrong"), "GenericCalls");
 			return nullptr;;
 		}
+		
 		TArray<AActor*> AttachedActors;
 		Parent->GetAttachedActors(AttachedActors);
 
 		for (AActor* Child : AttachedActors)
 		{
-			if (!Child) continue;
-			if (Child->GetName() == Name)return Child;
+			if (!Child)
+			{
+				continue;
+			}
+			
+			if (Child->GetName() == Name)
+			{
+				return Child;
+			}
 		}
 
 		return nullptr;
@@ -160,12 +198,21 @@ namespace GenericCalls
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildActorByClass - Parent was not found or is wrong"), "GenericCalls");
 			return nullptr;;
 		}
+		
 		TArray<AActor*> AttachedActors;
 		Parent->GetAttachedActors(AttachedActors);
+		
 		for (AActor* Child : AttachedActors)
 		{
-			if (!Child) continue;
-			if (T* CastChild = Cast<T>(Child)) return CastChild;
+			if (!Child)
+			{
+				continue;
+			}
+			
+			if (T* CastChild = Cast<T>(Child))
+			{
+				return CastChild;
+			}
 		}
 		return nullptr;
 	}
@@ -178,12 +225,21 @@ namespace GenericCalls
 			UE_LOG(LogTemp, Error, TEXT("%hs:FindChildComponentByClass - Parent was not found or is wrong"), "GenericCalls");
 			return nullptr;;
 		}
+		
 		TArray<USceneComponent*> AllComponents;
 		Parent->GetComponents<USceneComponent>(AllComponents);
+		
 		for (USceneComponent* Child : AllComponents)
 		{
-			if (!Child) continue;
-			if (T* CastChild = Cast<T>(Child)) return CastChild;
+			if (!Child)
+			{
+				continue;
+			}
+			
+			if (T* CastChild = Cast<T>(Child))
+			{
+				return CastChild;
+			}
 		}
 		return nullptr;
 	}

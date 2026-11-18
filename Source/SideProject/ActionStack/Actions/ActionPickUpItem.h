@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,21 +6,26 @@
 
 class ABaseInteractableCharacter;
 
-/**
-* Picks up item from ground into hand
- */
 UCLASS()
 class SIDEPROJECT_API UActionPickUpItem : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionPickUpItem* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionPickUpItem* Create(UObject* Outer, 
+		ABaseInteractableCharacter* InCompanionCharacter);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
 
+	//FIELDS:
 private:
-	ABaseInteractableCharacter* CompanionCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> CompanionCharacter = nullptr;
+	
 	bool TriedToPickUpItem = false;
 };

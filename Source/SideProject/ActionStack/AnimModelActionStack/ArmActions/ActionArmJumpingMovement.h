@@ -12,12 +12,19 @@ class SIDEPROJECT_API UActionArmJumpingMovement : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionArmJumpingMovement* Create(UObject* Outer, UMoveArm* InMoveArm);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionArmJumpingMovement* Create(UObject* Outer,
+		UMoveArm* InMoveArm);
 	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	
+	//FIELDS:
 private:
-	UMoveArm* MoveArmRef = nullptr;
+	UPROPERTY()
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 };

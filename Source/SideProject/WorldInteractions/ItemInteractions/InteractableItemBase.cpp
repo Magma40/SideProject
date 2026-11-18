@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
 
 AInteractableItemBase::AInteractableItemBase()
@@ -10,6 +9,7 @@ AInteractableItemBase::AInteractableItemBase()
 void AInteractableItemBase::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	switch (MaterialOverlayStatus)
 	{
 		case EMaterialOverlayStatus::None: break;
@@ -24,12 +24,18 @@ void AInteractableItemBase::AttachToComponent_Implementation(USceneComponent* In
 	//Disable the collision on every static mesh child component 
 	for (UPrimitiveComponent* Prim : GetPrimitiveComponentChildren_Implementation())
 	{
-		if (!IsValid(Prim)) continue;
+		if (!IsValid(Prim))
+		{
+			continue;
+		}
+		
 		Prim->SetSimulatePhysics(false);
 		Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+	
 	//Remove all overlay material and attach this item onto desired component
 	DisableMaterialInterface_Implementation();
+	
 	GetRootComponent()->AttachToComponent(InAttachToComponent ,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
@@ -42,9 +48,14 @@ void AInteractableItemBase::DetachFromComponent_Implementation()
 	//Reenable the collision on every static mesh child component 
 	for (UPrimitiveComponent* Prim : GetPrimitiveComponentChildren_Implementation())
 	{
-		if (!IsValid(Prim)) continue;
+		if (!IsValid(Prim))
+		{
+			continue;
+		}
+		
 		Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+	
 	//Remove all overlay material just in case
 	DisableMaterialInterface_Implementation();
 }
@@ -53,7 +64,12 @@ void AInteractableItemBase::DetachFromComponent_Implementation()
 void AInteractableItemBase::EnableMaterialInterface_Implementation()
 {
 	const TArray<UStaticMeshComponent*> StaticMeshes = GetStaticMeshChildren_Implementation();
-	if (StaticMeshes.IsEmpty()) return;
+	
+	if (StaticMeshes.IsEmpty())
+	{
+		return;
+	}
+	
 	for (UStaticMeshComponent* StaticMeshComponent : StaticMeshes)
 	{
 		if (IsValid(StaticMeshComponent))
@@ -61,6 +77,7 @@ void AInteractableItemBase::EnableMaterialInterface_Implementation()
 			StaticMeshComponent->SetOverlayMaterial(OutlineMaterialInterface);
 		}
 	}
+	
 	MaterialOverlayStatus = EMaterialOverlayStatus::Inactive;
 }
 
@@ -68,7 +85,12 @@ void AInteractableItemBase::EnableMaterialInterface_Implementation()
 void AInteractableItemBase::DisableMaterialInterface_Implementation()
 {
 	const TArray<UStaticMeshComponent*> StaticMeshes = GetStaticMeshChildren_Implementation();
-	if (StaticMeshes.IsEmpty()) return;
+	
+	if (StaticMeshes.IsEmpty())
+	{
+		return;
+	}
+	
 	for (UStaticMeshComponent* StaticMeshComponent : StaticMeshes)
 	{
 		if (IsValid(StaticMeshComponent))
@@ -76,6 +98,7 @@ void AInteractableItemBase::DisableMaterialInterface_Implementation()
 			StaticMeshComponent->SetOverlayMaterial(nullptr);
 		}
 	}
+	
 	MaterialOverlayStatus = EMaterialOverlayStatus::None;
 }
 
@@ -83,6 +106,7 @@ TArray<UPrimitiveComponent*> AInteractableItemBase::GetPrimitiveComponentChildre
 {
 	TArray<UPrimitiveComponent*> Primitives;
 	GetComponents<UPrimitiveComponent>(Primitives);
+	
 	return Primitives;
 }
 
@@ -90,6 +114,7 @@ TArray<UStaticMeshComponent*> AInteractableItemBase::GetStaticMeshChildren_Imple
 {
 	TArray<UStaticMeshComponent*> StaticMeshes;
 	GetComponents<UStaticMeshComponent>(StaticMeshes);
+	
 	return StaticMeshes;
  }
 

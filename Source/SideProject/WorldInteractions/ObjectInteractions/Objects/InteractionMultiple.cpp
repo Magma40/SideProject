@@ -2,12 +2,17 @@
 #include "InteractionLightShift.h"
 #include "Tools/GenericCalls.h"
 
-AInteractionMultiple::AInteractionMultiple() { PrimaryActorTick.bCanEverTick = true;  }
+AInteractionMultiple::AInteractionMultiple()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
 
 void AInteractionMultiple::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsValid(ValidActorPatternCallInteract) && ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	
+	if (IsValid(ValidActorPatternCallInteract) && 
+		ValidActorPatternCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
 		ScriptInterface.SetObject(ValidActorPatternCallInteract);
@@ -15,10 +20,13 @@ void AInteractionMultiple::BeginPlay()
 
 		ValidInteractionPatternCallInteract = ScriptInterface;
 	}
+	
 	if (!ValidInteractionPatternCallInteract)
 	{
 		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ValidActorPatternCallInteract);
-		if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		
+		if (IsValid(InteractObject) && 
+			InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			TScriptInterface<IInteractionInterface> ScriptInterface;
 			ScriptInterface.SetObject(InteractObject);
@@ -28,11 +36,20 @@ void AInteractionMultiple::BeginPlay()
 		}	
 	}
 	
-	if (ActorsToCallInteract.IsEmpty()) return;
+	if (ActorsToCallInteract.IsEmpty())
+	{
+		return;
+	}
+	
 	for (AActor* ActorToCallInteract : ActorsToCallInteract)
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface;
-		if (!IsValid(ActorToCallInteract)) continue;
+		
+		if (!IsValid(ActorToCallInteract))
+		{
+			continue;
+		}
+		
 		if (ActorToCallInteract->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			ScriptInterface.SetObject(ActorToCallInteract);
@@ -40,11 +57,16 @@ void AInteractionMultiple::BeginPlay()
 
 			InteractionsToCallInteract.Add(ScriptInterface);
 		}
-		if (ScriptInterface) continue;
-		// Case 2: Check for component implementing interface
+		
+		if (ScriptInterface)
+		{
+			continue;
+		}
+		
 		UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(ActorToCallInteract);
 
-		if (IsValid(InteractObject) && InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+		if (IsValid(InteractObject) && 
+			InteractObject->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 		{
 			ScriptInterface.SetObject(InteractObject);
 			ScriptInterface.SetInterface(Cast<IInteractionInterface>(InteractObject));
@@ -52,6 +74,7 @@ void AInteractionMultiple::BeginPlay()
 			InteractionsToCallInteract.Add(ScriptInterface);
 		}
 	}
+	
 	InteractionChecks.SetNum(InteractionsToCallInteract.Num());
 }
 
@@ -60,10 +83,16 @@ void AInteractionMultiple::Interact_Implementation(ABaseInteractableCharacter* I
 	for (int i = 0; i < InteractionsToCallInteract.Num(); i++)
 	{
 		TScriptInterface<IInteractionInterface> ScriptInterface = InteractionsToCallInteract[i];
-		if (!IsValid(ScriptInterface.GetObject())) continue;
+		
+		if (!IsValid(ScriptInterface.GetObject()))
+		{
+			continue;
+		}
+		
 		if (ScriptInterface->GetInteractingBool_Implementation())
 		{
 			InteractionChecks[i] = true;
+			
 			if (InterwallTimer != 0.0f)
 			{
 				GetWorld()->GetTimerManager().SetTimer(MyTimerHandle, this, &AInteractionMultiple::ResetInteractionChecks, InterwallTimer, false);
@@ -76,6 +105,7 @@ void AInteractionMultiple::Interact_Implementation(ABaseInteractableCharacter* I
 		if (IsValid(ValidInteractionPatternCallInteract.GetObject()))
 		{
 			ValidInteractionPatternCallInteract->Interact_Implementation(InInteractingCharacter);
+			
 			Destroy(false);
 		}
 	}

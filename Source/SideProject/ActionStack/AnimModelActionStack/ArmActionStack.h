@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,32 +8,55 @@ class UMoveArm;
 class ABaseInteractableCharacter;
 class UInteractionBehaviour;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UArmActionStack : public UActionStack
 {
 	GENERATED_BODY()
 	
-protected:
-	UArmActionStack();
-	virtual void BeginPlay() override;
-
+	//FUNCTIONS:
 public:
-	void Init(UMoveArm*  InArmsRef, ABaseInteractableCharacter* InOwnerCharacter,  ABaseInteractableCharacter* InOwnerCompanion, USceneComponent* InBackHolster);
+	void Init(UMoveArm*  InArmRef, 
+		ABaseInteractableCharacter* InOwnerCharacter,  
+		ABaseInteractableCharacter* InOwnerCompanion, 
+		USceneComponent* InBackHolster);
+	
 	void AddMovingAction();
+	
 	void AddJumpingAction();
+	
 	void AddHolsterAction();
+	
 	void AddWaveAction();
+	
 	void AddPointingAction();
+	
 	void AddHandHoldingAction(UMoveArm* OtherCompanionArm);
+	
 	void AddHandToLocation(const FVector& InToLocation, bool bWantToPickUpItem);
 
 	void RemovePointingAction();
+	
+	//~ Begin Getters & Setters
+	UMoveArm* GetArm() const
+	{
+		return ArmRef;
+	}
+	//~ End Getters & Setters
 
-	UMoveArm* GetArm() const { return ArmRef; }
-
+protected:
+	virtual void BeginPlay() override;
+	
+	//FIELDS:
 private:
-	UMoveArm* ArmRef = nullptr;
-	UPROPERTY() USceneComponent* BackHolsterRef = nullptr;
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ABaseInteractableCharacter* OwnerCompanion = nullptr;
+	UPROPERTY()
+ 	TObjectPtr<UMoveArm> ArmRef = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<USceneComponent> BackHolsterRef = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY() 
+	TObjectPtr<ABaseInteractableCharacter> OwnerCompanion = nullptr;
 };

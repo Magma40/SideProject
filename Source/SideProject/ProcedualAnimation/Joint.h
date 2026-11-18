@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,12 +9,21 @@ class SIDEPROJECT_API UJoint : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 	
-protected:
 	UJoint();
+	
+	//FUNCTIONS:
+protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	virtual void TickComponent(float DeltaTime, 
+		ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;
 
+	//FIELDS:
 public:
-	USceneComponent* JointReference = nullptr;
-	UPROPERTY(EditAnywhere, Category = "Joint") FString JointName;
+	UPROPERTY()
+	TObjectPtr<USceneComponent> JointReference = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category = "Joint")
+	FString JointName;
 };

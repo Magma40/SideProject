@@ -1,13 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmWave.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 
-UActionArmWave* UActionArmWave::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter)
+UActionArmWave* UActionArmWave::Create(UObject* Outer, 
+	UMoveArm* InMoveArm, 
+	ABaseInteractableCharacter* InCharacter)
 {
 	UActionArmWave* Action = NewObject<UActionArmWave>(Outer);
+	
 	Action->MoveArmRef = InMoveArm;
 	Action->OwnerCharacter = InCharacter;
+	
 	return Action;
 }
 
@@ -28,19 +31,23 @@ void UActionArmWave::OnBegin_Implementation(const bool bFirstTime)
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset2));
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, MidOffset3));
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
+	
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
 void UActionArmWave::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
+	
 	MoveArmRef->bEnableArmConstraints = true;
 }
 
 void UActionArmWave::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+	
 	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
@@ -48,9 +55,15 @@ void UActionArmWave::OnUpdate_Implementation(const float DeltaTime)
 	}
 
 	//Do smooth custom animation 
-	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
+		AnimSubsystem->CustomAnim(DeltaTime, 
+			AnimTransforms, 
+			ElapsedTime, 
+			PlayRate);
+	
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
+	
 	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 }

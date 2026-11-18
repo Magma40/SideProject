@@ -1,12 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/ActionStack.h"
 
 UActionStack* UActionStack::Main = nullptr;
 
-// Sets default values for this component's properties
-UActionStack::UActionStack() { PrimaryComponentTick.bCanEverTick = true; }
+UActionStack::UActionStack()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
 
-void UActionStack::TickComponent(const float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UActionStack::TickComponent(const float DeltaTime, 
+	const ELevelTick TickType, 
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	UpdateActions(DeltaTime);
@@ -14,28 +17,37 @@ void UActionStack::TickComponent(const float DeltaTime, const ELevelTick TickTyp
 
  void UActionStack::UpdateActions(const float DeltaTime)
 {
-	if (IsEmpty()) return;
+	if (IsEmpty())
+	{
+		return;
+	}
 
-	// Acquire next action if needed
+	//Acquire next action if needed
 	if (!CurrentAction && ActionStack.Num() > 0)
 	{
 		CurrentAction = ActionStack[0];
+		
 		if (CurrentAction && IsValid(CurrentAction.GetObject()))
 		{
 			const bool bFirstTime = !FirstTimeActions.Contains(CurrentAction);
+			
 			FirstTimeActions.Add(CurrentAction);
+			
 			CurrentAction->Execute_OnBegin(CurrentAction.GetObject(), bFirstTime);
 		}
-		else CurrentAction = nullptr;
+		else
+		{
+			CurrentAction = nullptr;
+		}
 	}
 
-	// Update current action
+	//Update current action
 	if (CurrentAction && IsValid(CurrentAction.GetObject()))
 	{
-		TScriptInterface<IActionInterface> SafeAction = CurrentAction;
+		const TScriptInterface<IActionInterface> SafeAction = CurrentAction;
 		SafeAction->Execute_OnUpdate(SafeAction.GetObject(), DeltaTime);
 
-		// Action may have ended or been destroyed during update
+		//Action may have ended or been destroyed during update
 		if (SafeAction && IsValid(SafeAction.GetObject()))
 		{
 			if (ActionStack.Num() > 0 && SafeAction == ActionStack[0])
@@ -46,37 +58,56 @@ void UActionStack::TickComponent(const float DeltaTime, const ELevelTick TickTyp
 				}
 			}
 		}
-		else CurrentAction = nullptr;
+		else
+		{
+			CurrentAction = nullptr;
+		}
 	}
 
 }
 
-bool UActionStack::IsEmpty() const { return !CurrentAction && ActionStack.Num() == 0; }
+bool UActionStack::IsEmpty() const
+{
+	return !CurrentAction && ActionStack.Num() == 0;
+}
+
+bool UActionStack::Contains(const TScriptInterface<IActionInterface>& Action) const
+{
+	return Action != nullptr && ActionStack.Contains(Action);
+}
 
 void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
 {
-	if (!Action || !IsValid(Action.GetObject())) return;
+	if (!Action || !IsValid(Action.GetObject()))
+	{
+		return;
+	}
+	
 	CurrentAction = nullptr;
-	UE_LOG(LogTemp, Warning,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+	
 	ActionStack.Insert(Action, 0);
+	
+	UE_LOG(LogTemp, Warning,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
 }
 
 void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
 {
-	if (!Action) return;
+	if (!Action)
+	{
+		return;
+	}
+	
 	//Call On End on actions before destroying it
 	if (IsValid(Action.GetObject()))
 	{
 		Action->Execute_OnEnd(Action.GetObject());
 	}
+	
 	CurrentAction = nullptr;
-	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
+	
 	ActionStack.Remove(Action);
-}
-
-bool UActionStack::Contains(const TScriptInterface<IActionInterface>& Action) const
-{
-		return Action  != nullptr && ActionStack.Contains(Action);
+	
+	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
 }
 
 //TODO: This function needs a better name, too lazy to fix it
@@ -86,14 +117,8 @@ void UActionStack::ClearAllActionsExceptIndex(const int SaveIndex)
 	while (ActionStack.Num() > SaveIndex)
 	{
 		TScriptInterface<IActionInterface> Action = ActionStack[0];
-		if (!Action) continue;
-		if (IsValid(Action.GetObject()))
-		{
-			Action->Execute_OnEnd(Action.GetObject());
-		}
-		CurrentAction = nullptr;
-		UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-		ActionStack.Remove(Action);
+		
+		RemoveAction(Action);
 	}
 }
 

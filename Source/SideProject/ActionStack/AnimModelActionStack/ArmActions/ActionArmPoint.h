@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -17,29 +15,64 @@ class SIDEPROJECT_API UActionArmPoint : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionArmPoint* Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InOwnerCompanion);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
-	void OnEnd_Implementation() override;
+	static UActionArmPoint* Create(UObject* Outer, 
+		UMoveArm* InMoveArm, 
+		ABaseInteractableCharacter* InCharacter, 
+		ABaseInteractableCharacter* InOwnerCompanion);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	
+	virtual void OnEnd_Implementation() override;
 
 	void RenderPointingToIndicator();
+	
+	//~ Begin Getters & Setters
 	void GetActorPointingAt();
 
-	FVector GetPointingLocation() const { return PointingLocation; } 
-	AActor* GetActorPointedAt() { return ActorPointedAt; }
+	FORCEINLINE FVector GetPointingLocation() const
+	{
+		return PointingLocation;
+	} 
 	
+	FORCEINLINE AActor* GetActorPointedAt() const
+	{
+		return ActorPointedAt;
+	}
+	//~ End Getters & Setters
+	
+	//FIELDS:
 private:
-	UMoveArm* MoveArmRef = nullptr;
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ABaseInteractableCharacter* OwnerCompanion = nullptr;
+	UPROPERTY()
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCompanion = nullptr;
+	
+	UPROPERTY()
 	TArray<FTransform> AnimTransforms;
+	
 	float ElapsedTime = 0.0f;
+	
 	float PlayRate = 1.0f;
 
-	UPROPERTY() TArray<APointingIndicator*> PointingIndicators;
+	UPROPERTY() 
+	TArray<TObjectPtr<APointingIndicator>> PointingIndicators;
+	
+	UPROPERTY()
 	FVector PointingLocation = FVector::ZeroVector;
-	AActor* ActorPointedAt = nullptr;
-	APlayerCamera* TheMainCameraInScene = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<AActor> ActorPointedAt = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<APlayerCamera> TheMainCameraInScene = nullptr;
 };

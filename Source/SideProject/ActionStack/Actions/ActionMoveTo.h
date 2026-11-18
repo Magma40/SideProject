@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -19,21 +17,40 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 {
 	GENERATED_BODY()
 
+	//FUNCTIONS:
 public:
-	static UActionMoveTo* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, const FVector& InTargetLocation, bool InNeedIndicator);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnEnd_Implementation() override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionMoveTo* Create(UObject* Outer,
+		ABaseInteractableCharacter* InCompanionCharacter, 
+		const FVector& InTargetLocation, 
+		bool InNeedIndicator);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnEnd_Implementation() override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	
+	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 
+	//FIELDS:
 private:
-	ABaseInteractableCharacter* CompanionCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> CompanionCharacter = nullptr;
+	
+	UPROPERTY()
 	FVector TargetLocation = FVector::ZeroVector;
+	
 	float MinDistance = 10.0f;
-	AActor* IndicatorActor = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<AActor> IndicatorActor = nullptr;
+	
 	bool bNeedIndicator = true;
 	
 	bool bMoveCompleted = false;
-	 void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
+	
+	UPROPERTY()
 	FAIRequestID  MoveRequestID;
 };

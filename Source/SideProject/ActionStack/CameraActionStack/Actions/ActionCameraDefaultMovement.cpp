@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedPlayerInput.h"
@@ -13,21 +12,32 @@
 UActionCameraDefaultMovement* UActionCameraDefaultMovement::Create(UObject* Outer, AMainCharacter* InOwnerCharacter, APlayerCamera* InPlayerCamera)
 {
 	UActionCameraDefaultMovement* Action = NewObject<UActionCameraDefaultMovement>(Outer);
+	
 	Action->OwnerCharacter = InOwnerCharacter;
 	Action->PlayerCamera = InPlayerCamera;
+	
 	return Action;
 }
 
 void UActionCameraDefaultMovement::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
-	if (!OwnerCharacter) return;
+	if (!OwnerCharacter)
+	{
+		return;
+	}
 
 	const APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController());
-	if (!PC) return;
+	if (!PC)
+	{
+		return;
+	}
 
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PC->InputComponent);
-	if (!Input) return;
+	if (!Input)
+	{
+		return;
+	}
 
 	Input->BindAction(OwnerCharacter->GetLookAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitLookRangeForCamera);
 	Input->BindAction(OwnerCharacter->GetMoveAction(), ETriggerEvent::Triggered, this, &UActionCameraDefaultMovement::LimitMoveRangeForCamera);
@@ -66,22 +76,34 @@ bool UActionCameraDefaultMovement::IsDone_Implementation() const
 	return false;
 }
 
-void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value) // Const function :)
+void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionValue& Value)
 {
-	if (!IsValid(PlayerCamera)) return;
-	if (!IsValid(PlayerCamera->GetCurrentCameraPoint())) return;
+	if (!IsValid(PlayerCamera))
+	{
+		return;
+	}
+	
+	if (!IsValid(PlayerCamera->GetCurrentCameraPoint()))
+	{
+		return;
+	}
+	
 	const FRotator CameraRotation = PlayerCamera->GetActorRotation();
 	const FRotator StartTransformRotation = PlayerCamera->GetStartCameraTransform().GetRotation().Rotator();
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	//If Player using is a gamepad, invert Y 
-	if(APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+	if(const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
-		if (UInputDeviceSubsystem* InputDeviceSubsystem = GEngine->GetEngineSubsystem<UInputDeviceSubsystem>())
+		if (const UInputDeviceSubsystem* InputDeviceSubsystem = GEngine->GetEngineSubsystem<UInputDeviceSubsystem>())
     	{
     		const FPlatformUserId UserId = PlayerController->GetPlatformUserId();
     		FHardwareDeviceIdentifier DeviceIdentifier = InputDeviceSubsystem->GetMostRecentlyUsedHardwareDevice(UserId);
-    		if (DeviceIdentifier.PrimaryDeviceType == EHardwareDevicePrimaryType::Gamepad) MovementVector.Y *= -1.f;
+			
+    		if (DeviceIdentifier.PrimaryDeviceType == EHardwareDevicePrimaryType::Gamepad)
+    		{
+    			MovementVector.Y *= -1.f;
+    		}
     	}
 	}
 
@@ -97,16 +119,26 @@ void UActionCameraDefaultMovement::LimitLookRangeForCamera(const FInputActionVal
 	YawDelta   = FMath::Clamp(YawDelta,   -RotationLimit, RotationLimit);
 
 	//Apply new rotation
-	const FRotator LimitedRotation( StartTransformRotation.Pitch + PitchDelta, StartTransformRotation.Yaw   + YawDelta, StartTransformRotation.Roll);
+	const FRotator LimitedRotation(
+		StartTransformRotation.Pitch + PitchDelta, 
+		StartTransformRotation.Yaw   + YawDelta, 
+		StartTransformRotation.Roll);
+	
 	PlayerCamera->SetActorRelativeRotation(LimitedRotation);
 }
 
 void UActionCameraDefaultMovement::LimitMoveRangeForCamera()
 {
-    if (!IsValid(PlayerCamera)) return;
+    if (!IsValid(PlayerCamera))
+    {
+	    return;
+    }
 
-    ACameraPoint* CurrentPoint = PlayerCamera->GetCurrentCameraPoint();
-    if (!IsValid(CurrentPoint)) return;
+    const ACameraPoint* CurrentPoint = PlayerCamera->GetCurrentCameraPoint();
+    if (!IsValid(CurrentPoint))
+    {
+	    return;
+    }
 
     const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();

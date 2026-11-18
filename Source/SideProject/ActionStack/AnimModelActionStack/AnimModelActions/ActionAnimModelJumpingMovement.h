@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,21 +5,29 @@
 #include "ActionAnimModelJumpingMovement.generated.h"
 
 class ABaseInteractableCharacter;
-/**
-* Picks up item from ground into hand
- */
+
 UCLASS()
 class SIDEPROJECT_API UActionAnimModelJumpingMovement : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionAnimModelJumpingMovement* Create(UObject* Outer, ABaseInteractableCharacter* InOwnerCharacter, ABaseInteractableCharacter* InOtherOwnerCharacter);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionAnimModelJumpingMovement* Create(UObject* Outer, 
+		ABaseInteractableCharacter* InOwnerCharacter, 
+		ABaseInteractableCharacter* InOtherOwnerCharacter);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
 
+	//FIELDS:
 private:
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ABaseInteractableCharacter* OtherOwnerCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OtherOwnerCharacter = nullptr;
 };

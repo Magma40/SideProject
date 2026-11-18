@@ -1,5 +1,4 @@
 #include "CompanionUIIndicator.h"
-
 #include "PlayerCamera.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
@@ -18,7 +17,7 @@ UCompanionWidgetIndicator::UCompanionWidgetIndicator()
 
 	if (QuestionMarkTextureFinder.Succeeded() && ExclamationMarkTextureFinder.Succeeded() && FailedMarkTextureFinder.Succeeded())
 	{
-		QuestonMarkTexture = QuestionMarkTextureFinder.Object;
+		QuestionMarkTexture = QuestionMarkTextureFinder.Object;
 		ExclamationMarkTexture = ExclamationMarkTextureFinder.Object;
 		FailedTexture = FailedMarkTextureFinder.Object;
 	}
@@ -32,7 +31,7 @@ UCompanionWidgetIndicator::UCompanionWidgetIndicator()
 void UCompanionWidgetIndicator::OnRegister()
 {
 	Super::OnRegister();
-	AActor* OwnerActor = GetOwner();
+	
 	if (ACompanionPawn* OwnerCompanion = Cast<ACompanionPawn>(GetOwner()))
 	{
 		OwnerCompanion->SetCompanionWidgetIndicator(this);
@@ -46,6 +45,7 @@ void UCompanionWidgetIndicator::OnRegister()
 void UCompanionWidgetIndicator::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	AActor* FindActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCamera::StaticClass());
 	PlayerCamera = Cast<APlayerCamera>(FindActor);
 	
@@ -53,25 +53,39 @@ void UCompanionWidgetIndicator::BeginPlay()
 	CompanionWidget = Cast<UCompanionWidget>(GetWidget());
 }
 
-void UCompanionWidgetIndicator::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UCompanionWidgetIndicator::TickComponent(float DeltaTime, 
+	enum ELevelTick TickType, 
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!IsValid(PlayerCamera)) return;
+	
+	if (!IsValid(PlayerCamera))
+	{
+		return;
+	}
+	
 	this->SetWorldRotation((PlayerCamera->GetActorLocation() - GetComponentLocation()).Rotation());
 
-	if (bDoOnce && CompanionWidget && CompanionWidget->GetImageIndicator()) // this is stupid, widget won't get ImageIndicator in BeginPlay?
+	if (bDoOnce && 
+		CompanionWidget && 
+		CompanionWidget->GetImageIndicator()) //this is stupid, widget won't get ImageIndicator in BeginPlay?
 	{
 		CompanionWidget->GetImageIndicator()->SetBrushFromTexture(FailedTexture, true);
 		CompanionWidget->GetImageIndicator()->SetVisibility(ESlateVisibility::Hidden);
+		
 		bDoOnce = false;
 	}
 
-	if (IsValid(CompanionWidget) && IsValid(CompanionWidget->GetImageIndicator()) && CurrentIndicatorImage != ECompanionIndicatorImage::None)
+	if (IsValid(CompanionWidget) && 
+		IsValid(CompanionWidget->GetImageIndicator()) && 
+		CurrentIndicatorImage != ECompanionIndicatorImage::None)
 	{
 		const UImage* Image = CompanionWidget->GetImageIndicator();
+		
 		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Image->Slot))
 		{
-			FVector2D CurrentSize = CanvasSlot->GetSize();
+			const FVector2D CurrentSize = CanvasSlot->GetSize();
+			
 			if (CurrentSize.X < BaseSize.X)
 			{
 				const FVector2D NewSize = CurrentSize + IndicatorShowSpeed;
@@ -83,17 +97,23 @@ void UCompanionWidgetIndicator::TickComponent(float DeltaTime, enum ELevelTick T
 
 void UCompanionWidgetIndicator::SetNewIndicatorImage(const ECompanionIndicatorImage NewImageType)
 {
-	if (CurrentIndicatorImage != NewImageType) CompanionWidget->SetIndicatorSize(FVector2D::Zero());
+	if (CurrentIndicatorImage != NewImageType)
+	{
+		CompanionWidget->SetIndicatorSize(FVector2D::Zero());
+	}
 	
 	UImage* IndicatorImage = CompanionWidget->GetImageIndicator();
-	if (!IsValid(IndicatorImage)) return;
+	if (!IsValid(IndicatorImage))
+	{
+		return;
+	}
 	
 	UTexture2D* IndicatorTexture = nullptr;
 	IndicatorImage->SetVisibility(ESlateVisibility::Visible);
 
 	switch (NewImageType)
 	{
-		case ECompanionIndicatorImage::QuestionMark : IndicatorTexture = QuestonMarkTexture; break;
+		case ECompanionIndicatorImage::QuestionMark : IndicatorTexture = QuestionMarkTexture; break;
 		case ECompanionIndicatorImage::ExclamationMark : IndicatorTexture = ExclamationMarkTexture; break;
 		case ECompanionIndicatorImage::Failed : IndicatorTexture = FailedTexture; break;
 		case ECompanionIndicatorImage::None:
@@ -103,6 +123,7 @@ void UCompanionWidgetIndicator::SetNewIndicatorImage(const ECompanionIndicatorIm
 			break;
 		}
 	}
+	
 	CurrentIndicatorImage = NewImageType;
 	IndicatorImage->SetBrushFromTexture(IndicatorTexture, true);
 }

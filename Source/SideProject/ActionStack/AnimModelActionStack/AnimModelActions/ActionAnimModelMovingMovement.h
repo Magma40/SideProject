@@ -14,12 +14,19 @@ class SIDEPROJECT_API UActionAnimModelMovingMovement : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionAnimModelMovingMovement* Create(UObject* Outer, AMovingModel* InMovingModel);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionAnimModelMovingMovement* Create(UObject* Outer, 
+		AMovingModel* InMovingModel);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
 
+	//FIELDS:
 private:
-	AMovingModel* MovingModelRef = nullptr;
+	UPROPERTY()
+	TObjectPtr<AMovingModel> MovingModelRef = nullptr;
 };

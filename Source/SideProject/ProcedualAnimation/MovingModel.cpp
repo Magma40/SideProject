@@ -1,35 +1,37 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ProcedualAnimation/MovingModel.h"
 #include "ProcedualAnimation/MoveLeg.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
 #include "Tools/GenericCalls.h"
 
-AMovingModel::AMovingModel() { PrimaryActorTick.bCanEverTick = true; }
-
-void AMovingModel::InitSceneComponents() // This one is called through UAnimModelActionStack
+AMovingModel::AMovingModel()
 {
-	// Get Hips
-	Hips = GenericCalls::FindChildByExactName(this, TEXT("Hips"));
-	if (!Hips)
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AMovingModel::InitSceneComponents() //This one is called through UAnimModelActionStack
+{
+	//Get Hips
+	Hips_Ref = GenericCalls::FindChildByExactName(this, TEXT("Hips"));
+	
+	if (!Hips_Ref)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s:InitSceneComponents - Hips not found or wrong type"), *StaticClass()->GetName());
 		return;
 	}
 
-	// Get Chest
-	Chest = GenericCalls::FindChildByExactName(this, TEXT("Chest"));
-	if (!Chest)
+	//Get Chest
+	Chest_Ref = GenericCalls::FindChildByExactName(this, TEXT("Chest"));
+	
+	if (!Chest_Ref)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s:InitSceneComponents - Chest not found or wrong type"),  *StaticClass()->GetName());
 		return;
 	}
 
-	// Legs and arms chains
-	Legs = BuildLimbChains<UMoveLeg>(Hips,TEXT("UpperLeg_"),TEXT("Knee_"),TEXT("Foot_"));
-	Arms = BuildLimbChains<UMoveArm>( Chest,TEXT("UpperArm_"),TEXT("Elbow_"),TEXT("Hand_"));
+	//Legs and arms chains
+	Legs = BuildLimbChains<UMoveLeg>(Hips_Ref,TEXT("UpperLeg_"),TEXT("Knee_"),TEXT("Foot_"));
+	Arms = BuildLimbChains<UMoveArm>( Chest_Ref,TEXT("UpperArm_"),TEXT("Elbow_"),TEXT("Hand_"));
 }
 
 void AMovingModel::BeginPlay()
@@ -38,21 +40,29 @@ void AMovingModel::BeginPlay()
 
 	//Setup base hip height reference 
 	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
-	const float HipLocalZ  = ParentXform.InverseTransformPosition(Hips->GetComponentLocation()).Z;
+	
+	const float HipLocalZ  = ParentXform.InverseTransformPosition(Hips_Ref->GetComponentLocation()).Z;
 	const float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
+	
 	BaseHipHeight = HipLocalZ - FootLocalZ;
 }
 
 void AMovingModel::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	//DrawDebugJoints();
 	//DrawDebugLimbs();
 }
 
 void AMovingModel::UpdateHips()
 {
-	if (Legs.Num() == 0 || !IsValid(Hips)) return;
+	if (Legs.Num() == 0 ||
+		!IsValid(Hips_Ref))
+	{
+		return;
+	}
+	
 	const float HipSway =  GetHipSway();
 
 	//Simulate a constant vertical hip sway
@@ -61,7 +71,7 @@ void AMovingModel::UpdateHips()
 	const FVector NewHipLocalPos = FVector(0, 0, HipHeight) + HipSway;
 
 	//Apply New Hip Location
-	Hips->SetRelativeLocation(NewHipLocalPos);
+	Hips_Ref->SetRelativeLocation(NewHipLocalPos);
 }
 
 
@@ -69,62 +79,95 @@ void AMovingModel::UpdateHips()
 float AMovingModel::GetHipSway()
 {
 	float HipSway = 0.0f;
+	
 	//Leg Logic
 	for (const FLimbChain& Leg : Legs)
 	{
 		const UMoveLeg* UpperLeg = Cast<UMoveLeg>(Leg.Upper);
-		if (!IsValid(UpperLeg)) continue;
+		
+		if (!IsValid(UpperLeg))
+		{
+			continue;
+		}
+		
 		if (UpperLeg->IsStepping())
 		{
 			const float Lift = UpperLeg->GetLiftAmount();
 			const bool IsRight = UpperLeg->GetName().EndsWith(TEXT("_R"));
+			
 			HipSway = Lift * (IsRight ? 1.f : -1.f);
 		}
 	}
+	
 	HipSway = HipSway * 0.1f;
+	
 	return HipSway;
 }
 
 void AMovingModel::SetJumpingAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->PushJumpingActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->PushJumpingActionMovement();
 }
 
 void AMovingModel::SetArmsWaveAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->PushWaveActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->PushWaveActionMovement();
 }
 void AMovingModel::SetArmsBackHolsterAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->PushHolsterActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->PushHolsterActionMovement();
 }
 
 void AMovingModel::SetArmsPointingAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->PushPointingActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->PushPointingActionMovement();
 }
 
 void AMovingModel::RemoveArmsPointingAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->RemovePointingActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->RemovePointingActionMovement();
 }
 
 void AMovingModel::SetArmsHoldingHandsAnim() const
 {
-	if (!IsValid(AnimModelActionStack)) return;
-	AnimModelActionStack->PushHandHoldingActionMovement();
+	if (!IsValid(AnimModelActionStack_Ref))
+	{
+		return;
+	}
+	
+	AnimModelActionStack_Ref->PushHandHoldingActionMovement();
 }
 
 //Debug draw line the procedural animation joints
 void AMovingModel::DrawDebugJoints()
 {
-	FVector Pos_Hips = Hips->GetComponentLocation();
-	FVector Pos_Chest = Chest->GetComponentLocation();
+	FVector Pos_Hips = Hips_Ref->GetComponentLocation();
+	FVector Pos_Chest = Chest_Ref->GetComponentLocation();
 	
 	FVector Pos_UpperLeg_R =	FVector::ZeroVector;
 	FVector Pos_Knee_R = FVector::ZeroVector;
@@ -142,28 +185,64 @@ void AMovingModel::DrawDebugJoints()
 	FVector Pos_Elbow_R = FVector::ZeroVector;
 	FVector Pos_Hand_R = FVector::ZeroVector;
 
-	for(FLimbChain& Leg : Legs)
+	for(const FLimbChain& Leg : Legs)
 	{
-		if (Leg.Upper->GetName().EndsWith(TEXT("_R"))) Pos_UpperLeg_R = Leg.Upper->GetComponentLocation();
-		else  Pos_UpperLeg_L = Leg.Upper->GetComponentLocation();
+		if (Leg.Upper->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_UpperLeg_R = Leg.Upper->GetComponentLocation();
+		}
+		else
+		{
+			Pos_UpperLeg_L = Leg.Upper->GetComponentLocation();
+		}
 
-		if (Leg.Middle->GetName().EndsWith(TEXT("_R"))) Pos_Knee_R = Leg.Middle->GetComponentLocation();
-		else  Pos_Knee_L = Leg.Middle->GetComponentLocation();
+		if (Leg.Middle->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Knee_R = Leg.Middle->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Knee_L = Leg.Middle->GetComponentLocation();
+		}
 
-		if (Leg.End->GetName().EndsWith(TEXT("_R"))) Pos_Foot_R = Leg.End->GetComponentLocation();
-		else  Pos_Foot_L = Leg.End->GetComponentLocation();
+		if (Leg.End->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Foot_R = Leg.End->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Foot_L = Leg.End->GetComponentLocation();
+		}
 	}
 
-	for(FLimbChain& Arm : Arms)
+	for(const FLimbChain& Arm : Arms)
 	{
-		if (Arm.Upper->GetName().EndsWith(TEXT("_R"))) Pos_UpperArm_R = Arm.Upper->GetComponentLocation();
-		else  Pos_UpperArm_L = Arm.Upper->GetComponentLocation();
+		if (Arm.Upper->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_UpperArm_R = Arm.Upper->GetComponentLocation();
+		}
+		else
+		{
+			Pos_UpperArm_L = Arm.Upper->GetComponentLocation();
+		}
 
-		if (Arm.Middle->GetName().EndsWith(TEXT("_R"))) Pos_Elbow_R = Arm.Middle->GetComponentLocation();
-		else  Pos_Elbow_L = Arm.Middle->GetComponentLocation();
+		if (Arm.Middle->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Elbow_R = Arm.Middle->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Elbow_L = Arm.Middle->GetComponentLocation();
+		}
 
-		if (Arm.End->GetName().EndsWith(TEXT("_R"))) Pos_Hand_R = Arm.End->GetComponentLocation();
-		else  Pos_Hand_L = Arm.End->GetComponentLocation();
+		if (Arm.End->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Hand_R = Arm.End->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Hand_L = Arm.End->GetComponentLocation();
+		}
 	}
 
 	DrawDebugSphere(GetWorld(), Pos_Hips,8.f, 12, FColor::Cyan);
@@ -189,8 +268,8 @@ void AMovingModel::DrawDebugJoints()
 //Debug draw line the procedural animation limbs
 void AMovingModel::DrawDebugLimbs()
 {
-	FVector Pos_Hips = Hips->GetComponentLocation();
-	FVector Pos_Chest = Chest->GetComponentLocation();
+	FVector Pos_Hips = Hips_Ref->GetComponentLocation();
+	FVector Pos_Chest = Chest_Ref->GetComponentLocation();
 	
 	FVector Pos_UpperLeg_R = FVector::ZeroVector;
 	FVector Pos_Knee_R = FVector::ZeroVector;
@@ -208,28 +287,64 @@ void AMovingModel::DrawDebugLimbs()
 	FVector Pos_Elbow_R = FVector::ZeroVector;
 	FVector Pos_Hand_R = FVector::ZeroVector;
 
-	for(FLimbChain& Leg : Legs)
+	for(const FLimbChain& Leg : Legs)
 	{
-		if (Leg.Upper->GetName().EndsWith(TEXT("_R"))) Pos_UpperLeg_R = Leg.Upper->GetComponentLocation();
-		else  Pos_UpperLeg_L = Leg.Upper->GetComponentLocation();
+		if (Leg.Upper->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_UpperLeg_R = Leg.Upper->GetComponentLocation();
+		}
+		else
+		{
+			Pos_UpperLeg_L = Leg.Upper->GetComponentLocation();
+		}
 
-		if (Leg.Middle->GetName().EndsWith(TEXT("_R"))) Pos_Knee_R = Leg.Middle->GetComponentLocation();
-		else  Pos_Knee_L = Leg.Middle->GetComponentLocation();
+		if (Leg.Middle->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Knee_R = Leg.Middle->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Knee_L = Leg.Middle->GetComponentLocation();
+		}
 
-		if (Leg.End->GetName().EndsWith(TEXT("_R"))) Pos_Foot_R = Leg.End->GetComponentLocation();
-		else  Pos_Foot_L = Leg.End->GetComponentLocation();
+		if (Leg.End->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Foot_R = Leg.End->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Foot_L = Leg.End->GetComponentLocation();
+		}
 	}
 
-	for(FLimbChain& Arm : Arms)
+	for(const FLimbChain& Arm : Arms)
 	{
-		if (Arm.Upper->GetName().EndsWith(TEXT("_R"))) Pos_UpperArm_R = Arm.Upper->GetComponentLocation();
-		else  Pos_UpperArm_L = Arm.Upper->GetComponentLocation();
+		if (Arm.Upper->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_UpperArm_R = Arm.Upper->GetComponentLocation();
+		}
+		else
+		{
+			Pos_UpperArm_L = Arm.Upper->GetComponentLocation();
+		}
 
-		if (Arm.Middle->GetName().EndsWith(TEXT("_R"))) Pos_Elbow_R = Arm.Middle->GetComponentLocation();
-		else  Pos_Elbow_L = Arm.Middle->GetComponentLocation();
+		if (Arm.Middle->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Elbow_R = Arm.Middle->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Elbow_L = Arm.Middle->GetComponentLocation();
+		}
 
-		if (Arm.End->GetName().EndsWith(TEXT("_R"))) Pos_Hand_R = Arm.End->GetComponentLocation();
-		else  Pos_Hand_L = Arm.End->GetComponentLocation();
+		if (Arm.End->GetName().EndsWith(TEXT("_R")))
+		{
+			Pos_Hand_R = Arm.End->GetComponentLocation();
+		}
+		else
+		{
+			Pos_Hand_L = Arm.End->GetComponentLocation();
+		}
 	}
 
 	DrawDebugLine(GetWorld(), Pos_Hips, Pos_Chest, FColor::Cyan);
@@ -259,22 +374,33 @@ TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const F
 {
 	TArray<FLimbChain> OutChains;
 
-	TArray<USceneComponent*> UpperList = GenericCalls::FindChildrenByPrefix(Root, UpperPrefix);
+	const TArray<USceneComponent*> UpperList = GenericCalls::FindChildrenByPrefix(Root, UpperPrefix);
 
 	for (USceneComponent* UpperComp : UpperList)
 	{
 		TUpperClass* Upper = Cast<TUpperClass>(UpperComp);
-		if (!Upper) continue;
+		if (!Upper)
+		{
+			continue;
+		}
 
 		FLimbChain Chain;
 		Chain.Upper = Upper;
 
 		TArray<USceneComponent*> Middles = GenericCalls::FindChildrenByPrefix(UpperComp, MiddlePrefix);
-		if (Middles.Num() == 0) continue;
+		if (Middles.Num() == 0)
+		{
+			continue;
+		}
+		
 		Chain.Middle = Middles[0];
 
 		TArray<USceneComponent*> Ends = GenericCalls::FindChildrenByPrefix(Chain.Middle, EndPrefix);
-		if (Ends.Num() == 0) continue;
+		if (Ends.Num() == 0)
+		{
+			continue;
+		}
+		
 		Chain.End = Ends[0];
 
 		OutChains.Add(Chain);
@@ -287,7 +413,10 @@ USceneComponent* AMovingModel::GetRightHand() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
-		if (Arm.End->GetName().EndsWith(TEXT("_R"))) return Arm.End;
+		if (Arm.End->GetName().EndsWith(TEXT("_R")))
+		{
+			return Arm.End;
+		}
 	}
 	return nullptr;
 }
@@ -296,7 +425,10 @@ USceneComponent* AMovingModel::GetLeftHand() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
-		if (Arm.End->GetName().EndsWith(TEXT("_L"))) return Arm.End;
+		if (Arm.End->GetName().EndsWith(TEXT("_L")))
+		{
+			return Arm.End;
+		}
 	}
 	return nullptr;
 }
@@ -305,7 +437,10 @@ UMoveArm* AMovingModel::GetRightArm() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
-		if (Arm.Upper->GetName().EndsWith(TEXT("_R"))) return Cast<UMoveArm>(Arm.Upper);
+		if (Arm.Upper->GetName().EndsWith(TEXT("_R")))
+		{
+			return Cast<UMoveArm>(Arm.Upper);
+		}
 	}
 	return nullptr;
 }
@@ -314,7 +449,10 @@ UMoveArm* AMovingModel::GetLeftArm() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
-		if (Arm.Upper->GetName().EndsWith(TEXT("_L"))) return Cast<UMoveArm>(Arm.Upper);
+		if (Arm.Upper->GetName().EndsWith(TEXT("_L")))
+		{
+			return Cast<UMoveArm>(Arm.Upper);
+		}
 	}
 	return nullptr;
 }
@@ -322,19 +460,23 @@ UMoveArm* AMovingModel::GetLeftArm() const
 TArray<UMoveLeg*> AMovingModel::GetLegs()
 {
 	TArray<UMoveLeg*> LegsTops;
+	
 	for(const FLimbChain Leg : Legs)
 	{
 		LegsTops.Add(Cast<UMoveLeg>(Leg.Upper));
 	}
+	
 	return LegsTops;
 }
 
 TArray<UMoveArm*> AMovingModel::GetArms()
 {
 	TArray<UMoveArm*> ArmsTops;
+	
 	for(const FLimbChain Arm : Arms)
 	{
 		ArmsTops.Add(Cast<UMoveArm>(Arm.Upper));
 	}
+	
 	return ArmsTops;
 }

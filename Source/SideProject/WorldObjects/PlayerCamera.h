@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,18 +11,36 @@ class SIDEPROJECT_API APlayerCamera : public ACameraActor
 {
 	GENERATED_BODY()
 	
-protected:
 	APlayerCamera();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 	
+	//FUNCTIONS:
 public:
- 	UFUNCTION(BlueprintCallable) void SetNewCameraPoint(ACameraPoint* NewCameraPoint);
+	//~ Begin Getters & Setters
+	UFUNCTION(BlueprintCallable) 
+	void SetNewCameraPoint(ACameraPoint* NewCameraPoint);
+	
 	static APlayerCamera* GetCamera(const UObject* WorldContext = nullptr);
-	FTransform GetStartCameraTransform() const { return StartTransform; }
-	ACameraPoint* GetCurrentCameraPoint() const { return CurrentCameraPoint; }
+	
+	FTransform GetStartCameraTransform() const
+	{
+		return StartTransform;
+	}
+	
+	ACameraPoint* GetCurrentCameraPoint() const
+	{
+		return CurrentCameraPoint;
+	}
+	//~ End Getters & Setters
+	
+protected:
+	virtual void BeginPlay() override;
+	
+	virtual void Tick(float DeltaTime) override;
 
 private:
-	ACameraPoint* CurrentCameraPoint = nullptr;
+	UPROPERTY()
+	TObjectPtr<ACameraPoint> CurrentCameraPoint = nullptr;
+	
+	UPROPERTY()
 	FTransform StartTransform = FTransform::Identity;
 };

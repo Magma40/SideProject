@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,27 +7,40 @@
 class AInteractableItemBase;
 class ABaseInteractableCharacter;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UInteractDoor : public UInteractionBehaviour
 {
 	GENERATED_BODY()
+	
+	UInteractDoor();
+	
+	//FUNCTIONS:
+public:
+	virtual void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
+	
+	virtual void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
+	
+	virtual TArray<UStaticMeshComponent*> GetAllStaticMeshesInOwner_Implementation() override;
 
 protected:
-	UInteractDoor();
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
+	virtual void TickComponent(float DeltaTime, 
+		ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;
+	
+	//FIELDS:
 public:
-	void Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter) override;
-	void PerformInteraction_Implementation(ABaseInteractableCharacter* InteractingCharacter) override;
-	TArray<UStaticMeshComponent*>  GetAllStaticMeshesInOwner_Implementation() override;
+	UPROPERTY(EditAnywhere, Category="DoorReferences")
+	TObjectPtr<AInteractableItemBase> ItemNeeded = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category="DoorReferences") 
+	TObjectPtr<AActor> Lock = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category="DoorReferences") 
+	FComponentReference PhysicsConstraintsRef;
 
 private:
 	float CachedDoorSwing = 0.0f;
-	
-public:
-	UPROPERTY(EditAnywhere, Category="DoorReferences") AInteractableItemBase* ItemNeeded = nullptr;
-	UPROPERTY(EditAnywhere, Category="DoorReferences") AActor* Lock = nullptr;
-	UPROPERTY(EditAnywhere, Category="DoorReferences") FComponentReference PhysicsConstraintsRef;
 };
 

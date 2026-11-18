@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,50 +16,62 @@ struct FArmsPose
 	FQuat Rotation = FQuat::Identity;
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UMoveArm : public USceneComponent
 {
 	GENERATED_BODY()
-
-protected: //Functions
+	
 	UMoveArm();
+
+	//FUNCTIONS:
+protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	virtual void TickComponent(float DeltaTime, 
+		ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 	void Init();
+	
 	void UpdateIK();
 
-public: // Variables
-	
+	//FIELDS:
+public:
+	UPROPERTY()
 	FArmsPose TargetPose = FArmsPose();
-	TArray<USceneComponent*> ArmParts;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<USceneComponent>> ArmParts;
+	
 	bool bEnableArmConstraints = true;
 };
 
-static FVector ConstrainSwingTwist( const FVector& RestDirWS, const FVector& DesiredDirWS, float MaxSwingDegrees)
+static FVector ConstrainSwingTwist( const FVector& RestDirWS, 
+	const FVector& DesiredDirWS,
+	const float MaxSwingDegrees)
 {
-	// Quaternion rotating rest direction → desired direction
-	FQuat Delta = FQuat::FindBetweenNormals(RestDirWS, DesiredDirWS);
+	//Quaternion rotating rest direction → desired direction
+	const FQuat Delta = FQuat::FindBetweenNormals(RestDirWS, DesiredDirWS);
 
-	// Decompose into swing + twist around RestDir
+	//Decompose into swing + twist around RestDir
 	FQuat Swing, Twist;
 	Delta.ToSwingTwist(RestDirWS, Swing, Twist);
 
-	// Extract swing angle
+	//Extract swing angle
 	FVector SwingAxis;
 	float SwingAngle;
 	Swing.ToAxisAndAngle(SwingAxis, SwingAngle);
 
-	// Clamp swing angle
-	float MaxSwingRad = FMath::DegreesToRadians(MaxSwingDegrees);
+	//Clamp swing angle
+	const float MaxSwingRad = FMath::DegreesToRadians(MaxSwingDegrees);
 	SwingAngle = FMath::Clamp(SwingAngle, -MaxSwingRad, MaxSwingRad);
 
-	// Rebuild constrained swing
+	//Rebuild constrained swing
 	Swing = FQuat(SwingAxis, SwingAngle);
 
-	// Combine swing + original twist
-	FQuat Limited = Swing * Twist;
+	//Combine swing + original twist
+	const FQuat Limited = Swing * Twist;
 
-	// Apply to rest direction
+	//Apply to rest direction
 	return Limited.RotateVector(RestDirWS).GetSafeNormal();
 }

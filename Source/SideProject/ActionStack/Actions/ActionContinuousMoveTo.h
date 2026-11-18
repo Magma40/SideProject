@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -17,21 +15,37 @@ class SIDEPROJECT_API UActionContinuousMoveTo : public UAction
 {
 	GENERATED_BODY()
 
+	//FUNCTIONS:
 public:
-	static UActionContinuousMoveTo* Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter);
-	bool IsDone_Implementation() const override;
-	void OnEnd_Implementation() override;
-	void OnUpdate_Implementation(float DeltaTime) override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionContinuousMoveTo* Create(UObject* Outer, 
+		ABaseInteractableCharacter* InCompanionCharacter,
+		ABaseInteractableCharacter* InOtherCharacter);
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnEnd_Implementation() override;
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
 
 	void StartMove() const;
 
+	//FIELDS:
 private:
-	ABaseInteractableCharacter* CompanionCharacter = nullptr;
-	ABaseInteractableCharacter* OtherCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> CompanionCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OtherCharacter = nullptr;
 
+	UPROPERTY()
 	TWeakObjectPtr<AAIController> CachedController;
+	
+	UPROPERTY()
 	FTimerHandle FollowTimer;
+	
 	float FollowDistance = 25.0f;
+	
 	float CheckInterval = 0.1f;
 };

@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/CameraActionStack/Actions/ActionToCameraPoint.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -6,22 +5,36 @@
 #include "WorldObjects/CameraManagerMain.h"
 #include "WorldObjects/PlayerCamera.h"
 
-UActionToCameraPoint* UActionToCameraPoint::Create(UObject* Outer, APlayerCamera* InPlayerCamera, AMainCharacter* InOwnerCharacter, ACameraPoint* InNewCameraPoint, float InPlayRate)
+UActionToCameraPoint* UActionToCameraPoint::Create(UObject* Outer, 
+	APlayerCamera* InPlayerCamera, 
+	AMainCharacter* InOwnerCharacter, 
+	ACameraPoint* InNewCameraPoint, const float InPlayRate)
 {
 	UActionToCameraPoint* Action = NewObject<UActionToCameraPoint>(Outer);
+	
 	Action->PlayerCamera = InPlayerCamera;
 	Action->NewCameraPoint = InNewCameraPoint;
 	Action->OwnerCharacter = InOwnerCharacter;
 	Action->PlayRate = InPlayRate;
+	
 	return Action;
 }
 
 void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+	
 	PlayerCamera->SetNewCameraPoint(NewCameraPoint);
-	ACameraManagerMain* CameraManager = Cast<ACameraManagerMain>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraManagerMain::StaticClass()));
-	if (!IsValid(CameraManager)) return;
+	
+	ACameraManagerMain* CameraManager = 
+		Cast<ACameraManagerMain>(
+			UGameplayStatics::GetActorOfClass(GetWorld(), 
+				ACameraManagerMain::StaticClass()));
+	
+	if (!IsValid(CameraManager))
+	{
+		return;
+	}
 	
 	const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();
@@ -32,6 +45,7 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 
 	float SliderLimit;
 	float EntryOffset;
+	
 	if (IsValid(CameraManager->BaseCameraPoint))
 	{
 		SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
@@ -48,7 +62,10 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 	}
 	
 	const FVector NewLocation = BaseLocation + RightDirection * EntryOffset;
-	const FTransform NewCameraTransform(BaseTransform.GetRotation(),NewLocation,FVector::OneVector);
+	const FTransform NewCameraTransform(
+		BaseTransform.GetRotation(),
+		NewLocation,
+		FVector::OneVector);
 
 	AnimTransforms.Add(PlayerCamera->GetActorTransform());
 	AnimTransforms.Add(NewCameraTransform);
@@ -59,14 +76,23 @@ void UActionToCameraPoint::OnUpdate_Implementation(const float DeltaTime)
 	Super::OnUpdate_Implementation(DeltaTime);
 
 	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	
 	if (!AnimSubsystem)
 	{
-		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
+		UE_LOG(LogTemp, 
+			Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), 
+			*this->GetFName().ToString());
 		return;
 	}
 
-	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
+		AnimSubsystem->CustomAnim(DeltaTime, 
+			AnimTransforms, 
+			ElapsedTime, 
+			PlayRate);
+	
 	PlayerCamera->SetActorLocationAndRotation(NewValues.Value.GetLocation(), NewValues.Value.GetRotation());
+	
 	AnimTransforms = NewValues.Key.Key;
 	ElapsedTime = NewValues.Key.Value;
 }

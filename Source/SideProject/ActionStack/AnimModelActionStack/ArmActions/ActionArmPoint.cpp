@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
@@ -13,19 +12,25 @@
 #include "WorldObjects/CompanionUIIndicator.h"
 #include "WorldObjects/PointingIndicator.h"
 
-UActionArmPoint* UActionArmPoint::Create(UObject* Outer, UMoveArm* InMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InCompanion )
+UActionArmPoint* UActionArmPoint::Create(UObject* Outer, 
+	UMoveArm* InMoveArm, 
+	ABaseInteractableCharacter* InCharacter, 
+	ABaseInteractableCharacter* InOwnerCompanion )
 {
 	UActionArmPoint* Action = NewObject<UActionArmPoint>(Outer);
+	
 	Action->MoveArmRef = InMoveArm;
 	Action->OwnerCharacter = InCharacter;
-	Action->OwnerCompanion = InCompanion;
+	Action->OwnerCompanion = InOwnerCompanion;
 	Action->TheMainCameraInScene = APlayerCamera::GetCamera(InCharacter->GetWorld());
+	
 	return Action;
 }
 
 void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+	
 	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion))
 	{
 		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::QuestionMark);
@@ -35,11 +40,15 @@ void UActionArmPoint::OnBegin_Implementation(const bool bFirstTime)
 void UActionArmPoint::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
+	
 	while (PointingIndicators.Num() > 0)
 	{
-		AActor* Extra = PointingIndicators.Pop();
-		if (Extra) Extra->Destroy();
+		if (AActor* Extra = PointingIndicators.Pop())
+		{
+			Extra->Destroy();
+		}
 	}
+	
 	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCompanion))
 	{
 		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
@@ -65,9 +74,12 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	//Calculate which direction the arm should point at
 	FVector Direction = LocationB - LocationA;
 	Direction.Normalize();
+	
 	FVector NewZAxis = Direction;
 	FVector WorldUpVector = FVector::UpVector; 
+	
 	FVector NewXAxis = FVector::CrossProduct(WorldUpVector, NewZAxis).GetSafeNormal();
+	
 	if (NewXAxis.IsNearlyZero())
 	{
 		FVector WorldRightVector = FVector::RightVector;
@@ -76,12 +88,17 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 
 	//Make it so the "top" of hand is facing the direction of the pointing location
 	FVector NewYAxis = FVector::CrossProduct(NewZAxis, NewXAxis).GetSafeNormal();
-	FMatrix Matrix( FPlane(NewXAxis, 0.f), FPlane(NewYAxis, 0.f), FPlane(NewZAxis, 0.f), FPlane(0.f, 0.f, 0.f, 1.f));
+	FMatrix Matrix(FPlane(NewXAxis, 0.f), 
+		FPlane(NewYAxis, 0.f), 
+		FPlane(NewZAxis, 0.f), 
+		FPlane(0.f, 0.f, 0.f, 1.f));
+	
 	FRotator NewRotation = Matrix.Rotator();
 	RelativeQuat = Xform.InverseTransformRotation(NewRotation.Quaternion());
 
 	//Construct animation points to point arm at pointing location
 	AnimTransforms.Empty();
+	
 	FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	AnimTransforms.Add(FTransform(RelativeQuat, HandLocationPos));
 
@@ -89,6 +106,7 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	AnimTransforms.Add(FTransform(RelativeQuat, PointLocation));
 
 	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	
 	if (!AnimSubsystem)
 	{
 		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
@@ -96,7 +114,12 @@ void UActionArmPoint::OnUpdate_Implementation(float DeltaTime)
 	}
 
 	//Update arm pointing animation 
-	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = AnimSubsystem->CustomAnim(DeltaTime, AnimTransforms, ElapsedTime, PlayRate);
+	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
+		AnimSubsystem->CustomAnim(DeltaTime, 
+			AnimTransforms, 
+			ElapsedTime, 
+			PlayRate);
+	
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
 }
@@ -108,7 +131,11 @@ bool UActionArmPoint::IsDone_Implementation() const
 
 void UActionArmPoint::RenderPointingToIndicator()
 {
-	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
+	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3)
+	{
+		return;
+	}
+	
 	FHitResult Hit;
 	const FVector StartCamera = TheMainCameraInScene->GetActorLocation();
 	const FVector End = StartCamera + (TheMainCameraInScene->GetActorForwardVector() * 10000.f);
@@ -119,6 +146,7 @@ void UActionArmPoint::RenderPointingToIndicator()
 	Params.AddIgnoredActor(OwnerCharacter);
 	Params.AddIgnoredActor(TheMainCameraInScene);
 	Params.AddIgnoredActors(ActorsToIgnore);
+	
 	if (GetWorld()->LineTraceSingleByChannel(Hit,StartCamera,End,ECC_Visibility,Params ))
 	{
 		PointingLocation = Hit.ImpactPoint;
@@ -128,7 +156,7 @@ void UActionArmPoint::RenderPointingToIndicator()
 		const float TotalDistance = FVector::Distance(Hit.ImpactPoint, Start);
 		const int32 RequiredCount = FMath::FloorToInt(TotalDistance / EachSpawnDistance);
 	
-		// Spawn new indicators if we need more
+		//Spawn new indicators if we need more
 		while (PointingIndicators.Num() < RequiredCount)
 		{
 			FActorSpawnParameters SpawnParams;
@@ -136,7 +164,9 @@ void UActionArmPoint::RenderPointingToIndicator()
 			SpawnParams.Instigator = OwnerCharacter;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			APointingIndicator* Indicator = GetWorld()->SpawnActor<APointingIndicator>(APointingIndicator::StaticClass(), OwnerCharacter->GetActorLocation(), FRotator::ZeroRotator, SpawnParams);
+			APointingIndicator* Indicator = GetWorld()->SpawnActor<APointingIndicator>(APointingIndicator::StaticClass(), 
+				OwnerCharacter->GetActorLocation(), 
+				FRotator::ZeroRotator, SpawnParams);
 
 			if (IsValid(Indicator))
 			{
@@ -144,14 +174,16 @@ void UActionArmPoint::RenderPointingToIndicator()
 			}
 		}
 	
-		// Destroy extra indicators if we need fewer
+		//Destroy extra indicators if we need fewer
 		while (PointingIndicators.Num() > RequiredCount)
 		{
-			AActor* Extra = PointingIndicators.Pop();
-			if (Extra) Extra->Destroy();
+			if (AActor* Extra = PointingIndicators.Pop())
+			{
+				Extra->Destroy();
+			}
 		}
 	
-		// Move indicators and draw debug spheres for visualization
+		//Move indicators and draw debug spheres for visualization
 		for (int32 i = 0; i < PointingIndicators.Num(); i++)
 		{
 			FVector NewLocation = Start + MoveArmRef->ArmParts[2]->GetUpVector() * EachSpawnDistance * (i + 1);
@@ -165,23 +197,28 @@ void UActionArmPoint::RenderPointingToIndicator()
 
 void UActionArmPoint::GetActorPointingAt()
 {
-	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3) return;
+	if (!MoveArmRef || MoveArmRef->ArmParts.Num() < 3)
+	{
+		return;
+	}
 	
 	FHitResult Hit;
 	const FVector Start = MoveArmRef->ArmParts[2]->GetComponentLocation();
-	FVector End = Start + MoveArmRef->ArmParts[2]->GetUpVector() * 10000.0f;
+	const FVector End = Start + MoveArmRef->ArmParts[2]->GetUpVector() * 10000.0f;
 	
 	FCollisionQueryParams Params;
 	TArray<AActor*> ChildActors;
 	OwnerCharacter->GetAllChildActors(ChildActors);
 	Params.AddIgnoredActor(OwnerCharacter);
 	Params.AddIgnoredActors(ChildActors);
+	
 	if (GetWorld()->LineTraceSingleByChannel(Hit,Start,End,ECC_Visibility,Params))
 	{
 		AActor* HitActor = Hit.GetActor();
 		if (IsValid(HitActor))
 		{
 			UInteractionBehaviour* InteractObject = GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(HitActor);
+			
 			if (IsValid(InteractObject))
 			{
 				InteractObject->SetNeedOutlineMaterial_Implementation(EMaterialOverlayStatus::Active);
@@ -196,7 +233,10 @@ void UActionArmPoint::GetActorPointingAt()
 				}
 				else ActorPointedAt = nullptr;
 			}
-			else ActorPointedAt = nullptr;
+			else
+			{
+				ActorPointedAt = nullptr;
+			}
 		}
 	}
 }

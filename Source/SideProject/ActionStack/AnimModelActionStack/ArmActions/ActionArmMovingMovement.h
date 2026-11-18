@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,14 +10,21 @@ class SIDEPROJECT_API UActionArmMovingMovement : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionArmMovingMovement* Create(UObject* Outer, UMoveArm* InMoveArm);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
+	static UActionArmMovingMovement* Create(UObject* Outer,
+		UMoveArm* InMoveArm);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
 
 	bool ShouldHoldUpHands() const;
 	
+	//FIELDS:
 private:
-	UMoveArm* MoveArmRef = nullptr;
+	UPROPERTY()
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 };

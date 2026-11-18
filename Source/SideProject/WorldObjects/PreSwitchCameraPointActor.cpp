@@ -1,5 +1,4 @@
 #include "PreSwitchCameraPointActor.h"
-
 #include "CameraPoint.h"
 #include "PlayerCamera.h"
 #include "ActionStack/CameraActionStack/CameraActionStack.h"
@@ -28,60 +27,138 @@ APreSwitchCameraPointActor::APreSwitchCameraPointActor()
 void APreSwitchCameraPointActor::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &APreSwitchCameraPointActor::OverlapBegin);
 	BoxComponent->OnComponentEndOverlap.AddDynamic(this, &APreSwitchCameraPointActor::OverlapEnd);
 
 	PlayerCamera = Cast<APlayerCamera>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCamera::StaticClass()));
-	if (!IsValid(PlayerCamera)) return;
+	
+	if (!IsValid(PlayerCamera))
+	{
+		return;
+	}
 	
 	TArray<UCameraActionStack* >Components;
 	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	if (!Components.IsEmpty() && IsValid(Components[0])) CameraActionStack = Components[0];
-	if (!IsValid(CameraActionStack)) return;
+	
+	if (!Components.IsEmpty() && 
+		IsValid(Components[0]))
+	{
+		CameraActionStack = Components[0];
+	}
+	
+	if (!IsValid(CameraActionStack))
+	{
+		return;
+	}
 }
 
-void APreSwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void APreSwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, 
+	bool bFromSweep, 
+	const FHitResult& SweepResult)
 {
-	if (!IsValid(InsideAreaCameraPoint) || !IsValid(OutsideAreaCameraPoint)) return;
-	if (bHasTriggered) return;
+	if (!IsValid(InsideAreaCameraPoint) ||
+		!IsValid(OutsideAreaCameraPoint))
+	{
+		return;
+	}
+	
+	if (bHasTriggered)
+	{
+		return;
+	}
 
-	AMainCharacter* TempChar = Cast<AMainCharacter>(OtherActor);
-	if (!TempChar) return;
-	if (Cast<UCapsuleComponent>(OtherComp) != TempChar->GetCapsuleComponent()) return;
+	const AMainCharacter* TempChar = Cast<AMainCharacter>(OtherActor);
+	
+	if (!TempChar)
+	{
+		return;
+	}
+	
+	if (Cast<UCapsuleComponent>(OtherComp) != TempChar->GetCapsuleComponent())
+	{
+		return;
+	}
 	
 	bHasTriggered = true;
 
 	if (TempChar->GetCharacterMovement()->IsFalling())
 	{
-		if (bDontDoIfJumping) return;
-		else
+		if (bDontDoIfJumping)
 		{
-			CameraActionStack->PushToCameraPointAction(OutsideAreaCameraPoint, PlayRate);
-			if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
+			return;
+		}
+		
+		CameraActionStack->PushToCameraPointAction(OutsideAreaCameraPoint, PlayRate);
+		
+		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+		{
+			ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
 		}
 	}
 	
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>()) CameraActionStack->RemoveAction(ActionRef);
+	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	{
+		CameraActionStack->RemoveAction(ActionRef);
+	}
+	
 	CameraActionStack->PushToCameraPointAction(InsideAreaCameraPoint, PlayRate);
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(InsideAreaCameraPoint->RotationLimit);
+	
+	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	{
+		ActionRef->SetRotationLimit(InsideAreaCameraPoint->RotationLimit);
+	}
 }
 
-void APreSwitchCameraPointActor::OverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void APreSwitchCameraPointActor::OverlapEnd(UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex)
 {
-	if (!IsValid(InsideAreaCameraPoint) || !IsValid(OutsideAreaCameraPoint)) return;
-	AMainCharacter* TempChar = Cast<AMainCharacter>(OtherActor);
-	if (!TempChar) return;
-	if (Cast<UCapsuleComponent>(OtherComp) != TempChar->GetCapsuleComponent()) return;
-
-	for (ACameraPoint* CameraPoint : ExceptionalCameraPoints)
+	if (!IsValid(InsideAreaCameraPoint) || !IsValid(OutsideAreaCameraPoint))
 	{
-		if (!IsValid(CameraPoint)) continue;
-		if (PlayerCamera->GetCurrentCameraPoint() == CameraPoint) return;
+		return;
 	}
 
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>()) CameraActionStack->RemoveAction(ActionRef);
+	const AMainCharacter* TempChar = Cast<AMainCharacter>(OtherActor);
+	
+	if (!TempChar)
+	{
+		return;
+	}
+	
+	if (Cast<UCapsuleComponent>(OtherComp) != TempChar->GetCapsuleComponent())
+	{
+		return;
+	}
+
+	for (const ACameraPoint* CameraPoint : ExceptionalCameraPoints)
+	{
+		if (!IsValid(CameraPoint))
+		{
+			continue;
+		}
+		
+		if (PlayerCamera->GetCurrentCameraPoint() == CameraPoint)
+		{
+			return;
+		}
+	}
+
+	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	{
+		CameraActionStack->RemoveAction(ActionRef);
+	}
+	
 	CameraActionStack->PushToCameraPointAction(OutsideAreaCameraPoint, PlayRate);
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>()) ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
+	
+	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	{
+		ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
+	}
 	
 	bHasTriggered = false;
 }

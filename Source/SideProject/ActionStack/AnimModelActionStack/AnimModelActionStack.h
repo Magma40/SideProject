@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,39 +9,75 @@ class UArmActionStack;
 class ULegActionStack;
 class AMovingModel;
 
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
 {
 	GENERATED_BODY()
-
-private:
-	UAnimModelActionStack();
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void Init();
 	
-	
-	AMovingModel* MovingModelRef = nullptr;
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ABaseInteractableCharacter* CompanionOwnerCharacter = nullptr;
-	ULegActionStack* LegActionStackRef = nullptr;
-	UArmActionStack* ArmActionStack_RRef = nullptr;
-	UArmActionStack* ArmActionStack_LRef = nullptr;
-
-	float MinDistanceToHoldHands = 200.0f;
-
+	//FUNCTIONS:
 public:
 	void PushDefaultActionMovement();
+	
 	void PushJumpingActionMovement();
+	
 	void PushHolsterActionMovement() const;
+	
 	void PushWaveActionMovement() const;
+	
 	void PushPointingActionMovement() const;
+	
 	void PushHandHoldingActionMovement();
 
 	void RemovePointingActionMovement() const;
+	
+	//~ Begin Getters & Setters
+	UFUNCTION(BlueprintPure) 
+	UArmActionStack* GetArmActionStack_R() const
+	{
+		return ArmActionStack_RRef;
+	}
+	
+	UFUNCTION(BlueprintPure)
+	UArmActionStack* GetArmActionStack_L() const 
+	{
+		return ArmActionStack_LRef; 
+	}
+	
+	UFUNCTION(BlueprintPure) 
+	ULegActionStack* GetLegsActionStack() const
+	{
+		return LegActionStackRef;
+	}
+	//~ End Getters & Setters
 
-	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_R() const { return ArmActionStack_RRef; }
-	UFUNCTION(BlueprintCallable) UArmActionStack* GetArmActionStack_L() const { return ArmActionStack_LRef; }
-	UFUNCTION(BlueprintCallable) ULegActionStack* GetLegsActionStack() const { return LegActionStackRef;}
+protected:
+	virtual void BeginPlay() override;
+	
+	virtual void TickComponent(float DeltaTime, 
+		ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void Init();
+	
+	//FIELDS:
+private:
+	UPROPERTY()
+	TObjectPtr<AMovingModel> MovingModelRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> CompanionOwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ULegActionStack> LegActionStackRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UArmActionStack> ArmActionStack_RRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UArmActionStack> ArmActionStack_LRef = nullptr;
+
+	float MinDistanceToHoldHands = 200.0f;
 };

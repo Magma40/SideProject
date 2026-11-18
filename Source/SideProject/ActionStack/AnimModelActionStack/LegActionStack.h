@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,22 +7,28 @@
 class UMoveLeg;
 class ABaseInteractableCharacter;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API ULegActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
-protected: // Functions
-	ULegActionStack();
-	virtual void BeginPlay() override;
-
+	//FUNCTIONS:
 public:
-	void Init(const TArray<UMoveLeg*>& InLegsRef, ABaseInteractableCharacter* InOwnerCharacter);
+	void Init(const TArray<UMoveLeg*>& InLegsRef, 
+		ABaseInteractableCharacter* InOwnerCharacter);
+	
 	void AddMovingAction();
+	
 	void AddJumpingAction();
 	
-
-private: //Variables
-	TArray<UMoveLeg*> LegsRef;
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+protected:
+	virtual void BeginPlay() override;
+	
+	//FIELDS:
+private:
+	UPROPERTY()
+	TArray<TObjectPtr<UMoveLeg>> LegsRef;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 };

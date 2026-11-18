@@ -54,7 +54,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SideProject.uproject" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject.Target.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -165,23 +165,23 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.000000000062488" />
-      <entry key="S2" value="1.00537396203385" />
-      <entry key="S5" value="1.2724167994829085" />
-      <entry key="S10" value="2.0370347003204774" />
-      <entry key="S30" value="3.546992746966134" />
-      <entry key="S60" value="4.191311955662485" />
-      <entry key="M2" value="4.572696360821866" />
-      <entry key="M5" value="4.823226347419542" />
-      <entry key="M10" value="4.9106078199223475" />
-      <entry key="M15" value="4.940179524304545" />
-      <entry key="M30" value="4.969976342933933" />
-      <entry key="H1" value="4.984959708383009" />
-      <entry key="H2" value="4.992472724840118" />
-      <entry key="H4" value="4.996234578381811" />
-      <entry key="D1" value="4.999372181802755" />
-      <entry key="W1" value="4.999910305612528" />
+      <entry key="MS100" value="1.876743651606937" />
+      <entry key="MS500" value="2.8744828937761424" />
+      <entry key="S2" value="5.89280336800068" />
+      <entry key="S5" value="9.515443627838666" />
+      <entry key="S10" value="13.110546314612241" />
+      <entry key="S30" value="18.383542818386903" />
+      <entry key="S60" value="20.457342651179108" />
+      <entry key="M2" value="21.66294768936295" />
+      <entry key="M5" value="22.448389490575426" />
+      <entry key="M10" value="22.72130701411944" />
+      <entry key="M15" value="22.81355615118231" />
+      <entry key="M30" value="22.906452100522042" />
+      <entry key="H1" value="22.953898440039442" />
+      <entry key="H2" value="23.329017128076813" />
+      <entry key="H4" value="31.960594101735698" />
+      <entry key="D1" value="169.2163043263972" />
+      <entry key="W1" value="260.85205100365874" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -190,36 +190,36 @@
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
       <entry key="S30" value="0.0" />
-      <entry key="S60" value="0.0" />
-      <entry key="M2" value="0.0" />
-      <entry key="M5" value="0.0" />
-      <entry key="M10" value="0.0" />
-      <entry key="M15" value="0.0" />
-      <entry key="M30" value="0.0" />
-      <entry key="H1" value="0.0" />
-      <entry key="H2" value="0.0" />
-      <entry key="H4" value="0.0" />
-      <entry key="D1" value="0.0" />
-      <entry key="W1" value="0.0" />
+      <entry key="S60" value="1.683041019502699E-284" />
+      <entry key="M2" value="1.3719095654968413E-142" />
+      <entry key="M5" value="3.0920911055043527E-57" />
+      <entry key="M10" value="1.3752142308812253E-28" />
+      <entry key="M15" value="5.738294572826481E-19" />
+      <entry key="M30" value="3.185716367752919E-9" />
+      <entry key="H1" value="3.375294886012082E-4" />
+      <entry key="H2" value="0.14846158678006371" />
+      <entry key="H4" value="3.599861895584524" />
+      <entry key="D1" value="56.0519702580982" />
+      <entry key="W1" value="90.46510913046372" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.4205058242167664E-50" />
-      <entry key="MS500" value="1.1088275239299026E-10" />
-      <entry key="S2" value="0.006761675660322012" />
-      <entry key="S5" value="0.33885101758636577" />
-      <entry key="S10" value="1.2917565708526224" />
-      <entry key="S30" value="3.179349498638733" />
-      <entry key="S60" value="3.9862875594175686" />
-      <entry key="M2" value="4.464245890138699" />
-      <entry key="M5" value="4.77833042326827" />
-      <entry key="M10" value="4.887899282329106" />
-      <entry key="M15" value="4.9249819893028235" />
-      <entry key="M30" value="4.962348167905096" />
-      <entry key="H1" value="4.981138240240936" />
-      <entry key="H2" value="4.990560142006569" />
-      <entry key="H4" value="4.995277824322931" />
-      <entry key="D1" value="4.999212658498738" />
-      <entry key="W1" value="4.999887514994045" />
+      <entry key="MS100" value="1.7618100734050828" />
+      <entry key="MS500" value="2.8375259063211495" />
+      <entry key="S2" value="5.848109046948513" />
+      <entry key="S5" value="9.472513419469553" />
+      <entry key="S10" value="13.073460635715623" />
+      <entry key="S30" value="18.361919254006548" />
+      <entry key="S60" value="20.444534372367055" />
+      <entry key="M2" value="21.655946264755503" />
+      <entry key="M5" value="22.445430885693106" />
+      <entry key="M10" value="22.719800048334072" />
+      <entry key="M15" value="22.81254525802136" />
+      <entry key="M30" value="22.90594350661795" />
+      <entry key="H1" value="22.95398060070476" />
+      <entry key="H2" value="23.477292685170678" />
+      <entry key="H4" value="35.55968182255147" />
+      <entry key="D1" value="225.26637672501712" />
+      <entry key="W1" value="351.31672104225004" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -233,34 +233,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C/C++ Project.SideProject.executor": "Debug",
-    "C/C++ Project.UE5.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "RiderUnrealFileTemplatesSettings",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C/C++ Project.SideProject.executor&quot;: &quot;Debug&quot;,
+    &quot;C/C++ Project.UE5.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;RiderUnrealFileTemplatesSettings&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CidrLocalAttachDebugger.recentlyUsed">
       <recent name="com.jetbrains.rider.cpp.debugger.RiderCppLLDBDriverConfiguration" />
@@ -872,6 +872,9 @@
       <workItem from="1794503210989" duration="989000" />
       <workItem from="1794506052270" duration="593000" />
       <workItem from="1794507483762" duration="2106000" />
+      <workItem from="1794916133063" duration="377000" />
+      <workItem from="1794916694978" duration="1928000" />
+      <workItem from="1794919531171" duration="26642000" />
     </task>
     <servers />
   </component>

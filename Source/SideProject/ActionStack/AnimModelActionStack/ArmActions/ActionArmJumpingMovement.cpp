@@ -1,10 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h"
 
-UActionArmJumpingMovement* UActionArmJumpingMovement::Create(UObject* Outer, UMoveArm* InMoveArm)
+UActionArmJumpingMovement* UActionArmJumpingMovement::Create(UObject* Outer, 
+	UMoveArm* InMoveArm)
 {
 	UActionArmJumpingMovement* Action = NewObject<UActionArmJumpingMovement>(Outer);
+	
 	Action->MoveArmRef = InMoveArm;
+	
 	return Action;
 }
 

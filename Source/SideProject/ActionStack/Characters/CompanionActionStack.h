@@ -8,24 +8,36 @@
 
 class ABaseInteractableCharacter;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SIDEPROJECT_API UCompanionActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
-protected:
-	UCompanionActionStack();
-	virtual void BeginPlay() override;
-	void Init();
-
+	//FUNCTIONS
 public:
 	//Actions
 	void OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator);
+	
 	void OnAddActionPickUp();
+	
 	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
+	
 	void OnAddTryToInteractWithWorld();
-	ABaseInteractableCharacter* GetInteractableCharacter() const { return OwnerCharacter; }
+	
+	//~ Begin Getters & Setters
+	FORCEINLINE ABaseInteractableCharacter* GetInteractableCharacter() const
+	{
+		return OwnerCharacter;
+	}
+	//~ End Getters & Setters
+	
+protected:
+	virtual void BeginPlay() override;
+	
+	void Init();
 
+	//FIELDS:
 private:
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 };

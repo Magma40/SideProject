@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,23 +12,47 @@ class SIDEPROJECT_API UActionArmHandHolding : public UAction
 {
 	GENERATED_BODY()
 	
+	//FUNCTIONS:
 public:
-	static UActionArmHandHolding* Create(UObject* Outer, UMoveArm* InMoveArm, UMoveArm* InOtherMoveArm, ABaseInteractableCharacter* InCharacter, ABaseInteractableCharacter* InAICharacter);
-	void OnUpdate_Implementation(float DeltaTime) override;
-	bool IsDone_Implementation() const override;
-	void OnBegin_Implementation(bool bFirstTime) override;
-	void OnEnd_Implementation() override;
+	static UActionArmHandHolding* Create(UObject* Outer,
+		UMoveArm* InMoveArm, 
+		UMoveArm* InOtherMoveArm, 
+		ABaseInteractableCharacter* InCharacter, 
+		ABaseInteractableCharacter* InAICharacter);
+	
+	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	
+	virtual bool IsDone_Implementation() const override;
+	
+	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	
+	virtual void OnEnd_Implementation() override;
+	
+	//FIELDS:
+public:
+	UPROPERTY()
+	FVector PointingLocation = FVector::ZeroVector;
+	
+	UPROPERTY()
+	TObjectPtr<UActorComponent> ActorPointedAt = nullptr;
 
 private:
-	UMoveArm* MoveArmRef = nullptr;
-	UMoveArm* MoveOtherArmRef = nullptr;
-	ABaseInteractableCharacter* OwnerCharacter = nullptr;
-	ABaseInteractableCharacter* AIOwnerCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UMoveArm> MoveOtherArmRef = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<ABaseInteractableCharacter> AIOwnerCharacter = nullptr;
+	
+	UPROPERTY()
 	TArray<FTransform> AnimTransforms;
+	
 	float ElapsedTime = 0.0f;
+	
 	float PlayRate = 0.1f;
-
-public:
-	FVector PointingLocation = FVector::ZeroVector;
-	UActorComponent* ActorPointedAt = nullptr;
 };

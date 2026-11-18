@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/Actions/ActionMoveTo.h"
 #include "AIController.h"
 #include "Navigation/PathFollowingComponent.h"
@@ -6,26 +5,44 @@
 #include "Player/CompanionPawn.h"
 #include "WorldObjects/CompanionUIIndicator.h"
 
-UActionMoveTo* UActionMoveTo::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, const FVector& InTargetLocation, bool InNeedIndicator)
+UActionMoveTo* UActionMoveTo::Create(UObject* Outer, 
+	ABaseInteractableCharacter* InCompanionCharacter,
+	const FVector& InTargetLocation,
+	const bool InNeedIndicator)
 {
 	UActionMoveTo* Action = NewObject<UActionMoveTo>(Outer);
+	
 	Action->CompanionCharacter = InCompanionCharacter;
 	Action->TargetLocation = InTargetLocation;
 	Action->bNeedIndicator = InNeedIndicator;
+	
 	return Action;
 }
 
 void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 {
 	Super::OnBegin_Implementation(bFirstTime);
+	
 	bMoveCompleted = false;
-	if (!CompanionCharacter) return;
+	
+	if (!CompanionCharacter)
+	{
+		return;
+	}
 	
     AAIController* AIController = CompanionCharacter->GetController<AAIController>();
-	if (!AIController) return;
+	
+	if (!AIController)
+	{
+		return;
+	}
 	
 	UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent();
-	if (!PathComp) return;
+	
+	if (!PathComp)
+	{
+		return;
+	}
 
 	PathComp->AbortMove(*AIController, FPathFollowingResultFlags::ForcedScript);
 	PathComp->OnRequestFinished.AddUObject(this, &UActionMoveTo::OnMoveCompleted);
@@ -36,9 +53,10 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 
 	FNavPathSharedPtr NavPath;
 	MoveRequestID = AIController->MoveTo(MoveRequest, &NavPath);
+	
 	if (MoveRequestID != EPathFollowingRequestResult::RequestSuccessful)
 	{
-		// Extra debug info
+		//Extra debug info
 		UE_LOG(LogTemp, Error, TEXT("MoveTo FAILED! Pawn=%s Target=%s"), *CompanionCharacter->GetName(),*TargetLocation.ToString());
 		
 		UE_LOG(LogTemp, Warning, TEXT(" - Controller: %s"), *AIController->GetName());
@@ -51,6 +69,7 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 		}
 		
 		bMoveCompleted = true;
+		
 		return;
 	}
 
@@ -59,7 +78,10 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
 	}
 
-	if (!bNeedIndicator) return;
+	if (!bNeedIndicator)
+	{
+		return;
+	}
 	
 	//SpawnIndicator
 	IndicatorActor = GetWorld()->SpawnActor<AActor>();
@@ -76,6 +98,7 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 	Mesh->SetHiddenInGame(false);
 	
 	static UStaticMesh* ArrowMesh = nullptr;
+	
 	if (!ArrowMesh)
 	{
 		ArrowMesh = LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/InteractiveToolsFramework/Meshes/GizmoArrowHandle.GizmoArrowHandle"));
@@ -88,19 +111,27 @@ void UActionMoveTo::OnBegin_Implementation(const bool bFirstTime)
 	Mesh->RegisterComponent();
 		
 	UMaterialInterface*  OutlineSeeThrough = LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Materials/ActionStackMat/Mat_OutlineSeeThrough.Mat_OutlineSeeThrough"));
+	
 	Mesh->SetMaterial(0,  OutlineSeeThrough);
 }
 
 void UActionMoveTo::OnUpdate_Implementation(const float DeltaTime) 
 {
 	Super::OnUpdate_Implementation(DeltaTime);
+	
 	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
 	{
 		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
 	}
 	
-	if (!bNeedIndicator || !IsValid(IndicatorActor)) return;
+	if (!bNeedIndicator || 
+		!IsValid(IndicatorActor))
+	{
+		return;
+	}
+	
 	const float UpAndDown = TargetLocation.Z + FMath::Sin(GetWorld()->GetTimeSeconds() * 5.0f) * 25.0f;
+	
 	IndicatorActor->SetActorLocation(FVector(IndicatorActor->GetActorLocation().X, IndicatorActor->GetActorLocation().Y, UpAndDown));
 }
 
@@ -110,24 +141,32 @@ bool UActionMoveTo::IsDone_Implementation() const
 	{
 		return true;
 	}
+	
 	return bMoveCompleted;
 }
 
 void UActionMoveTo::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
+	
 	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(CompanionCharacter))
 	{
 		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
 	}
 	
-	if (!bNeedIndicator || !IsValid(IndicatorActor)) return;
+	if (!bNeedIndicator || 
+		!IsValid(IndicatorActor))
+	{
+		return;
+	}
+	
 	IndicatorActor->Destroy();
 }
 
 void UActionMoveTo::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	bMoveCompleted = true;
+	
 	if (const AAIController* AIController = CompanionCharacter->GetController<AAIController>())
 	{
 		if (UPathFollowingComponent* PathComp = AIController->GetPathFollowingComponent())

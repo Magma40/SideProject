@@ -14,12 +14,20 @@ class SIDEPROJECT_API ACameraManagerMain : public AActor
 {
 	GENERATED_BODY()
 	
-protected:
 	ACameraManagerMain();
+	
+	//FUNCTIONS:
+protected:
 	virtual void BeginPlay() override;
 
+	//FIELDS:
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") APlayerCamera* PlayerCamera = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") UCameraActionStack* CameraActionStack = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") ACameraPoint* BaseCameraPoint = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") 
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager")
+	TObjectPtr<UCameraActionStack> CameraActionStack = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "CameraManager") 
+	TObjectPtr<ACameraPoint> BaseCameraPoint = nullptr;
 };

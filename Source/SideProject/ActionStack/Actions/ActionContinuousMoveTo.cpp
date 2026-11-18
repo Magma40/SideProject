@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "ActionStack/Actions/ActionContinuousMoveTo.h"
 #include "Player/BaseInteractableCharacter.h"
 #include "AIController.h"
@@ -6,11 +5,15 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-UActionContinuousMoveTo* UActionContinuousMoveTo::Create(UObject* Outer, ABaseInteractableCharacter* InCompanionCharacter, ABaseInteractableCharacter* InOtherCharacter)
+UActionContinuousMoveTo* UActionContinuousMoveTo::Create(UObject* Outer, 
+	ABaseInteractableCharacter* InCompanionCharacter, 
+	ABaseInteractableCharacter* InOtherCharacter)
 {
 	UActionContinuousMoveTo* Action = NewObject<UActionContinuousMoveTo>(Outer);
+	
 	Action->CompanionCharacter = InCompanionCharacter;
 	Action->OtherCharacter = InOtherCharacter;
+	
 	return Action;
 }
 
@@ -19,7 +22,12 @@ void UActionContinuousMoveTo::OnBegin_Implementation(const bool bFirstTime)
 	Super::OnBegin_Implementation(bFirstTime);
 
 	AAIController* AIController = CompanionCharacter->GetController<AAIController>();
-	if (!AIController) return;
+	
+	if (!AIController)
+	{
+		return;
+	}
+	
 	CachedController = AIController;
 
 	GetWorld()->GetTimerManager().SetTimer(FollowTimer,this,&UActionContinuousMoveTo::StartMove,CheckInterval,true);
@@ -27,18 +35,35 @@ void UActionContinuousMoveTo::OnBegin_Implementation(const bool bFirstTime)
 
 void UActionContinuousMoveTo::StartMove() const
 {
-	if (CompanionCharacter->GetCharacterMovement()->IsFalling()) return;
-	const float DistSq = FVector::DistSquared(CompanionCharacter->GetActorLocation(),OtherCharacter->GetActorLocation());
-	if (DistSq <= FMath::Square(FollowDistance)) return;
-
-	if (CachedController->GetPathFollowingComponent()->GetStatus() == EPathFollowingStatus::Moving) return;
+	if (CompanionCharacter->GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
 	
-	UPathFollowingComponent* PathComp = CachedController->GetPathFollowingComponent();
-	if (!PathComp) return;
+	const float DistSq = FVector::DistSquared(
+		CompanionCharacter->GetActorLocation(),
+		OtherCharacter->GetActorLocation());
+	
+	if (DistSq <= FMath::Square(FollowDistance))
+	{
+		return;
+	}
 
-	EPathFollowingRequestResult::Type Result = CachedController->MoveToActor(
+	if (CachedController->GetPathFollowingComponent()->GetStatus() == EPathFollowingStatus::Moving)
+	{
+		return;
+	}
+	
+	const UPathFollowingComponent* PathComp = CachedController->GetPathFollowingComponent();
+	
+	if (!PathComp)
+	{
+		return;
+	}
+
+	const EPathFollowingRequestResult::Type Result = CachedController->MoveToActor(
 		OtherCharacter,
-		FollowDistance,   // small radius so it doesn't jitter
+		FollowDistance,
 		false,
 		true,
 		true
@@ -46,7 +71,7 @@ void UActionContinuousMoveTo::StartMove() const
 
 	if (Result != EPathFollowingRequestResult::RequestSuccessful)
 	{
-		// Extra debug info
+		//Extra debug info
 		UE_LOG(LogTemp, Error, TEXT("MoveTo FAILED! Pawn=%s Target=%s"), *CompanionCharacter->GetName(), *OtherCharacter->GetName());
 		
 		UE_LOG(LogTemp, Warning, TEXT(" - Controller: %s"), *CachedController->GetName());
@@ -58,8 +83,15 @@ void UActionContinuousMoveTo::StartMove() const
 void UActionContinuousMoveTo::OnUpdate_Implementation(const float DeltaTime)
 {
 	Super::OnUpdate_Implementation(DeltaTime);
-	if (OtherCharacter->Sprinting) CompanionCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionCharacter->MaxSprintSpeed;
-	else  CompanionCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionCharacter->WalkSpeed;
+	
+	if (OtherCharacter->Sprinting)
+	{
+		CompanionCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionCharacter->MaxSprintSpeed;
+	}
+	else
+	{
+		CompanionCharacter->GetCharacterMovement()->MaxWalkSpeed = CompanionCharacter->WalkSpeed;
+	}
 }
 
 bool UActionContinuousMoveTo::IsDone_Implementation() const
@@ -70,7 +102,8 @@ bool UActionContinuousMoveTo::IsDone_Implementation() const
 void UActionContinuousMoveTo::OnEnd_Implementation()
 {
 	Super::OnEnd_Implementation();
+	
 	GetWorld()->GetTimerManager().ClearTimer(FollowTimer);
+	
 	CachedController->StopMovement();
 }
-
