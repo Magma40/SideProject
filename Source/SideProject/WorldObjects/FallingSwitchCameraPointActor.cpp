@@ -40,13 +40,13 @@ void AFallingSwitchCameraPointActor::BeginPlay()
 		return;
 	}
 	
-	TArray<UCameraActionStack* >Components;
-	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	
-	if (!Components.IsEmpty() && IsValid(Components[0]))
-	{
-		CameraActionStack = Components[0];
-	}
+	// TArray<UCameraActionStack* >Components;
+	// PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	//
+	// if (!Components.IsEmpty() && IsValid(Components[0]))
+	// {
+	// 	CameraActionStack = Components[0];
+	// }
 	
 	if (!IsValid(CameraActionStack))
 	{
@@ -87,11 +87,11 @@ void AFallingSwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* Overlappe
 		return;
 	}
 
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
-	{
-		CameraActionStack->RemoveAction(ActionRef);
-	}
-	
+	// if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	// {
+	// 	CameraActionStack->RemoveAction(ActionRef);
+	// }
+	//
 	if (TempChar->GetCharacterMovement()->IsFalling())
 	{
 		CameraActionStack->PushToCameraPointAction(FallBackCameraPoint, PlayRate);
@@ -100,10 +100,10 @@ void AFallingSwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* Overlappe
 		
 		TempChar->SetNewRespawnPoint(FallBackCameraPoint->PlayerRoomSpawnPoint);
 		
-		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-		{
-			ActionRef->SetRotationLimit(FallBackCameraPoint->RotationLimit);
-		}
+		// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+		// {
+		// 	ActionRef->SetRotationLimit(FallBackCameraPoint->RotationLimit);
+		// }
 	}
 }
 

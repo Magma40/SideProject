@@ -13,18 +13,19 @@ class SIDEPROJECT_API UActionTryToInteractWithWorld : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionTryToInteractWithWorld* Create(UObject* Outer, 
-		ABaseInteractableCharacter* InCompanionCharacter);
+	//Typed initialization called by the templated factory.
+	void Init(ABaseInteractableCharacter* InOwnerCharacter)
+	{
+		CompanionCharacter = InOwnerCharacter;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual bool IsDone() const override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> CompanionCharacter = nullptr;
 	
 	bool TriedToInteractWithWorld = false;

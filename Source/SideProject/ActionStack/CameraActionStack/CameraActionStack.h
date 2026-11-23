@@ -4,36 +4,58 @@
 #include "ActionStack/ActionStack.h"
 #include "CameraActionStack.generated.h"
 
+class ACameraManagerMain;
+class UAnimationCurveSubsystem;
 class APlayerCamera;
 class AMainCharacter;
 class ACameraPoint;
+class APlayerController;
+class UInputDeviceSubsystem;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class SIDEPROJECT_API UCameraActionStack : public UActionStack
 {
 	GENERATED_BODY()
 	
 	//FUNCTIONS:
 public:
-	void PushDefaultActionMovement();
+	//Typed initialization called by the templated factory.
+	void Init(AMainCharacter* InOwnerCharacter,
+		APlayerCamera* InPlayerCamera,
+		APlayerController* InPlayerController,
+		UInputDeviceSubsystem* InInputDeviceSubsystem,
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		ACameraManagerMain* InCameraManager)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		PlayerCamera = InPlayerCamera;
+		PlayerController = InPlayerController;
+		InputDeviceSubsystem = InInputDeviceSubsystem;
+		AnimSubsystem = InAnimSubsystem;
+		CameraManager = InCameraManager;
+	}
 	
-	UFUNCTION(BlueprintCallable)
+	void PushDefaultActionMovement(const float InRotationLimit, const float InSliderMoveSpeed);
+	
 	void PushToCameraPointAction(ACameraPoint* InNewCameraPoint, float InPlayRate);
-
-protected:
-	virtual void BeginPlay() override;
-	
-	virtual void TickComponent(float DeltaTime, 
-		ELevelTick TickType, 
-		FActorComponentTickFunction* ThisTickFunction) override;
-	
-	void Init();
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<AMainCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<APlayerController> PlayerController = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UInputDeviceSubsystem> InputDeviceSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<ACameraManagerMain> CameraManager = nullptr;
 };

@@ -1,13 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ActionStack/ActionStack.h"
 #include "ActionAnimModelMovingMovement.generated.h"
 
-class AMovingModel;
-
+class UMovingModel;
 
 UCLASS()
 class SIDEPROJECT_API UActionAnimModelMovingMovement : public UAction
@@ -16,17 +13,18 @@ class SIDEPROJECT_API UActionAnimModelMovingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionAnimModelMovingMovement* Create(UObject* Outer, 
-		AMovingModel* InMovingModel);
+	//Typed initialization called by the templated factory.
+	virtual void Init(UMovingModel* InMovingModel)
+	{
+		MovingModel = InMovingModel;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
-	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual bool IsDone() const override { return false; }
 
 	//FIELDS:
 private:
-	UPROPERTY()
-	TObjectPtr<AMovingModel> MovingModelRef = nullptr;
+	UPROPERTY(Transient)
+	TObjectPtr<UMovingModel> MovingModel = nullptr;
 };

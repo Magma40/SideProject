@@ -1,40 +1,18 @@
 #include "ActionStack/CameraActionStack/Actions/ActionToCameraPoint.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
-#include "Kismet/GameplayStatics.h"
 #include "Public/CameraPoint.h"
 #include "WorldObjects/CameraManagerMain.h"
 #include "WorldObjects/PlayerCamera.h"
 
-UActionToCameraPoint* UActionToCameraPoint::Create(UObject* Outer, 
-	APlayerCamera* InPlayerCamera, 
-	AMainCharacter* InOwnerCharacter, 
-	ACameraPoint* InNewCameraPoint, const float InPlayRate)
+void UActionToCameraPoint::OnBegin(const bool bFirstTime)
 {
-	UActionToCameraPoint* Action = NewObject<UActionToCameraPoint>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->PlayerCamera = InPlayerCamera;
-	Action->NewCameraPoint = InNewCameraPoint;
-	Action->OwnerCharacter = InOwnerCharacter;
-	Action->PlayRate = InPlayRate;
-	
-	return Action;
-}
-
-void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(PlayerCamera));
+	check(IsValid(NewCameraPoint));
+	check(IsValid(CameraManager))
 	
 	PlayerCamera->SetNewCameraPoint(NewCameraPoint);
-	
-	ACameraManagerMain* CameraManager = 
-		Cast<ACameraManagerMain>(
-			UGameplayStatics::GetActorOfClass(GetWorld(), 
-				ACameraManagerMain::StaticClass()));
-	
-	if (!IsValid(CameraManager))
-	{
-		return;
-	}
 	
 	const FTransform BaseTransform = PlayerCamera->GetStartCameraTransform();
 	const FVector BaseLocation = BaseTransform.GetLocation();
@@ -48,13 +26,13 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 	
 	if (IsValid(CameraManager->BaseCameraPoint))
 	{
-		SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
+		SliderLimit = NewCameraPoint->MinMaxSliderValue;
 		EntryOffset = -SliderLimit;
 		CameraManager->BaseCameraPoint = nullptr;
 	}
 	else
 	{
-		SliderLimit = PlayerCamera->GetCurrentCameraPoint()->MinMaxSliderValue;
+		SliderLimit = NewCameraPoint->MinMaxSliderValue;
 		const FVector PreviousLocation = PlayerCamera->GetActorLocation();
 		const float Side = FVector::DotProduct(PreviousLocation - BaseLocation,RightDirection);
 
@@ -71,19 +49,12 @@ void UActionToCameraPoint::OnBegin_Implementation(const bool bFirstTime)
 	AnimTransforms.Add(NewCameraTransform);
 }
 
-void UActionToCameraPoint::OnUpdate_Implementation(const float DeltaTime) 
+void UActionToCameraPoint::OnUpdate(const float DeltaTime) 
 {
-	Super::OnUpdate_Implementation(DeltaTime);
-
-	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
+	Super::OnUpdate(DeltaTime);
 	
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, 
-			Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), 
-			*this->GetFName().ToString());
-		return;
-	}
+	check(IsValid(PlayerCamera));
+	check(IsValid(AnimSubsystem));
 
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
 		AnimSubsystem->CustomAnim(DeltaTime, 
@@ -97,7 +68,7 @@ void UActionToCameraPoint::OnUpdate_Implementation(const float DeltaTime)
 	ElapsedTime = NewValues.Key.Value;
 }
 
-bool UActionToCameraPoint::IsDone_Implementation() const
+bool UActionToCameraPoint::IsDone() const
 {
 	return AnimTransforms.Num() <= 1;
 }

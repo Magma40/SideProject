@@ -14,23 +14,27 @@ class SIDEPROJECT_API UActionLegJumpingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionLegJumpingMovement* Create(UObject* Outer, 
-		const TArray<UMoveLeg*>& InMoveLegs,
-		ABaseInteractableCharacter* InOwnerCharacter);
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
+		const TArray<UMoveLeg*>& InMoveLegs)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MoveLegsRef = InMoveLegs;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual void OnEnd() override;
 	
-	virtual void OnEnd_Implementation() override;
+	virtual bool IsDone() const override;
 
 	//FIELDS:
 private:
-	UPROPERTY()
-	TArray<TObjectPtr<UMoveLeg>> MoveLegsRef;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UMoveLeg>> MoveLegsRef;
 };

@@ -3,21 +3,11 @@
 #include "Player/BaseInteractableCharacter.h"
 #include "ProcedualAnimation/MoveLeg.h"
 
-UActionLegJumpingMovement* UActionLegJumpingMovement::Create(UObject* Outer, 
-	const TArray<UMoveLeg*>& InMoveLegs, 
-	ABaseInteractableCharacter* InOwnerCharacter)
+void UActionLegJumpingMovement::OnBegin(const bool bFirstTime)
 {
-	UActionLegJumpingMovement* Action = NewObject<UActionLegJumpingMovement>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->MoveLegsRef = InMoveLegs;
-	Action->OwnerCharacter = InOwnerCharacter;
-	
-	return Action;
-}
-
-void UActionLegJumpingMovement::OnBegin_Implementation(bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(!MoveLegsRef.IsEmpty());
 	
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
@@ -31,9 +21,11 @@ void UActionLegJumpingMovement::OnBegin_Implementation(bool bFirstTime)
 	}
 }
 
-void UActionLegJumpingMovement::OnUpdate_Implementation(float DeltaTime) 
+void UActionLegJumpingMovement::OnUpdate(float DeltaTime) 
 {
-	Super::OnUpdate_Implementation(DeltaTime);
+	Super::OnUpdate(DeltaTime);
+	
+	check(!MoveLegsRef.IsEmpty());
 	
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
@@ -47,8 +39,10 @@ void UActionLegJumpingMovement::OnUpdate_Implementation(float DeltaTime)
 	}
 }
 
-void UActionLegJumpingMovement::OnEnd_Implementation()
+void UActionLegJumpingMovement::OnEnd()
 {
+	check(!MoveLegsRef.IsEmpty());
+	
 	for (UMoveLeg* Leg : MoveLegsRef)
 	{
 		Leg->bIsJumping = false;
@@ -56,12 +50,10 @@ void UActionLegJumpingMovement::OnEnd_Implementation()
 	}
 }
 
-bool UActionLegJumpingMovement::IsDone_Implementation() const
+bool UActionLegJumpingMovement::IsDone() const
 {
-	if (OwnerCharacter->GetMovementComponent()->IsFalling())
-	{
-		return false;
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(OwnerCharacter->GetMovementComponent()));
 	
-	return true;
+	return !OwnerCharacter->GetMovementComponent()->IsFalling();
 }

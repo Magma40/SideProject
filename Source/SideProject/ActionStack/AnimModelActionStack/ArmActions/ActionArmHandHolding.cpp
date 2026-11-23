@@ -2,56 +2,32 @@
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 
-UActionArmHandHolding* UActionArmHandHolding::Create(UObject* Outer, 
-	UMoveArm* InMoveArm,
-	UMoveArm* InOtherMoveArm,
-	ABaseInteractableCharacter* InCharacter, 
-	ABaseInteractableCharacter* InAICharacter)
+void UActionArmHandHolding::OnBegin(const bool bFirstTime)
 {
-	UActionArmHandHolding* Action = NewObject<UActionArmHandHolding>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->MoveArmRef = InMoveArm;
-	Action->MoveOtherArmRef = InOtherMoveArm;
-	Action->OwnerCharacter = InCharacter;
-	Action->AIOwnerCharacter = InAICharacter;
-	
-	return Action;
-}
-
-void UActionArmHandHolding::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(MoveArmRef));
+	check(!MoveArmRef->ArmParts.IsEmpty())
 	
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
 	
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
 
-	const FVector HandLocationPosOther = Xform.InverseTransformPosition(MoveOtherArmRef->ArmParts[2]->GetComponentLocation());
+	const FVector HandLocationPosOther = Xform.InverseTransformPosition(ToLocation);
 	
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPosOther));
 	
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
-void UActionArmHandHolding::OnEnd_Implementation()
+void UActionArmHandHolding::OnUpdate(const float DeltaTime) 
 {
-	Super::OnEnd_Implementation();
+	Super::OnUpdate(DeltaTime);
 	
-	MoveArmRef->bEnableArmConstraints = true;
-}
-
-void UActionArmHandHolding::OnUpdate_Implementation(const float DeltaTime) 
-{
-	Super::OnUpdate_Implementation(DeltaTime);
+	check(IsValid(MoveArmRef));
+	check(IsValid(AnimSubsystem));
 	
-	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
-	
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
-		return;
-	}
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
 		AnimSubsystem->CustomAnim(DeltaTime, 
 			AnimTransforms, 
@@ -59,18 +35,13 @@ void UActionArmHandHolding::OnUpdate_Implementation(const float DeltaTime)
 			PlayRate);
 	
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
-
-	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
-	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
-	
-	AnimTransforms[0].SetLocation(HandLocationPos);
-
-	const FVector HandLocationPosOther = Xform.InverseTransformPosition(MoveOtherArmRef->ArmParts[2]->GetComponentLocation());
-	
-	AnimTransforms[1].SetLocation(HandLocationPosOther);
 }
 
-bool UActionArmHandHolding::IsDone_Implementation() const
+void UActionArmHandHolding::OnEnd()
 {
-	return false;
+	Super::OnEnd();
+	
+	check(IsValid(MoveArmRef));
+	
+	MoveArmRef->bEnableArmConstraints = true;
 }

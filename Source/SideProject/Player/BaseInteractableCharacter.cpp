@@ -21,14 +21,14 @@ void ABaseInteractableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Get MovingModel
-	MovingModel =  GenericCalls::FindChildActorByClass<AMovingModel>(this);
-	
-	if (!MovingModel)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - MovingModel not found or wrong type"), *StaticClass()->GetName());
-		return;
-	}
+	// //Get MovingModel
+	// MovingModel =  GenericCalls::FindChildActorByClass<UMovingModel>(this);
+	//
+	// if (!MovingModel)
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("%s:BeginPlay - MovingModel not found or wrong type"), *StaticClass()->GetName());
+	// 	return;
+	// }
 
 	//Get BackItemHolster
 	BackHolster = GenericCalls::FindChildByExactName(MovingModel, TEXT("BackItemHolster"));

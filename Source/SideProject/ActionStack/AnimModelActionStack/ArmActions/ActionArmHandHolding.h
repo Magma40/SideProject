@@ -4,6 +4,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmHandHolding.generated.h"
 
+class UAnimationCurveSubsystem;
 class UMoveArm;
 class ABaseInteractableCharacter;
 
@@ -14,45 +15,46 @@ class SIDEPROJECT_API UActionArmHandHolding : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmHandHolding* Create(UObject* Outer,
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
 		UMoveArm* InMoveArm, 
-		UMoveArm* InOtherMoveArm, 
-		ABaseInteractableCharacter* InCharacter, 
-		ABaseInteractableCharacter* InAICharacter);
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		const FVector& InOtherHandLocation,
+		const float InPlayRate)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MoveArmRef = InMoveArm;
+		AnimSubsystem = InAnimSubsystem;
+		ToLocation = InOtherHandLocation;
+		PlayRate = InPlayRate;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual void OnEnd() override;
 	
-	virtual void OnEnd_Implementation() override;
+	virtual bool IsDone() const override { return false; }
 	
 	//FIELDS:
-public:
-	UPROPERTY()
-	FVector PointingLocation = FVector::ZeroVector;
-	
-	UPROPERTY()
-	TObjectPtr<UActorComponent> ActorPointedAt = nullptr;
-
 private:
-	UPROPERTY()
-	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<UMoveArm> MoveOtherArmRef = nullptr;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<ABaseInteractableCharacter> AIOwnerCharacter = nullptr;
+	UPROPERTY(Transient)
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	FVector ToLocation = FVector::ZeroVector;
+	
+	float PlayRate = 0.1f;
+	
+	UPROPERTY(Transient)
 	TArray<FTransform> AnimTransforms;
 	
 	float ElapsedTime = 0.0f;
-	
-	float PlayRate = 0.1f;
 };

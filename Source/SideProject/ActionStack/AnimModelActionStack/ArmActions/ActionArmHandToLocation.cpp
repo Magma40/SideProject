@@ -1,29 +1,13 @@
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmHandToLocation.h"
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
-#include "Player/BaseInteractableCharacter.h"
-#include "Player/CompanionPawn.h"
 #include "ProcedualAnimation/MoveArm.h"
-#include "WorldObjects/CompanionUIIndicator.h"
 
-UActionArmHandToLocation* UActionArmHandToLocation::Create(UObject* Outer, 
-	ABaseInteractableCharacter* InOwnerCharacter, 
-	UMoveArm* InMoveArm, 
-	const FVector& InToLocation,
-	const bool bWantToPickUpItem)
+void UActionArmHandToLocation::OnBegin(const bool bFirstTime)
 {
-	UActionArmHandToLocation* Action = NewObject<UActionArmHandToLocation>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->OwnerCharacter = InOwnerCharacter;
-	Action->MoveArmRef = InMoveArm;
-	Action->ToLocation = InToLocation;
-	Action->bWantToPickUpItem = bWantToPickUpItem;
-	
-	return Action;
-}
-
-void UActionArmHandToLocation::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(MoveArmRef));
+	check(!MoveArmRef->ArmParts.IsEmpty())
 	
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	const FVector HandLocationPos = Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation());
@@ -35,36 +19,14 @@ void UActionArmHandToLocation::OnBegin_Implementation(const bool bFirstTime)
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, ToLocationPos));
 
 	AnimTransforms.Add(FTransform(MoveArmRef->TargetPose.Rotation, HandLocationPos));
-	
-	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCharacter))
-	{
-		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::ExclamationMark);
-	}
 }
 
-void UActionArmHandToLocation::OnEnd_Implementation()
+void UActionArmHandToLocation::OnUpdate(const float DeltaTime) 
 {
-	Super::OnEnd_Implementation();
+	Super::OnUpdate(DeltaTime);
 	
-	if (const ACompanionPawn* CompanionPawn = Cast<ACompanionPawn>(OwnerCharacter))
-	{
-		CompanionPawn->GetCompanionWidgetIndicator()->SetNewIndicatorImage(ECompanionIndicatorImage::None);
-	}
-}
-
-void UActionArmHandToLocation::OnUpdate_Implementation(const float DeltaTime) 
-{
-	Super::OnUpdate_Implementation(DeltaTime);
-
-	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
-	
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
-		return;
-	}
-	
-	const int BeforeMoveNum = AnimTransforms.Num();
+	check(IsValid(MoveArmRef));
+	check(IsValid(AnimSubsystem));
 	
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
 		AnimSubsystem->CustomAnim(DeltaTime, 
@@ -77,14 +39,9 @@ void UActionArmHandToLocation::OnUpdate_Implementation(const float DeltaTime)
 	
 	MoveArmRef->TargetPose.Position = NewValues.Value.GetLocation();
 	MoveArmRef->TargetPose.Rotation = NewValues.Value.GetRotation();
-
-	if (BeforeMoveNum != AnimTransforms.Num() && bWantToPickUpItem)
-	{
-		OwnerCharacter->TryToPickUpItem();
-	}
 }
 
-bool UActionArmHandToLocation::IsDone_Implementation() const
+bool UActionArmHandToLocation::IsDone() const
 {
 	return AnimTransforms.Num() <= 1;
 }

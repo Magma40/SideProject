@@ -2,21 +2,12 @@
 #include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "ProcedualAnimation/MoveArm.h"
 
-UActionArmWave* UActionArmWave::Create(UObject* Outer, 
-	UMoveArm* InMoveArm, 
-	ABaseInteractableCharacter* InCharacter)
+void UActionArmWave::OnBegin(const bool bFirstTime)
 {
-	UActionArmWave* Action = NewObject<UActionArmWave>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->MoveArmRef = InMoveArm;
-	Action->OwnerCharacter = InCharacter;
-	
-	return Action;
-}
-
-void UActionArmWave::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(MoveArmRef));
+	check(!MoveArmRef->ArmParts.IsEmpty())
 
 	//Calculate each animation point
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
@@ -35,24 +26,12 @@ void UActionArmWave::OnBegin_Implementation(const bool bFirstTime)
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
-void UActionArmWave::OnEnd_Implementation()
+void UActionArmWave::OnUpdate(const float DeltaTime) 
 {
-	Super::OnEnd_Implementation();
+	Super::OnUpdate(DeltaTime);
 	
-	MoveArmRef->bEnableArmConstraints = true;
-}
-
-void UActionArmWave::OnUpdate_Implementation(const float DeltaTime) 
-{
-	Super::OnUpdate_Implementation(DeltaTime);
-	
-	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
-	
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
-		return;
-	}
+	check(IsValid(MoveArmRef));
+	check(IsValid(AnimSubsystem));
 
 	//Do smooth custom animation 
 	const TTuple<TTuple<TArray<FTransform>, float>,FTransform> NewValues = 
@@ -68,7 +47,16 @@ void UActionArmWave::OnUpdate_Implementation(const float DeltaTime)
 	ElapsedTime = NewValues.Key.Value;
 }
 
-bool UActionArmWave::IsDone_Implementation() const
+void UActionArmWave::OnEnd()
+{
+	Super::OnEnd();
+	
+	check(IsValid(MoveArmRef));
+	
+	MoveArmRef->bEnableArmConstraints = true;
+}
+
+bool UActionArmWave::IsDone() const
 {
 	return AnimTransforms.Num() <= 1;
 }

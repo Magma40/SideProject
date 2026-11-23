@@ -4,22 +4,45 @@
 #include "ActionStack/ActionStack.h"
 #include "ArmActionStack.generated.h"
 
+class APlayerCamera;
+class UAnimationCurveSubsystem;
 class UMoveArm;
 class ABaseInteractableCharacter;
 class UInteractionBehaviour;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class SIDEPROJECT_API UArmActionStack : public UActionStack
 {
 	GENERATED_BODY()
 	
 	//FUNCTIONS:
 public:
-	void Init(UMoveArm*  InArmRef, 
-		ABaseInteractableCharacter* InOwnerCharacter,  
-		ABaseInteractableCharacter* InOwnerCompanion, 
-		USceneComponent* InBackHolster);
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,  
+		ABaseInteractableCharacter* InOwnerCompanion,
+		UMoveArm* InArm, 
+		USceneComponent* InBackHolster,
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		APlayerCamera* InPlayerCamera,
+		const float InHolsterPlayRate,
+		const float InWavePlayRate,
+		const float InPointPlayRate,
+		const float InHandHoldingPlayRate,
+		const float InHandToLocationPlayRate)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		OwnerCompanion = InOwnerCompanion;
+		Arm = InArm;
+		BackHolsterRef = InBackHolster;
+		AnimSubsystem = InAnimSubsystem;
+		PlayerCamera = InPlayerCamera;
+		HolsterPlayRate = InHolsterPlayRate;
+		WavePlayRate = InWavePlayRate;
+		PointPlayRate = InPointPlayRate;
+		HandHoldingPlayRate = InHandHoldingPlayRate;
+		HandToLocationPlayRate = InHandToLocationPlayRate;
+	}
 	
+	//Actions:
 	void AddMovingAction();
 	
 	void AddJumpingAction();
@@ -28,35 +51,41 @@ public:
 	
 	void AddWaveAction();
 	
-	void AddPointingAction();
+	void AddPointingAction(const FVector& InPointingAtLocation);
 	
-	void AddHandHoldingAction(UMoveArm* OtherCompanionArm);
+	void AddHandHoldingAction(const FVector& InOtherHandLocation);
 	
-	void AddHandToLocation(const FVector& InToLocation, bool bWantToPickUpItem);
-
-	void RemovePointingAction();
+	void AddHandToLocation(const FVector& InToLocation);
 	
-	//~ Begin Getters & Setters
-	UMoveArm* GetArm() const
-	{
-		return ArmRef;
-	}
-	//~ End Getters & Setters
-
-protected:
-	virtual void BeginPlay() override;
+	void HandlePointingAtAction();
 	
 	//FIELDS:
 private:
-	UPROPERTY()
- 	TObjectPtr<UMoveArm> ArmRef = nullptr;
-	
-	UPROPERTY() 
-	TObjectPtr<USceneComponent> BackHolsterRef = nullptr;
-	
-	UPROPERTY() 
+	UPROPERTY(Transient) 
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY() 
+	UPROPERTY(Transient) 
 	TObjectPtr<ABaseInteractableCharacter> OwnerCompanion = nullptr;
+	
+	UPROPERTY(Transient)
+ 	TObjectPtr<UMoveArm> Arm = nullptr;
+	
+	UPROPERTY(Transient) 
+	TObjectPtr<USceneComponent> BackHolsterRef = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	float HolsterPlayRate = 1.0f;
+	
+	float WavePlayRate = 1.0f;
+	
+	float PointPlayRate = 1.0f;
+	
+	float HandHoldingPlayRate = 1.0f;
+	
+	float HandToLocationPlayRate = 1.0f;
 };

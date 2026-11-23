@@ -4,6 +4,12 @@
 #include "GameFramework/Actor.h"
 #include "MovingModel.generated.h"
 
+class ULimb;
+class UJoint;
+class UActionStack;
+
+DECLARE_LOG_CATEGORY_EXTERN(ProceduralAnimationLogCategory, Log, All);
+
 USTRUCT()
 struct FLimbChain
 {
@@ -14,6 +20,28 @@ struct FLimbChain
 	UPROPERTY()  USceneComponent* End = nullptr; // Foot or Hand
 };
 
+USTRUCT(BlueprintType)
+struct FProceduralBodyPart
+{
+	GENERATED_BODY()
+	
+public:
+	//Type of action stack class this body part should replicate
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UActionStack> ActionStackType = nullptr;
+	
+	//Positions of the joints for the body part.
+	//True = mesh is visible, False = mesh is invisible. 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TMap<FVector, bool> JointsPositions = {};
+	
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UJoint>> Joints = TArray<TObjectPtr<UJoint>>();
+	
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ULimb>> Limbs = TArray<TObjectPtr<ULimb>>();
+};
+
 class UAnimModelActionStack;
 class UMoveLeg;
 class UMoveArm;
@@ -22,11 +50,11 @@ class UMoveArm;
  The class for the hips in procedural animation
  */
 UCLASS()
-class SIDEPROJECT_API AMovingModel : public AActor
+class SIDEPROJECT_API UMovingModel : public USceneComponent
 {
 	GENERATED_BODY()
 	
-	AMovingModel();
+	UMovingModel();
 
 	//FUNCTIONS
 public:
@@ -90,22 +118,33 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	virtual void Tick(float DeltaTime) override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void BuildProceduralBodyParts();
+	
+	FName GenerateJointName(const int32 InstanceIndex) const;
+	
 	void DrawDebugJoints();
 	
 	void DrawDebugLimbs();
 
 	//FIELDS:
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Hips") 
 	float HipSwayAmount = 0.1f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Hips") 
 	float MoveSpeed = 1.0f; 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hips") 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Hips") 
 	float RotationSpeed = 100.0f;
+	
+	//Procedural body parts.
+	//Key defines where first joint should start from.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BodyParts") 
+	TArray<FProceduralBodyPart> ProceduralBodyParts;
 
 private:
 	float BaseHipHeight = 0.0f;

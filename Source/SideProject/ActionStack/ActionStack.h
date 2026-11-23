@@ -1,176 +1,143 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
-#include "UObject/Interface.h"
+#include "UObject/Object.h"
 #include "ActionStack.generated.h"
 
-UINTERFACE(MinimalAPI, Blueprintable)
-class UActionInterface : public UInterface
-{
-	GENERATED_BODY()
-};
+DECLARE_LOG_CATEGORY_EXTERN(ActionStackLogCategory, Log, All);
 
-class IActionInterface
+/// <summary>
+/// Action UObject, this will exist behind the scenes of the game.
+/// This handles all global logic an Action should do.
+/// </summary>
+UCLASS(Abstract) 
+class SIDEPROJECT_API UAction : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "ActionStackLogic") 
-	void OnBegin(bool bFirstTime);
+	//Non-templated Create that just creates the object (no typed init)
+	static UAction* CreateGeneric(UObject* Outer, const TSubclassOf<UAction> ActionClass)
+	{
+		if (!IsValid(ActionClass))
+		{
+			return nullptr;
+		}
+		
+		return NewObject<UAction>(Outer, ActionClass);
+	}
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "ActionStackLogic") 
-	void OnUpdate(float DeltaTime);
+	//Gets called once after the action has been pushed onto a stack.
+	virtual void OnBegin(bool bFirstTime) {} 
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "ActionStackLogic") 
-	void OnEnd();
+	//Gets called on update if action is on top of the stack.
+	virtual void OnUpdate(float DeltaTime) {}
 	
-	UFUNCTION(BlueprintNativeEvent, Category = "ActionStackLogic") 
-	bool IsDone() const;
+	//Gets called once before the action is about to be removed from the stack.
+	virtual void OnEnd() {}
+	
+	//Check if current action is finished and should be removed from the stack.
+	virtual bool IsDone() const { return true; }
+	
+	//Check if the current action is allowed to be pushed onto a stack
+	virtual bool CanBeAdded() const { return true; }
+
+	//FIELDS
+protected:
+	//Array of actions that this action needs to be on a stack before getting pushed onto stack
+	//This is used in CanBeAdded()
+	UPROPERTY()
+	TArray<TSubclassOf<UAction>> ActionsNeeded;
+	
+	//Array of actions that block this action from getting pushed onto stack
+	//This is used in CanBeAdded()
+	UPROPERTY()
+	TArray<TSubclassOf<UAction>> ActionBlockers;
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SIDEPROJECT_API UActionStack : public USceneComponent
+//Templated factory that constructs a UAction-derived object and calls its typed Init(...) method.
+//Requires TAction to derive from UAction and to implement: void Init(Args...).
+template <typename TAction, typename... TArgs>
+TAction* CreateAction(UObject* Outer, TArgs&&... Args)
+{
+	static_assert(TIsDerivedFrom<TAction, 
+		UAction>::Value, 
+		"TAction must derive from UAction");
+
+	//Set outer and GC tracking.
+	TAction* New = NewObject<TAction>(Outer);
+	if (!IsValid(New))
+	{
+		return nullptr;
+	}
+
+	//Call the strongly-typed Init on the created object.
+	New->Init(Forward<TArgs>(Args)...);
+
+	return New;
+}
+
+/// <summary>
+/// Action Stack UObject, this will exist behind the scenes of the game.
+/// This handles all the calls the Action should do.
+/// </summary>
+UCLASS(Abstract)
+class SIDEPROJECT_API UActionStack : public UObject
 {
 	GENERATED_BODY()
 	
 	//FUNCTIONS:
 public:
-	UActionStack();
-	
-	UFUNCTION(BlueprintCallable)
-	void PushAction(const TScriptInterface<IActionInterface>& Action);
-	
-	UFUNCTION(BlueprintCallable) 
-	void RemoveAction(const TScriptInterface<IActionInterface>& Action);
-	
-	UFUNCTION(BlueprintCallable)
-	bool Contains(const TScriptInterface<IActionInterface>& Action) const;
-
-	UFUNCTION(BlueprintCallable) 
-	void ClearAllActionsExceptIndex(const int SaveIndex);
-	
-	//~ Begin Getters & Setters
-	UFUNCTION(BlueprintPure, Category = "ActionStack") 
-	TArray<TScriptInterface<IActionInterface>> GetActionStack()
+	//Non-templated Create that just creates the object (no typed init)
+	static UActionStack* CreateGeneric(UObject* Outer, const TSubclassOf<UActionStack> ActionClass)
 	{
-		return ActionStack;
+		if (!IsValid(ActionClass))
+		{
+			return nullptr;
+		}
+		
+		return NewObject<UActionStack>(Outer, ActionClass);
 	}
 	
-	UFUNCTION(BlueprintPure) 
-	TScriptInterface<IActionInterface> GetCurrentAction() const
-	{
-		return CurrentAction;
-	}
-	
-	static UActionStack* GetMain(UObject* WorldContext = nullptr);
-	
-	template<typename T>
-	UFUNCTION(BlueprintCallable) 
-	T* GetAction();
-
-	template<typename T>
-	UFUNCTION(BlueprintCallable) 
-	TScriptInterface<IActionInterface> GetInterfacedAction(T* InAction);
-	//~ End Getters & Setters
-	
-protected:
-	virtual void TickComponent(float DeltaTime, 
-		ELevelTick TickType, 
-		FActorComponentTickFunction* ThisTickFunction) override;
-	
+	//Update the top action in the ActionStack
 	virtual void UpdateActions(float DeltaTime);
 	
-	FORCEINLINE bool IsEmpty() const;
+	//Push an action onto the top of the ActionStack
+	virtual void PushAction(UAction& Action);
+	
+	//Pop an action from the top of the ActionStack
+	virtual void PopAction(UAction& Action);
+	
+	//Does the ActionStack contain the inserted action class?
+	virtual bool Contains(const TSubclassOf<UAction>& InActionClass) const;
+	
+	//Is the ActionStack empty?
+	FORCEINLINE virtual bool IsEmpty() const;
 	
 	//FIELDS:
-public:
-	static UActionStack* Main;
-	
 private:
-	UPROPERTY() 
-	TArray<TScriptInterface<IActionInterface>> ActionStack = TArray<TScriptInterface<IActionInterface>>();
-	
-	TSet<TScriptInterface<IActionInterface>> FirstTimeActions = TSet<TScriptInterface<IActionInterface>>();
-	
-	UPROPERTY() 
-	TScriptInterface<IActionInterface> CurrentAction = nullptr;
-
+	UPROPERTY(Transient) 
+	TArray<TObjectPtr<UAction>> ActionStack;
 };
 
-UCLASS(Abstract, Blueprintable) 
-class SIDEPROJECT_API UAction : public UObject, public IActionInterface
+//Templated factory that constructs a UActionStack-derived object and calls its typed Init(...) method.
+//Requires TActionStack to derive from UActionStack and to implement: void Init(Args...).
+template <typename TActionStack, typename... TArgs>
+TActionStack* CreateActionStack(UObject* Outer, TArgs&&... Args)
 {
-	GENERATED_BODY()
+	static_assert(TIsDerivedFrom<TActionStack, 
+		UActionStack>::Value, 
+		"TActionStack must derive from UActionStack");
 
-public:
-	virtual void OnBegin_Implementation(bool bFirstTime) override {}
-	virtual void OnUpdate_Implementation(float DeltaTime) override {}
-	virtual void OnEnd_Implementation() override {}
-	virtual bool IsDone_Implementation() const override { return true; }
-
-	//override ToString();
-};
-
-UCLASS(Abstract, Blueprintable)
-class SIDEPROJECT_API UActionBehaviour : public UObject, public IActionInterface// public MonoBehaviour
-{
-	GENERATED_BODY()
-
-public:
-	virtual void OnBegin_Implementation(bool bFirstTime) override {}
-	virtual void OnUpdate_Implementation(float DeltaTime) override {}
-	virtual void OnEnd_Implementation() override {}
-	virtual bool IsDone_Implementation() const override { return true; }
-
-	//override ToString();
-};
-
-UCLASS(Abstract, Blueprintable)
-class SIDEPROJECT_API UActionObject  : public UObject, public IActionInterface// public ScriptableObject
-{
-	GENERATED_BODY()
-
-public:
-	virtual void OnBegin_Implementation(bool bFirstTime) override {}
-	virtual void OnUpdate_Implementation(float DeltaTime) override {}
-	virtual void OnEnd_Implementation() override {}
-	virtual bool IsDone_Implementation() const override { return true; }
-
-	//override ToString();
-};
-
-template<typename T>
-T* UActionStack::GetAction()
-{
-	static_assert(TIsDerivedFrom<T, UObject>::IsDerived, "T must be a UObject type");
-	for (const TScriptInterface<IActionInterface>& Action : ActionStack)
+	//Set outer and GC tracking.
+	TActionStack* New = NewObject<TActionStack>(Outer);
+	if (!IsValid(New))
 	{
-		if (Action)
-		{
-			if (T* TypedAction = Cast<T>(Action.GetObject()))
-			{
-				return TypedAction;
-			}
-		}
+		return nullptr;
 	}
-	return nullptr;
-}
 
-template<typename T>
-TScriptInterface<IActionInterface> UActionStack::GetInterfacedAction(T* InAction)
-{
-	TScriptInterface<IActionInterface> ActionInterface;
-	UObject* ActionObject = Cast<UObject>(InAction);
-	
-	if (!ActionObject)
-	{
-		return ActionInterface;
-	}
-	
-	ActionInterface.SetObject(ActionObject);
-	ActionInterface.SetInterface(Cast<IActionInterface>(ActionObject));
-	
-	return ActionInterface;
-}
+	//Call the strongly-typed Init on the created object.
+	New->Init(Forward<TArgs>(Args)...);
 
+	return New;
+}

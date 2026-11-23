@@ -26,16 +26,16 @@ void UInteractItemPlaceHolder::TickComponent(const float DeltaTime,
 	
 	if (bInteracting)
 	{
-		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
+		//UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
 		
-		const TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
+		//const TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
 		
-		if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
-		{
-			bInteracting = false;
-			
-			return;
-		}
+		// if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
+		// {
+		// 	bInteracting = false;
+		// 	
+		// 	return;
+		// }
 		
 		if (!IsValid(InteractingCharacter->GetItemInHand()) || 
 			InteractingCharacter->GetItemInHand() != ItemNeeded)
@@ -63,7 +63,7 @@ void UInteractItemPlaceHolder::PerformInteraction_Implementation(ABaseInteractab
 		return; 
 	}
 	
-	InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(this->GetComponentLocation(), false);
+	//InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(this->GetComponentLocation(), false);
 }
 
 void UInteractItemPlaceHolder::Interact_Implementation(ABaseInteractableCharacter* InInteractingCharacter)

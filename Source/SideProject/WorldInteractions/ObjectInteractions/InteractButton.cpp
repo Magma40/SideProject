@@ -14,7 +14,7 @@ void UInteractButton::PerformInteraction_Implementation(ABaseInteractableCharact
 {
 	Super::PerformInteraction_Implementation(InInteractingCharacter);
 	
-	InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(GetComponentLocation(), false);
+	//InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(GetComponentLocation(), false);
 }
 
 

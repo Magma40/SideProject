@@ -8,7 +8,6 @@
 
 class UInputAction;
 struct FInputActionValue;
-class AMovingModel;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 

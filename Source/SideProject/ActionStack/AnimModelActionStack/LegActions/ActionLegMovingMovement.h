@@ -13,17 +13,20 @@ class SIDEPROJECT_API UActionLegMovingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionLegMovingMovement* Create(UObject* Outer,
-		const TArray<UMoveLeg*>& InMoveLegs);
+	//Typed initialization called by the templated factory.
+	virtual void Init(const TArray<UMoveLeg*>& InMoveLegs)
+	{
+		MoveLegsRef = InMoveLegs;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual bool IsDone() const override { return false; }
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UMoveLeg>> MoveLegsRef;
 };

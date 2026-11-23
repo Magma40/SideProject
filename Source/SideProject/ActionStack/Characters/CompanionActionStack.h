@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,36 +6,34 @@
 
 class ABaseInteractableCharacter;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class SIDEPROJECT_API UCompanionActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
 	//FUNCTIONS
 public:
+	//Typed initialization called by the templated factory.
+	void Init(ABaseInteractableCharacter* InOwnerCharacter)
+	{
+		OwnerCharacter = InOwnerCharacter;
+	}
+	
 	//Actions
-	void OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator);
+	void OnAddActionMoveTo(const FVector& InMoveToLocation);
 	
 	void OnAddActionPickUp();
 	
-	void OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer);
+	void OnAddActionContinuousMove(const FVector& InMoveToLocation);
 	
 	void OnAddTryToInteractWithWorld();
 	
-	//~ Begin Getters & Setters
-	FORCEINLINE ABaseInteractableCharacter* GetInteractableCharacter() const
-	{
-		return OwnerCharacter;
-	}
-	//~ End Getters & Setters
-	
-protected:
-	virtual void BeginPlay() override;
-	
-	void Init();
-
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	float MinDistanceForMoveTo = 10.0f;
+	
+	float MinDistanceForContinuousMoveTo = 25.0f;
 };

@@ -4,6 +4,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmPoint.generated.h"
 
+class UAnimationCurveSubsystem;
 class APointingIndicator;
 class APlayerCamera;
 class UMoveArm;
@@ -17,62 +18,47 @@ class SIDEPROJECT_API UActionArmPoint : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmPoint* Create(UObject* Outer, 
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
 		UMoveArm* InMoveArm, 
-		ABaseInteractableCharacter* InCharacter, 
-		ABaseInteractableCharacter* InOwnerCompanion);
-	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
-	
-	virtual bool IsDone_Implementation() const override;
-	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-	
-	virtual void OnEnd_Implementation() override;
-
-	void RenderPointingToIndicator();
-	
-	//~ Begin Getters & Setters
-	void GetActorPointingAt();
-
-	FORCEINLINE FVector GetPointingLocation() const
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		APlayerCamera* InPlayerCamera,
+		const FVector& InPointingAtLocation,
+		const float InPlayRate)
 	{
-		return PointingLocation;
-	} 
-	
-	FORCEINLINE AActor* GetActorPointedAt() const
-	{
-		return ActorPointedAt;
+		OwnerCharacter = InOwnerCharacter;
+		MoveArmRef = InMoveArm;
+		AnimSubsystem = InAnimSubsystem;
+		PlayerCamera = InPlayerCamera;
+		PointingAtLocation = InPointingAtLocation;
+		PlayRate = InPlayRate;
 	}
-	//~ End Getters & Setters
+	
+	virtual void OnUpdate(float DeltaTime) override;
+	
+	virtual bool IsDone() const override { return false; }
 	
 	//FIELDS:
 private:
-	UPROPERTY()
-	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<ABaseInteractableCharacter> OwnerCompanion = nullptr;
+	UPROPERTY(Transient)
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY(Transient)
+	FVector PointingAtLocation = FVector::ZeroVector;
+	
+	float PlayRate = 1.0f;
+	
+	UPROPERTY(Transient)
 	TArray<FTransform> AnimTransforms;
 	
 	float ElapsedTime = 0.0f;
-	
-	float PlayRate = 1.0f;
-
-	UPROPERTY() 
-	TArray<TObjectPtr<APointingIndicator>> PointingIndicators;
-	
-	UPROPERTY()
-	FVector PointingLocation = FVector::ZeroVector;
-	
-	UPROPERTY()
-	TObjectPtr<AActor> ActorPointedAt = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<APlayerCamera> TheMainCameraInScene = nullptr;
 };

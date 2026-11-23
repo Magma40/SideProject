@@ -2,33 +2,28 @@
 #include "ArmActionStack.h"
 #include "LegActions/ActionLegMovingMovement.h"
 #include "LegActions/ActionLegJumpingMovement.h"
-
-void ULegActionStack::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	Main = this;
-}
-
-void ULegActionStack::Init(const TArray<UMoveLeg*>& InLegsRef, ABaseInteractableCharacter* InOwnerCharacter)
-{
-	LegsRef = InLegsRef;
-	OwnerCharacter = InOwnerCharacter;
-}
+#include "Player/BaseInteractableCharacter.h"
 
 void ULegActionStack::AddMovingAction()
 {
-	UActionLegMovingMovement* DefaultMovingAction = UActionLegMovingMovement::Create(this, 
-		LegsRef);
+	check(!Legs.IsEmpty());
 	
-	this->PushAction(DefaultMovingAction);
+	UActionLegMovingMovement* DefaultMovingAction = 
+		CreateAction<UActionLegMovingMovement>(this, 
+		Legs);
+	
+	PushAction(*DefaultMovingAction);
 }
 
 void ULegActionStack::AddJumpingAction()
 {
-	UActionLegJumpingMovement* LegJumpingMovement = UActionLegJumpingMovement::Create(this, 
-		LegsRef, 
-		OwnerCharacter);
+	check(IsValid(OwnerCharacter));
+	check(!Legs.IsEmpty());
 	
-	this->PushAction(LegJumpingMovement);
+	UActionLegJumpingMovement* LegJumpingMovement = 
+		CreateAction<UActionLegJumpingMovement>(this, 
+		OwnerCharacter,
+		Legs);
+	
+	PushAction(*LegJumpingMovement);
 }

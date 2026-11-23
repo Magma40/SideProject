@@ -4,6 +4,8 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionToCameraPoint.generated.h"
 
+class ACameraManagerMain;
+class UAnimationCurveSubsystem;
 class APlayerCamera;
 class ACameraPoint;
 class AMainCharacter;
@@ -15,33 +17,44 @@ class SIDEPROJECT_API UActionToCameraPoint : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionToCameraPoint* Create(UObject* Outer, 
-		APlayerCamera* InPlayerCamera, 
-		AMainCharacter* InOwnerCharacter, 
-		ACameraPoint* InNewCameraPoint, 
-		float InPlayRate);
+	//Typed initialization called by the templated factory.
+	void Init(APlayerCamera* InPlayerCamera,
+		ACameraPoint* InNewCameraPoint,
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		ACameraManagerMain* InCameraManager,
+		const float InPlayRate)
+	{
+		PlayerCamera = InPlayerCamera;
+		NewCameraPoint = InNewCameraPoint;
+		AnimSubsystem = InAnimSubsystem;
+		CameraManager = InCameraManager;
+		PlayRate = InPlayRate;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual bool IsDone() const override;
 	
 	//FIELDS:
 private:
-	UPROPERTY()
-	TObjectPtr<AMainCharacter> OwnerCharacter = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<ACameraPoint> NewCameraPoint = nullptr;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
 	
-	UPROPERTY()
-	TArray<FTransform> AnimTransforms;
+	UPROPERTY(Transient)
+	TObjectPtr<ACameraPoint> NewCameraPoint = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<ACameraManagerMain> CameraManager = nullptr;
+	
+	float PlayRate = 5.0f;
 	
 	float ElapsedTime = 0.0f;
 	
-	float PlayRate = 5.0f;
+	UPROPERTY(Transient)
+	TArray<FTransform> AnimTransforms;
 };

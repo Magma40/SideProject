@@ -126,11 +126,4 @@ void AMainCharacter::RespawnCharacter()
 	//Do camera move transition to player respawn 
 	CameraManagerMain->BaseCameraPoint = TheMainCameraInScene->GetCurrentCameraPoint();
 	CameraManagerMain->CameraActionStack->PushToCameraPointAction(TheMainCameraInScene->GetCurrentCameraPoint(), 1.0f);
-
-	//If Player is hand holding with AI companion, break it up
-	if (const TScriptInterface<IActionInterface> PlayerHandHoldingAction = 
-		GetMovingModel()->GetAnimModelActionStack()->GetInterfacedAction(GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>()))
-	{
-		GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(PlayerHandHoldingAction);
-	}
 }

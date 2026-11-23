@@ -1,150 +1,87 @@
 #include "ActionStack/ActionStack.h"
 
-UActionStack* UActionStack::Main = nullptr;
+DEFINE_LOG_CATEGORY(ActionStackLogCategory);
 
-UActionStack::UActionStack()
+void UActionStack::UpdateActions(const float DeltaTime)
 {
-	PrimaryComponentTick.bCanEverTick = true;
-}
-
-void UActionStack::TickComponent(const float DeltaTime, 
-	const ELevelTick TickType, 
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UpdateActions(DeltaTime);
-}
-
- void UActionStack::UpdateActions(const float DeltaTime)
-{
+	//If stack is empty, no need to update any actions.
 	if (IsEmpty())
 	{
 		return;
 	}
-
-	//Acquire next action if needed
-	if (!CurrentAction && ActionStack.Num() > 0)
+	
+	//Only update the top action.
+	//If action is finished, remove it from the stack.
+	if (IsValid(ActionStack.Last()) && 
+		!ActionStack.Last()->IsDone())
 	{
-		CurrentAction = ActionStack[0];
+		ActionStack.Last()->OnUpdate(DeltaTime);
+	}
+	else
+	{
+		PopAction(*ActionStack.Last());
+	}
+}
+
+void UActionStack::PushAction(UAction& Action)
+{
+	//No need to add the action if it's already on the stack
+	if (Contains(Action.GetClass()))
+	{
+		const FString FailureReason = IsValid(Action.GetClass()) 
+		? FString::Printf(TEXT("Action (%s) is already on the stack"), *Action.GetClass()->GetName()) 
+		: TEXT("Action was not valid");
 		
-		if (CurrentAction && IsValid(CurrentAction.GetObject()))
-		{
-			const bool bFirstTime = !FirstTimeActions.Contains(CurrentAction);
-			
-			FirstTimeActions.Add(CurrentAction);
-			
-			CurrentAction->Execute_OnBegin(CurrentAction.GetObject(), bFirstTime);
-		}
-		else
-		{
-			CurrentAction = nullptr;
-		}
+		UE_LOG(ActionStackLogCategory, Warning, TEXT("%s::PushAction() - Failed To Push Action: \n%s"), *GetName(), *FailureReason);
+		
+		return;
 	}
+	
+	//Call OnBegin on the action before adding it 
+	Action.OnBegin(true);
+	
+	//Insert action to the top of the stack
+	ActionStack.Push(&Action);
+}
 
-	//Update current action
-	if (CurrentAction && IsValid(CurrentAction.GetObject()))
+void UActionStack::PopAction(UAction& Action)
+{
+	//No need to remove an action if it's not on the stack
+	if (!Contains(Action.GetClass()))
 	{
-		const TScriptInterface<IActionInterface> SafeAction = CurrentAction;
-		SafeAction->Execute_OnUpdate(SafeAction.GetObject(), DeltaTime);
-
-		//Action may have ended or been destroyed during update
-		if (SafeAction && IsValid(SafeAction.GetObject()))
-		{
-			if (ActionStack.Num() > 0 && SafeAction == ActionStack[0])
-			{
-				if (SafeAction->Execute_IsDone(SafeAction.GetObject()))
-				{
-					RemoveAction(SafeAction);
-				}
-			}
-		}
-		else
-		{
-			CurrentAction = nullptr;
-		}
+		const FString FailureReason = IsValid(Action.GetClass()) 
+		? FString::Printf(TEXT("Action (%s) was not on the stack"), *Action.GetClass()->GetName()) 
+		: TEXT("Action was not valid");
+		
+		UE_LOG(ActionStackLogCategory, Warning, TEXT("%s::PushAction() - Failed To Push Action: \n%s"), *GetName(), *FailureReason);
+		
+		return;
 	}
-
+	
+	//Call OnEnd on the action before removing it
+	Action.OnEnd();
+	
+	//Remove action from the stack
+	ActionStack.Pop();
 }
 
 bool UActionStack::IsEmpty() const
 {
-	return !CurrentAction && ActionStack.Num() == 0;
+	return ActionStack.Num() == 0;
 }
 
-bool UActionStack::Contains(const TScriptInterface<IActionInterface>& Action) const
+bool UActionStack::Contains(const TSubclassOf<UAction>& InActionClass) const
 {
-	return Action != nullptr && ActionStack.Contains(Action);
-}
-
-void UActionStack::PushAction(const TScriptInterface<IActionInterface>& Action)
-{
-	if (!Action || !IsValid(Action.GetObject()))
+	if (!IsValid(InActionClass))
 	{
-		return;
+		return false;
 	}
-	
-	CurrentAction = nullptr;
-	
-	ActionStack.Insert(Action, 0);
-	
-	UE_LOG(LogTemp, Warning,TEXT("Action %s Has Been Pushed Onto The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-}
 
-void UActionStack::RemoveAction(const TScriptInterface<IActionInterface>& Action)
-{
-	if (!Action)
+	//Do an iterator,
+	//We use ContainsByPredicate since the stack can only contain a single action of each class.
+	return ActionStack.ContainsByPredicate(
+		[InActionClass](const TObjectPtr<UAction>& ExistingAction)
 	{
-		return;
-	}
-	
-	//Call On End on actions before destroying it
-	if (IsValid(Action.GetObject()))
-	{
-		Action->Execute_OnEnd(Action.GetObject());
-	}
-	
-	CurrentAction = nullptr;
-	
-	ActionStack.Remove(Action);
-	
-	UE_LOG(LogTemp, Error,TEXT("Action %s Has Been Removed From The %s"),*Action.GetObject()->GetFName().ToString(), *this->GetFName().ToString());
-}
-
-//TODO: This function needs a better name, too lazy to fix it
-//Removes all actions from the to until it hits the input int
-void UActionStack::ClearAllActionsExceptIndex(const int SaveIndex)
-{
-	while (ActionStack.Num() > SaveIndex)
-	{
-		TScriptInterface<IActionInterface> Action = ActionStack[0];
-		
-		RemoveAction(Action);
-	}
-}
-
-UActionStack* UActionStack::GetMain(UObject* WorldContext)
-{
-	if (IsValid(Main)) return Main;
-	else return nullptr;
-	// UWorld* World = nullptr;
-	// if (WorldContext)
-	// {
-	// 	World = WorldContext->GetWorld();
-	// }
-	// else if (GEngine && GEngine->GetWorldContexts().Num() > 0)
-	// {
-	// 	World = GEngine->GetWorldContexts()[0].World();
-	// }
-	//
-	// if (!World) return nullptr;
-	// AMainGameMode* GM = Cast<AMainGameMode>(UGameplayStatics::GetGameMode(World));
-	// if (!GM || !GM->ActionStack)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("UActionStack::GetMain() - GameMode or ActionStack missing!"));
-	// 	return nullptr;
-	// }
-	// // Main = GM->ActionStack;
-	// // return Main;
-	//
-	// return GM->ActionStack;
+		return IsValid(ExistingAction) && ExistingAction->IsA(InActionClass);
+	});
 }

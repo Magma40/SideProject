@@ -13,21 +13,16 @@ class SIDEPROJECT_API UActionAnimModelJumpingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionAnimModelJumpingMovement* Create(UObject* Outer, 
-		ABaseInteractableCharacter* InOwnerCharacter, 
-		ABaseInteractableCharacter* InOtherOwnerCharacter);
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter)
+	{
+		OwnerCharacter = InOwnerCharacter;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual bool IsDone() const override;
 	
-	virtual bool IsDone_Implementation() const override;
-	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<ABaseInteractableCharacter> OtherOwnerCharacter = nullptr;
 };

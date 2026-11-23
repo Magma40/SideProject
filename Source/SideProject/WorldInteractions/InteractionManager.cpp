@@ -155,7 +155,7 @@ void UInteractionBehaviour::PerformInteraction_Implementation(ABaseInteractableC
 	
 	if (IsValid(InInteractingCharacter))
 	{
-		InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->ClearAllActionsExceptIndex(1);
+		//InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->ClearAllActionsExceptIndex(1);
 	}
 	
 	bInteracting = true;

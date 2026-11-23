@@ -38,14 +38,14 @@ void APreSwitchCameraPointActor::BeginPlay()
 		return;
 	}
 	
-	TArray<UCameraActionStack* >Components;
-	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	
-	if (!Components.IsEmpty() && 
-		IsValid(Components[0]))
-	{
-		CameraActionStack = Components[0];
-	}
+	// TArray<UCameraActionStack* >Components;
+	// PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	//
+	// if (!Components.IsEmpty() && 
+	// 	IsValid(Components[0]))
+	// {
+	// 	CameraActionStack = Components[0];
+	// }
 	
 	if (!IsValid(CameraActionStack))
 	{
@@ -94,23 +94,23 @@ void APreSwitchCameraPointActor::OverlapBegin(UPrimitiveComponent* OverlappedCom
 		
 		CameraActionStack->PushToCameraPointAction(OutsideAreaCameraPoint, PlayRate);
 		
-		if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-		{
-			ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
-		}
+		// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+		// {
+		// 	ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
+		// }
 	}
 	
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
-	{
-		CameraActionStack->RemoveAction(ActionRef);
-	}
+	// if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	// {
+	// 	CameraActionStack->RemoveAction(ActionRef);
+	// }
 	
 	CameraActionStack->PushToCameraPointAction(InsideAreaCameraPoint, PlayRate);
 	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->SetRotationLimit(InsideAreaCameraPoint->RotationLimit);
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->SetRotationLimit(InsideAreaCameraPoint->RotationLimit);
+	// }
 }
 
 void APreSwitchCameraPointActor::OverlapEnd(UPrimitiveComponent* OverlappedComponent, 
@@ -148,17 +148,17 @@ void APreSwitchCameraPointActor::OverlapEnd(UPrimitiveComponent* OverlappedCompo
 		}
 	}
 
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
-	{
-		CameraActionStack->RemoveAction(ActionRef);
-	}
+	// if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	// {
+	// 	CameraActionStack->RemoveAction(ActionRef);
+	// }
 	
 	CameraActionStack->PushToCameraPointAction(OutsideAreaCameraPoint, PlayRate);
 	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->SetRotationLimit(OutsideAreaCameraPoint->RotationLimit);
+	// }
 	
 	bHasTriggered = false;
 }

@@ -1,12 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ActionStack/ActionStack.h"
 #include "ActionArmJumpingMovement.generated.h"
 
+class ABaseInteractableCharacter;
 class UMoveArm;
+
 UCLASS()
 class SIDEPROJECT_API UActionArmJumpingMovement : public UAction
 {
@@ -14,17 +14,21 @@ class SIDEPROJECT_API UActionArmJumpingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmJumpingMovement* Create(UObject* Outer,
-		UMoveArm* InMoveArm);
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
+		UMoveArm* InMoveArm)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MoveArmRef = InMoveArm;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
-	
-	virtual bool IsDone_Implementation() const override;
-	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual bool IsDone() const override;
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
+	
+	UPROPERTY(Transient)
 	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 };

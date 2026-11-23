@@ -1,51 +1,46 @@
 #include "CameraActionStack.h"
+#include "CameraPoint.h"
 #include "ActionStack/CameraActionStack/Actions/ActionCameraDefaultMovement.h"
 #include "ActionStack/CameraActionStack/Actions/ActionToCameraPoint.h"
-#include "Kismet/GameplayStatics.h"
+#include "Core/Subsystems/AnimationCurveSubsystem.h"
+#include "GameFramework/InputDeviceSubsystem.h"
 #include "Player/MainCharacter.h"
+#include "WorldObjects/CameraManagerMain.h"
 #include "WorldObjects/PlayerCamera.h"
 
-void UCameraActionStack::BeginPlay()
+void UCameraActionStack::PushDefaultActionMovement(const float InRotationLimit, const float InSliderMoveSpeed)
 {
-	Super::BeginPlay();
+	check(IsValid(OwnerCharacter));
+	check(IsValid(PlayerCamera));
+	check(IsValid(PlayerController));
+	check(IsValid(InputDeviceSubsystem));
 	
-	Main = this;
-	
-	Init();
-	
-	PushDefaultActionMovement();
-}
-
-void UCameraActionStack::TickComponent(const float DeltaTime,
-	const ELevelTick TickType, 
-	FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
-void UCameraActionStack::Init()
-{
-	OwnerCharacter = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
-	
-    PlayerCamera = APlayerCamera::GetCamera(this);
-}
-
-void UCameraActionStack::PushDefaultActionMovement()
-{
-	UActionCameraDefaultMovement* DefaultMovement = UActionCameraDefaultMovement::Create(this, 
+	UActionCameraDefaultMovement* DefaultMovement = 
+		CreateAction<UActionCameraDefaultMovement>(this, 
 		OwnerCharacter, 
-		PlayerCamera);
+		PlayerCamera,
+		PlayerController,
+		InputDeviceSubsystem,
+		InRotationLimit,
+		InSliderMoveSpeed);
 	
-	PushAction(DefaultMovement);
+	PushAction(*DefaultMovement);
 }
 
 void UCameraActionStack::PushToCameraPointAction(ACameraPoint* InNewCameraPoint, const float InPlayRate)
 {
-	UActionToCameraPoint* ToCameraPoint = UActionToCameraPoint::Create(this, 
-		PlayerCamera, 
-		OwnerCharacter,
-		InNewCameraPoint ,
+	check(IsValid(PlayerCamera));
+	check(IsValid(InNewCameraPoint));
+	check(IsValid(AnimSubsystem));
+	check(IsValid(CameraManager));
+	
+	UActionToCameraPoint* ToCameraPoint = 
+		CreateAction<UActionToCameraPoint>(this, 
+		PlayerCamera,
+		InNewCameraPoint, 
+		AnimSubsystem,
+		CameraManager,
 		InPlayRate);
 	
-	PushAction(ToCameraPoint);
+	PushAction(*ToCameraPoint);
 }

@@ -4,6 +4,8 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmHandToLocation.generated.h"
 
+class UAnimationCurveSubsystem;
+class APlayerCamera;
 class UMoveArm;
 class ABaseInteractableCharacter;
 
@@ -14,37 +16,44 @@ class SIDEPROJECT_API UActionArmHandToLocation : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmHandToLocation* Create(UObject* Outer, 
-		ABaseInteractableCharacter* InOwnerCharacter, 
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
 		UMoveArm* InMoveArm, 
-		const FVector& InToLocation, 
-		bool bWantToPickUpItem);
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		const FVector& InToLocation,
+		const float InPlayRate)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MoveArmRef = InMoveArm;
+		AnimSubsystem = InAnimSubsystem;
+		ToLocation = InToLocation;
+		PlayRate = InPlayRate;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-	
-	virtual void OnEnd_Implementation() override;
+	virtual bool IsDone() const override;
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	bool bWantToPickUpItem = false;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	UPROPERTY(Transient)
+	FVector ToLocation = FVector::ZeroVector;
+	
+	float PlayRate = 1.0f;
+	
+	UPROPERTY(Transient)
 	TArray<FTransform> AnimTransforms;
 	
 	float ElapsedTime = 0.0f;
-	
-	float PlayRate = 1.0f;
-
-	UPROPERTY()
-	FVector ToLocation = FVector::ZeroVector;
 };

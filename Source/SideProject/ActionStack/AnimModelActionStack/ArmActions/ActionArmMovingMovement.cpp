@@ -1,48 +1,32 @@
-
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmMovingMovement.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProcedualAnimation/MoveArm.h"
 
-UActionArmMovingMovement* UActionArmMovingMovement::Create(UObject* Outer, 
-	UMoveArm* InMoveArm)
+void UActionArmMovingMovement::OnBegin(const bool bFirstTime)
 {
-	UActionArmMovingMovement* Action = NewObject<UActionArmMovingMovement>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->MoveArmRef = InMoveArm;
-	
-	return Action;
-}
-
-void UActionArmMovingMovement::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(MoveArmRef));
 	
 	MoveArmRef->TargetPose.Position = FVector(0,25,  -50);
 	MoveArmRef->TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
 }
 
-void UActionArmMovingMovement::OnUpdate_Implementation(const float DeltaTime) 
+void UActionArmMovingMovement::OnUpdate(const float DeltaTime) 
 {
-	Super::OnUpdate_Implementation(DeltaTime);
+	Super::OnUpdate(DeltaTime);
+	
+	check(IsValid(MoveArmRef));
 	
 	MoveArmRef->TargetPose.Position = FVector(0,25,  -50);
 	MoveArmRef->TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
-	// if (ShouldHoldUpHands()) {}
-	// else
-	// {
-	// 	MoveArmRef->TargetPose.Position = FVector(0,25,  -50);
-	// 	MoveArmRef->TargetPose.Rotation = FRotator(0, 0, 0).Quaternion();
-	// 	MoveArmRef->bEnableArmConstraints = true;
-	// }
-}
-
-bool UActionArmMovingMovement::IsDone_Implementation() const
-{
-	return false;
 }
 
 bool UActionArmMovingMovement::ShouldHoldUpHands() const
 {
+	check(IsValid(MoveArmRef));
+	check(!MoveArmRef->ArmParts.IsEmpty())
+	
 	MoveArmRef->bEnableArmConstraints = false;
 	
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();

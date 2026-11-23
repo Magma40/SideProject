@@ -7,15 +7,27 @@
 class ABaseInteractableCharacter;
 class UArmActionStack;
 class ULegActionStack;
-class AMovingModel;
+class UMovingModel;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class SIDEPROJECT_API UAnimModelActionStack : public UActionStack
 {
 	GENERATED_BODY()
 	
 	//FUNCTIONS:
 public:
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
+		UMovingModel* InMovingModel,
+		ULegActionStack* InLegsActionStack,
+		const TArray<UArmActionStack*> InArmsActionStack)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MovingModel = InMovingModel;
+		LegsActionStack = InLegsActionStack;
+		ArmsActionStack = InArmsActionStack;
+	}
+	
+	//Actions:
 	void PushDefaultActionMovement();
 	
 	void PushJumpingActionMovement();
@@ -24,60 +36,23 @@ public:
 	
 	void PushWaveActionMovement() const;
 	
-	void PushPointingActionMovement() const;
+	void PushPointingActionMovement(const FVector& InPointingAtLocation) const;
 	
-	void PushHandHoldingActionMovement();
-
-	void RemovePointingActionMovement() const;
+	void PushHandHoldingActionMovement_R(const FVector& InOtherHandLocation) const;
 	
-	//~ Begin Getters & Setters
-	UFUNCTION(BlueprintPure) 
-	UArmActionStack* GetArmActionStack_R() const
-	{
-		return ArmActionStack_RRef;
-	}
-	
-	UFUNCTION(BlueprintPure)
-	UArmActionStack* GetArmActionStack_L() const 
-	{
-		return ArmActionStack_LRef; 
-	}
-	
-	UFUNCTION(BlueprintPure) 
-	ULegActionStack* GetLegsActionStack() const
-	{
-		return LegActionStackRef;
-	}
-	//~ End Getters & Setters
-
-protected:
-	virtual void BeginPlay() override;
-	
-	virtual void TickComponent(float DeltaTime, 
-		ELevelTick TickType, 
-		FActorComponentTickFunction* ThisTickFunction) override;
-	
-	void Init();
+	void PushHandHoldingActionMovement_L(const FVector& InOtherHandLocation) const;
 	
 	//FIELDS:
 private:
-	UPROPERTY()
-	TObjectPtr<AMovingModel> MovingModelRef = nullptr;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<ABaseInteractableCharacter> CompanionOwnerCharacter = nullptr;
+	UPROPERTY(Transient)
+	TObjectPtr<UMovingModel> MovingModel = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<ULegActionStack> LegActionStackRef = nullptr;
+	UPROPERTY(Transient)
+	TObjectPtr<ULegActionStack> LegsActionStack = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<UArmActionStack> ArmActionStack_RRef = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<UArmActionStack> ArmActionStack_LRef = nullptr;
-
-	float MinDistanceToHoldHands = 200.0f;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UArmActionStack>> ArmsActionStack;
 };

@@ -147,26 +147,26 @@ void AInteractionMovingFence::Interact_Implementation(ABaseInteractableCharacter
 		return;
 	}
 
-	UCameraActionStack* CameraActionStack = nullptr;
+	// UCameraActionStack* CameraActionStack = nullptr;
+	//
+	// TArray<UCameraActionStack* >Components;
+	// PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	//
+	// if (!Components.IsEmpty() && 
+	// 	IsValid(Components[0]))
+	// {
+	// 	CameraActionStack = Components[0];
+	// }
+	//
+	// if (!IsValid(CameraActionStack))
+	// {
+	// 	return;
+	// }
 	
-	TArray<UCameraActionStack* >Components;
-	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	
-	if (!Components.IsEmpty() && 
-		IsValid(Components[0]))
-	{
-		CameraActionStack = Components[0];
-	}
-	
-	if (!IsValid(CameraActionStack))
-	{
-		return;
-	}
-	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->LimitMoveRangeForCamera();
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->LimitMoveRangeForCamera();
+	// }
 }
 
 TArray<UStaticMeshComponent*> AInteractionMovingFence::GetAllStaticMeshesInOwner_Implementation()

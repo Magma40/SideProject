@@ -7,7 +7,6 @@
 #include "ActionMoveTo.generated.h"
 
 class ABaseInteractableCharacter;
-class AMovingModel;
 
 /**
  * Moves a CompanionCharacter to a target location using AIController, I had no idea this is how you write a summary in unreal
@@ -19,38 +18,34 @@ class SIDEPROJECT_API UActionMoveTo : public UAction
 
 	//FUNCTIONS:
 public:
-	static UActionMoveTo* Create(UObject* Outer,
-		ABaseInteractableCharacter* InCompanionCharacter, 
-		const FVector& InTargetLocation, 
-		bool InNeedIndicator);
+	//Typed initialization called by the templated factory.
+	void Init(ABaseInteractableCharacter* InOwnerCharacter,
+		const FVector& InTargetLocation,
+		const float InMinDistance)
+	{
+		CompanionCharacter = InOwnerCharacter;
+		TargetLocation = InTargetLocation;
+		MinDistance = InMinDistance;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
-	
-	virtual void OnEnd_Implementation() override;
-	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual bool IsDone() const override;
 	
 	void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> CompanionCharacter = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FVector TargetLocation = FVector::ZeroVector;
 	
 	float MinDistance = 10.0f;
 	
-	UPROPERTY()
-	TObjectPtr<AActor> IndicatorActor = nullptr;
-	
-	bool bNeedIndicator = true;
-	
 	bool bMoveCompleted = false;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FAIRequestID  MoveRequestID;
 };

@@ -26,15 +26,15 @@ void ACameraManagerMain::BeginPlay()
 	{
 		return;
 	}
-	
-	TArray<UCameraActionStack* >Components;
-	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	
-	if (!Components.IsEmpty() && 
-		IsValid(Components[0]))
-	{
-		CameraActionStack = Components[0];
-	}
+	//
+	// TArray<UCameraActionStack* >Components;
+	// PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	//
+	// if (!Components.IsEmpty() && 
+	// 	IsValid(Components[0]))
+	// {
+	// 	CameraActionStack = Components[0];
+	// }
 	
 	if (!IsValid(CameraActionStack))
 	{
@@ -48,10 +48,10 @@ void ACameraManagerMain::BeginPlay()
 		CameraActionStack->PushToCameraPointAction(BaseCameraPoint, 1.0f);
 	}
 	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->SetRotationLimit(BaseCameraPoint->RotationLimit);
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->SetRotationLimit(BaseCameraPoint->RotationLimit);
+	// }
 
 	AMainCharacter* Player = Cast<AMainCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AMainCharacter::StaticClass()));
 	

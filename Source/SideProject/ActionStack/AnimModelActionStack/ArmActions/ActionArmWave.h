@@ -4,6 +4,7 @@
 #include "ActionStack/ActionStack.h"
 #include "ActionArmWave.generated.h"
 
+class UAnimationCurveSubsystem;
 class UMoveArm;
 class ABaseInteractableCharacter;
 
@@ -14,30 +15,41 @@ class SIDEPROJECT_API UActionArmWave : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmWave* Create(UObject* Outer, 
-		UMoveArm* InMoveArm, 
-		ABaseInteractableCharacter* InCharacter);
+	//Typed initialization called by the templated factory.
+	virtual void Init(ABaseInteractableCharacter* InOwnerCharacter,
+		UMoveArm* InMoveArm,
+		UAnimationCurveSubsystem* InAnimSubsystem,
+		const float InPlayRate)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		MoveArmRef = InMoveArm;
+		AnimSubsystem = InAnimSubsystem;
+		PlayRate = InPlayRate;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
+	virtual void OnEnd() override;
 	
-	virtual void OnEnd_Implementation() override;
-
+	virtual bool IsDone() const override;
+	
 	//FIELDS:
 private:
-	UPROPERTY()
-	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
-	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimationCurveSubsystem> AnimSubsystem = nullptr;
+	
+	float PlayRate = 1.0f;
+	
+	UPROPERTY(Transient)
 	TArray<FTransform> AnimTransforms;
 	
 	float ElapsedTime = 0.0f;
-	
-	float PlayRate = 1.0f;
 };

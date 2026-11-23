@@ -1,7 +1,6 @@
 #include "ActionStack/AnimModelActionStack/ArmActionStack.h"
 
 #include "AnimModelActionStack.h"
-#include "ActionStack/Characters/CompanionActionStack.h"
 #include "ArmActions/ActionArmMovingMovement.h"
 #include "ArmActions/ActionArmJumpingMovement.h"
 #include "ArmActions/ActionArmToHolster.h"
@@ -9,254 +8,149 @@
 #include "ArmActions/ActionArmPoint.h"
 #include "ArmActions/ActionArmHandHolding.h"
 #include "ArmActions/ActionArmHandToLocation.h"
+#include "Core/Subsystems/AnimationCurveSubsystem.h"
 #include "Player/BaseInteractableCharacter.h"
-#include "Player/CompanionPawn.h"
-#include "ProcedualAnimation/MovingModel.h"
-#include "Tools/GenericCalls.h"
-#include "WorldInteractions/InteractionManager.h"
-#include "WorldInteractions/ItemInteractions/InteractableItemBase.h"
-
-void UArmActionStack::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	Main = this;
-}
-
-void UArmActionStack::Init(UMoveArm* InArmRef, 
-	ABaseInteractableCharacter* InOwnerCharacter, 
-	ABaseInteractableCharacter* InOwnerCompanion, 
-	USceneComponent* InBackHolster)
-{
-	ArmRef = InArmRef;
-	OwnerCharacter = InOwnerCharacter;
-	BackHolsterRef = InBackHolster;
-	OwnerCompanion = InOwnerCompanion;
-}
+#include "ProcedualAnimation/MoveArm.h"
+#include "WorldObjects/PlayerCamera.h"
 
 void UArmActionStack::AddMovingAction()
 {
-	UActionArmMovingMovement* ArmsDefaultMovement = UActionArmMovingMovement::Create(this, 
-		ArmRef);
+	check(IsValid(Arm));
 	
-	this->PushAction(ArmsDefaultMovement);
+	UActionArmMovingMovement* ArmsDefaultMovement = 
+		CreateAction<UActionArmMovingMovement>(this, 
+		Arm);
+	
+	PushAction(*ArmsDefaultMovement);
 }
+
 void UArmActionStack::AddJumpingAction()
 {
-	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())
-	{
-		this->RemoveAction(ActionRef);
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
 	
-	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
-	{
-		this->RemoveAction(ActionRef);
-	}
+	UActionArmJumpingMovement* ArmsJumpingMovement = 
+		CreateAction<UActionArmJumpingMovement>(this, 
+		OwnerCharacter,
+		Arm);
 	
-	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmHandToLocation* ActionRef = GetAction<UActionArmHandToLocation>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionArmJumpingMovement* ArmsJumpingMovement = UActionArmJumpingMovement::Create(this, 
-		ArmRef);
-	
-	this->PushAction(ArmsJumpingMovement);
+	PushAction(*ArmsJumpingMovement);
 }
 
 void UArmActionStack::AddHolsterAction()
 {
-	if (IsValid(GetAction<UActionArmToHolster>()) || 
-		GetAction<UActionArmJumpingMovement>() || 
-		GetAction<UActionArmHandToLocation>())
-	{
-		return;
-	}
-	
-	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
-	{
-		this->RemoveAction(ActionRef);
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
+	check(IsValid(BackHolsterRef));
+	check(IsValid(AnimSubsystem));
 
-	UActionArmToHolster* ArmsToHolster = UActionArmToHolster::Create(this, 
-		ArmRef, 
+	UActionArmToHolster* ArmsToHolster = 
+		CreateAction<UActionArmToHolster>(this, 
+		OwnerCharacter,
+		Arm, 
 		BackHolsterRef, 
-		OwnerCharacter);
+		AnimSubsystem,
+		HolsterPlayRate);
 	
-	this->PushAction(ArmsToHolster);
+	PushAction(*ArmsToHolster);
 }
 
 void UArmActionStack::AddWaveAction()
 {
-	if (GetAction<UActionArmJumpingMovement>() || 
-		IsValid(GetAction<UActionArmWave>()) || 
-		GetAction<UActionArmHandToLocation>() || 
-		OwnerCharacter->GetItemInHand() != nullptr)
-	{
-		return;
-	}
-	
-	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmHandHolding* ActionRef = OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->GetAction<UActionArmHandHolding>())
-	{
-		OwnerCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_L()->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmHandHolding* ActionRef = OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->GetAction<UActionArmHandHolding>())
-	{
-		OwnerCompanion->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->RemoveAction(ActionRef);
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
+	check(IsValid(AnimSubsystem));
 
-	if (!IsValid(OwnerCompanion))
-	{
-		return;
-	}
+	UActionArmWave* ArmsWave = 
+		CreateAction<UActionArmWave>(this, 
+		OwnerCharacter,
+		Arm, 
+		AnimSubsystem,
+		WavePlayRate);
 	
-	if (OwnerCharacter->GetItemInHand() != nullptr)
-	{
-		return;
-	}
-	
-	OwnerCompanion->GetCompanionActionStack()->ClearAllActionsExceptIndex(0);
-	
-	if (UActionArmPoint* PointAction = GetAction<UActionArmPoint>())
-	{
-		const FVector PointingLocationRef = PointAction->GetPointingLocation();
-		
-		if (IsValid(PointAction->GetActorPointedAt()) && 
-			Cast<AInteractableItemBase>(PointAction->GetActorPointedAt()))
-		{
-			const AInteractableItemBase* Interaction = Cast<AInteractableItemBase>(PointAction->GetActorPointedAt());
-			
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionPickUp();
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetActorLocation(), false);
-		}
-		else if (IsValid(PointAction->GetActorPointedAt()) && 
-				Cast<UInteractionBehaviour>(GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())))
-		{
-			const UInteractionBehaviour* Interaction = Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt()));
-			
-			OwnerCompanion->GetCompanionActionStack()->OnAddTryToInteractWithWorld();
-			OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetComponentLocation(), false);
-			
-			Cast<ACompanionPawn>(OwnerCompanion)->SetLastKnownInteractionBehaviour(Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())));
-		}
-		else
-		{
-				OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, true);
-		}
-		
-		return;
-	}
-
-	UActionArmWave* ArmsWave = UActionArmWave::Create(this, 
-		ArmRef, 
-		OwnerCharacter);
-	
-	this->PushAction(ArmsWave);
-	
-	OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(OwnerCharacter->GetActorLocation(), false);
+	PushAction(*ArmsWave);
 }
 
-void UArmActionStack::AddPointingAction()
+void UArmActionStack::AddPointingAction(const FVector& InPointingAtLocation)
 {
-	if (GetAction<UActionArmPoint>() || 
-		GetAction<UActionArmJumpingMovement>() || 
-		GetAction<UActionArmHandToLocation>() || 
-		OwnerCharacter->GetItemInHand() != nullptr)
-	{
-		return;
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
+	check(IsValid(AnimSubsystem));
+	check(IsValid(PlayerCamera));
 	
-	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionArmPoint* ArmsPoint = UActionArmPoint::Create(this, 
-		ArmRef, 
+	UActionArmPoint* ArmsPoint = 
+		CreateAction<UActionArmPoint>(this,
 		OwnerCharacter, 
-		OwnerCompanion);
+		Arm,
+		AnimSubsystem,
+		PlayerCamera,
+		InPointingAtLocation,
+		PointPlayRate);
 	
-	this->PushAction(ArmsPoint);
+	PushAction(*ArmsPoint);
 }
 
-void UArmActionStack::RemovePointingAction()
+void UArmActionStack::AddHandHoldingAction(const FVector& InOtherHandLocation)
 {
-	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
-	{
-		this->RemoveAction(ActionRef);
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
+	check(IsValid(AnimSubsystem));
+	
+	UActionArmHandHolding* ArmsHandHolding = 
+		CreateAction<UActionArmHandHolding>(this, 
+		OwnerCharacter,
+		Arm,
+		AnimSubsystem, 
+		InOtherHandLocation, 
+		HandHoldingPlayRate);
+	
+	PushAction(*ArmsHandHolding);
 }
 
-void UArmActionStack::AddHandHoldingAction(UMoveArm* OtherCompanionArm)
+void UArmActionStack::AddHandToLocation( const FVector& InToLocation)
 {
-	if (GetAction<UActionArmJumpingMovement>())
-	{
-		return;
-	}
+	check(IsValid(OwnerCharacter));
+	check(IsValid(Arm));
+	check(IsValid(AnimSubsystem));
 	
-	UActionArmHandHolding* ArmsHandHolding = UActionArmHandHolding::Create(this, 
-		ArmRef,
-		OtherCompanionArm, 
+	UActionArmHandToLocation* HandToLocation = 
+		CreateAction<UActionArmHandToLocation>(this, 
 		OwnerCharacter, 
-		OwnerCompanion);
+		Arm,
+		AnimSubsystem, 
+		InToLocation,
+		HandToLocationPlayRate);
 	
-	this->PushAction(ArmsHandHolding);
+	PushAction(*HandToLocation);
 }
 
-void UArmActionStack::AddHandToLocation( const FVector& InToLocation, const bool bWantToPickUpItem)
+void UArmActionStack::HandlePointingAtAction()
 {
-	if (GetAction<UActionArmJumpingMovement>())
-	{
-		return;
-	}
+	// const FVector PointingLocationRef = PointAction->GetPointingLocation();
+	// 	
+	// if (IsValid(PointAction->GetActorPointedAt()) && 
+	// 	Cast<AInteractableItemBase>(PointAction->GetActorPointedAt()))
+	// {
+	// 	const AInteractableItemBase* Interaction = Cast<AInteractableItemBase>(PointAction->GetActorPointedAt());
+	// 		
+	// 	OwnerCompanion->GetCompanionActionStack()->OnAddActionPickUp();
+	// 	OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetActorLocation(), false);
+	// }
+	// else if (IsValid(PointAction->GetActorPointedAt()) && 
+	// 		Cast<UInteractionBehaviour>(GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())))
+	// {
+	// 	const UInteractionBehaviour* Interaction = Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt()));
+	// 		
+	// 	OwnerCompanion->GetCompanionActionStack()->OnAddTryToInteractWithWorld();
+	// 	OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(Interaction->GetComponentLocation(), false);
+	// 		
+	// 	Cast<ACompanionPawn>(OwnerCompanion)->SetLastKnownInteractionBehaviour(Cast<UInteractionBehaviour>( GenericCalls::FindChildComponentByClass<UInteractionBehaviour>(PointAction->GetActorPointedAt())));
+	// }
+	// else
+	// {
+	// 	OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(PointingLocationRef, true);
 	
-	if (UActionArmToHolster* ActionRef = GetAction<UActionArmToHolster>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmWave* ActionRef = GetAction<UActionArmWave>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmPoint* ActionRef = GetAction<UActionArmPoint>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionArmHandToLocation* ActionRef = GetAction<UActionArmHandToLocation>())
-	{
-		this->RemoveAction(ActionRef);
-		return;
-	}
-	
-	UActionArmHandToLocation* HandToLocation = UActionArmHandToLocation::Create(this, 
-		OwnerCharacter, 
-		ArmRef,
-		InToLocation, 
-		bWantToPickUpItem);
-	
-	this->PushAction(HandToLocation);
+	//OwnerCompanion->GetCompanionActionStack()->OnAddActionMoveTo(OwnerCharacter->GetActorLocation(), false);
+
+	// }
 }

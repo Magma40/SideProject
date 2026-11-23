@@ -54,15 +54,11 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://24" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/SideProject.uproject" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject.Target.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/ActionStack.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionMoveTo.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Actions/ActionPickUpItem.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/AnimModelActions/ActionAnimModelJumpingMovement.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -82,6 +78,7 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmPoint.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmToHolster.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/ArmActions/ActionArmWave.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/AnimModelActionStack/LegActionStack.h" root0="FORCE_HIGHLIGHTING" />
@@ -97,6 +94,10 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/CameraActionStack/CameraActionStack.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActionStack.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActions/ActionContinuousMoveTo.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActions/ActionMoveTo.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActions/ActionPickUpItem.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/ActionStack/Characters/CompanionActions/ActionTryToInteractWithWorld.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainGameMode.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/MainMode.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Core/Subsystems/AnimationCurveSubsystem.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -106,6 +107,7 @@
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/CompanionPawn.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/Player/MainCharacter.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/SideProject/Private/CameraPointVisualizerComponent.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Joint.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Joint.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/SideProject/ProcedualAnimation/Limb.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -157,6 +159,10 @@
     <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Programs/Shared/EpicGames.BuildGraph/BgDiagnosticDef.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Programs/UnrealBuildTool/ProjectFiles/Eddie/EddieGenerator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Programs/UnrealCanvasApp/Source/UnrealCanvasApp/UnrealCanvasApp.Build.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Runtime/Online/XMPP/Public/XmppConnection.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../SSDGAMES/EpicGames/UE_5.9/Engine/Source/Runtime/Online/XMPP/Public/XmppMultiUserChat.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -165,61 +171,61 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.876743651606937" />
-      <entry key="MS500" value="2.8744828937761424" />
-      <entry key="S2" value="5.89280336800068" />
-      <entry key="S5" value="9.515443627838666" />
-      <entry key="S10" value="13.110546314612241" />
-      <entry key="S30" value="18.383542818386903" />
-      <entry key="S60" value="20.457342651179108" />
-      <entry key="M2" value="21.66294768936295" />
-      <entry key="M5" value="22.448389490575426" />
-      <entry key="M10" value="22.72130701411944" />
-      <entry key="M15" value="22.81355615118231" />
-      <entry key="M30" value="22.906452100522042" />
-      <entry key="H1" value="22.953898440039442" />
-      <entry key="H2" value="23.329017128076813" />
-      <entry key="H4" value="31.960594101735698" />
-      <entry key="D1" value="169.2163043263972" />
-      <entry key="W1" value="260.85205100365874" />
+      <entry key="MS100" value="1.0000001844841233" />
+      <entry key="MS500" value="1.0449978924868217" />
+      <entry key="S2" value="1.4752970138186994" />
+      <entry key="S5" value="1.969290291394138" />
+      <entry key="S10" value="2.5160835392641294" />
+      <entry key="S30" value="3.3906525551490883" />
+      <entry key="S60" value="3.896650683191868" />
+      <entry key="M2" value="4.324032010718561" />
+      <entry key="M5" value="4.689125765579824" />
+      <entry key="M10" value="4.836646635456811" />
+      <entry key="M15" value="4.889239452687708" />
+      <entry key="M30" value="4.943664426987969" />
+      <entry key="H1" value="4.971605882422714" />
+      <entry key="H2" value="5.06746207300427" />
+      <entry key="H4" value="10.907167893954396" />
+      <entry key="D1" value="521.7372719109857" />
+      <entry key="W1" value="1595.792124410028" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="0.0" />
-      <entry key="S60" value="1.683041019502699E-284" />
-      <entry key="M2" value="1.3719095654968413E-142" />
-      <entry key="M5" value="3.0920911055043527E-57" />
-      <entry key="M10" value="1.3752142308812253E-28" />
-      <entry key="M15" value="5.738294572826481E-19" />
-      <entry key="M30" value="3.185716367752919E-9" />
-      <entry key="H1" value="3.375294886012082E-4" />
-      <entry key="H2" value="0.14846158678006371" />
-      <entry key="H4" value="3.599861895584524" />
-      <entry key="D1" value="56.0519702580982" />
-      <entry key="W1" value="90.46510913046372" />
+      <entry key="S2" value="8.824929028455982E-91" />
+      <entry key="S5" value="1.401767960016274E-36" />
+      <entry key="S10" value="1.6661291863351797E-18" />
+      <entry key="S30" value="1.8797869322815593E-6" />
+      <entry key="S60" value="0.001938693123427118" />
+      <entry key="M2" value="0.06226650202478339" />
+      <entry key="M5" value="0.4992478110263349" />
+      <entry key="M10" value="0.9992461414177894" />
+      <entry key="M15" value="1.25928738048567" />
+      <entry key="M30" value="1.5870015703783384" />
+      <entry key="H1" value="1.7815769429086192" />
+      <entry key="H2" value="1.9053999839238385" />
+      <entry key="H4" value="3.2263886193601787" />
+      <entry key="D1" value="84.6565129915968" />
+      <entry key="W1" value="251.18681379135504" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.7618100734050828" />
-      <entry key="MS500" value="2.8375259063211495" />
-      <entry key="S2" value="5.848109046948513" />
-      <entry key="S5" value="9.472513419469553" />
-      <entry key="S10" value="13.073460635715623" />
-      <entry key="S30" value="18.361919254006548" />
-      <entry key="S60" value="20.444534372367055" />
-      <entry key="M2" value="21.655946264755503" />
-      <entry key="M5" value="22.445430885693106" />
-      <entry key="M10" value="22.719800048334072" />
-      <entry key="M15" value="22.81254525802136" />
-      <entry key="M30" value="22.90594350661795" />
-      <entry key="H1" value="22.95398060070476" />
-      <entry key="H2" value="23.477292685170678" />
-      <entry key="H4" value="35.55968182255147" />
-      <entry key="D1" value="225.26637672501712" />
-      <entry key="W1" value="351.31672104225004" />
+      <entry key="MS100" value="2.5450824595596227E-4" />
+      <entry key="MS500" value="0.19618000161070823" />
+      <entry key="S2" value="0.9336785322972154" />
+      <entry key="S5" value="1.589308606803529" />
+      <entry key="S10" value="2.2175724735652564" />
+      <entry key="S30" value="3.230743142861197" />
+      <entry key="S60" value="3.804653599681822" />
+      <entry key="M2" value="4.334097717733408" />
+      <entry key="M5" value="5.164743051550092" />
+      <entry key="M10" value="5.823051433960535" />
+      <entry key="M15" value="6.139641016190746" />
+      <entry key="M30" value="6.526025775853961" />
+      <entry key="H1" value="6.750805497299873" />
+      <entry key="H2" value="6.971648162997351" />
+      <entry key="H4" value="14.132594705400777" />
+      <entry key="D1" value="606.3894215197217" />
+      <entry key="W1" value="1846.977080945038" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -256,7 +262,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;RiderUnrealFileTemplatesSettings&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;UnrealLinkOptionsId&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
@@ -874,7 +880,10 @@
       <workItem from="1794507483762" duration="2106000" />
       <workItem from="1794916133063" duration="377000" />
       <workItem from="1794916694978" duration="1928000" />
-      <workItem from="1794919531171" duration="26642000" />
+      <workItem from="1794919531171" duration="41363000" />
+      <workItem from="1795090917539" duration="20656000" />
+      <workItem from="1795112881829" duration="137000" />
+      <workItem from="1795113079925" duration="17238000" />
     </task>
     <servers />
   </component>
@@ -916,6 +925,10 @@
   </component>
   <component name="UnrealLinkSettings">
     <option name="replaceWithHotReload" value="false" />
+  </component>
+  <component name="UnrealLogPanelSettings">
+    <option name="showMessages" value="false" />
+    <option name="showWarnings" value="false" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">

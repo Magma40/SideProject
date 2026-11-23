@@ -57,14 +57,14 @@ void ASwitchCameraPointActor::BeginPlay()
 		return;
 	}
 	
-	TArray<UCameraActionStack* >Components;
-	PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
-	
-	if (!Components.IsEmpty() &&
-		IsValid(Components[0]))
-	{
-		CameraActionStack = Components[0];
-	}
+	// TArray<UCameraActionStack* >Components;
+	// PlayerCamera->GetComponents<UCameraActionStack>(Components, true);
+	//
+	// if (!Components.IsEmpty() &&
+	// 	IsValid(Components[0]))
+	// {
+	// 	CameraActionStack = Components[0];
+	// }
 	
 	if (!IsValid(CameraActionStack))
 	{
@@ -116,10 +116,10 @@ void ASwitchCameraPointActor::PositiveOverlapBegin(UPrimitiveComponent* Overlapp
 		return;
 	}
 	
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
-	{
-		CameraActionStack->RemoveAction(ActionRef);
-	}
+	// if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	// {
+	// 	CameraActionStack->RemoveAction(ActionRef);
+	// }
 	
 	CameraActionStack->PushToCameraPointAction(CameraPoint_L, PlayRate);
 	
@@ -127,10 +127,10 @@ void ASwitchCameraPointActor::PositiveOverlapBegin(UPrimitiveComponent* Overlapp
 	
 	TempChar->SetNewRespawnPoint(CameraPoint_L->PlayerRoomSpawnPoint);
 	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->SetRotationLimit(CameraPoint_L->RotationLimit);
+	// }
 }
 
 void ASwitchCameraPointActor::PositiveOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
@@ -196,10 +196,10 @@ void ASwitchCameraPointActor::NegativeOverlapBegin(UPrimitiveComponent* Overlapp
 		return;
 	}
 	
-	if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
-	{
-		CameraActionStack->RemoveAction(ActionRef);
-	}
+	// if (UActionToCameraPoint* ActionRef = CameraActionStack->GetAction<UActionToCameraPoint>())
+	// {
+	// 	CameraActionStack->RemoveAction(ActionRef);
+	// }
 	
 	CameraActionStack->PushToCameraPointAction(CameraPoint_R, PlayRate);
 	
@@ -207,10 +207,10 @@ void ASwitchCameraPointActor::NegativeOverlapBegin(UPrimitiveComponent* Overlapp
 	
 	TempChar->SetNewRespawnPoint(CameraPoint_R->PlayerRoomSpawnPoint);
 	
-	if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
-	{
-		ActionRef->SetRotationLimit(CameraPoint_R->RotationLimit);
-	}
+	// if (UActionCameraDefaultMovement* ActionRef = CameraActionStack->GetAction<UActionCameraDefaultMovement>())
+	// {
+	// 	ActionRef->SetRotationLimit(CameraPoint_R->RotationLimit);
+	// }
 }
 
 void ASwitchCameraPointActor::NegativeOverlapEnd(UPrimitiveComponent* OverlappedComponent,

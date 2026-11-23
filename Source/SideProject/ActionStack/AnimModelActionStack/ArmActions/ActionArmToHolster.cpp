@@ -3,23 +3,12 @@
 #include "ProcedualAnimation/MoveArm.h"
 #include "Player/BaseInteractableCharacter.h"
 
-UActionArmToHolster* UActionArmToHolster::Create(UObject* Outer, 
-	UMoveArm* InMoveArm, 
-	USceneComponent* InBackHolster, 
-	ABaseInteractableCharacter* InCharacter)
+void UActionArmToHolster::OnBegin(const bool bFirstTime)
 {
-	UActionArmToHolster* Action = NewObject<UActionArmToHolster>(Outer);
+	Super::OnBegin(bFirstTime);
 	
-	Action->MoveArmRef = InMoveArm;
-	Action->BackHolsterRef = InBackHolster;
-	Action->OwnerCharacter = InCharacter;
-	
-	return Action;
-}
-
-void UActionArmToHolster::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
+	check(IsValid(MoveArmRef));
+	check(!MoveArmRef->ArmParts.IsEmpty())
 	
 	const FTransform Xform = MoveArmRef->ArmParts[0]->GetComponentTransform();
 	const FTransform HandTransform =  FTransform(FRotator(0, 0, 0),  Xform.InverseTransformPosition(MoveArmRef->ArmParts[2]->GetComponentLocation()));
@@ -38,25 +27,14 @@ void UActionArmToHolster::OnBegin_Implementation(const bool bFirstTime)
 	MoveArmRef->bEnableArmConstraints = false;
 }
 
-void UActionArmToHolster::OnEnd_Implementation()
-{
-	Super::OnEnd_Implementation();
-	
-	MoveArmRef->bEnableArmConstraints = true;
-}
-
 //Discovering Tuple and Pairs is the best thing that has happened to me
-void UActionArmToHolster::OnUpdate_Implementation(const float DeltaTime) 
+void UActionArmToHolster::OnUpdate(const float DeltaTime) 
 {
-	Super::OnUpdate_Implementation(DeltaTime);
+	Super::OnUpdate(DeltaTime);
 	
-	const UAnimationCurveSubsystem* AnimSubsystem =  GetWorld()->GetSubsystem<UAnimationCurveSubsystem>();
-	
-	if (!AnimSubsystem)
-	{
-		UE_LOG(LogTemp, Error,TEXT("%s - OnUpdate_Implementation - AnimSubsystem Could Not Be Found"), *this->GetFName().ToString());
-		return;
-	}
+	check(IsValid(MoveArmRef));
+	check(IsValid(AnimSubsystem));
+	check(IsValid(OwnerCharacter));
 
 	const int BeforeMoveNum = AnimTransforms.Num();
 	
@@ -78,7 +56,16 @@ void UActionArmToHolster::OnUpdate_Implementation(const float DeltaTime)
 	}
 }
 
-bool UActionArmToHolster::IsDone_Implementation() const
+void UActionArmToHolster::OnEnd()
+{
+	Super::OnEnd();
+	
+	check(IsValid(MoveArmRef));
+	
+	MoveArmRef->bEnableArmConstraints = true;
+}
+
+bool UActionArmToHolster::IsDone() const
 {
 	return AnimTransforms.Num() <= 1;
 }

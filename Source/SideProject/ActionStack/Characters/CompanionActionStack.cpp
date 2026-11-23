@@ -1,120 +1,54 @@
 #include "CompanionActionStack.h"
 #include "Player/BaseInteractableCharacter.h"
-#include "ActionStack/Actions/ActionMoveTo.h"
-#include "ActionStack/Actions/ActionPickUpItem.h"
-#include "ActionStack/Actions/ActionContinuousMoveTo.h"
-#include "ActionStack/Actions/ActionTryToInteractWithWorld.h"
+#include "CompanionActions/ActionMoveTo.h"
+#include "CompanionActions/ActionPickUpItem.h"
+#include "CompanionActions/ActionContinuousMoveTo.h"
+#include "ActionStack/Characters/CompanionActions/ActionTryToInteractWithWorld.h"
 
-void UCompanionActionStack::BeginPlay()
+void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation)
 {
-	Super::BeginPlay();
+	check(IsValid(OwnerCharacter));
 	
-	Main = this;
-	
-	Init();
-}
-
-void UCompanionActionStack::Init()
-{
-	OwnerCharacter = Cast<ABaseInteractableCharacter>(GetOwner());
-}
-
-void UCompanionActionStack::OnAddActionMoveTo(const FVector& InMoveToLocation, bool InNeedIndicator)
-{
-	if (!OwnerCharacter)
-	{
-		return;
-	}
-	
-	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionMoveTo* ActionRef = GetAction<UActionMoveTo>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionMoveTo* ActionMoveTo = UActionMoveTo::Create(this, 
+	UActionMoveTo* ActionMoveTo = 
+		CreateAction<UActionMoveTo>(this, 
 		OwnerCharacter, 
 		InMoveToLocation, 
-		InNeedIndicator);
+		MinDistanceForMoveTo);
 	
-	this->PushAction(ActionMoveTo);
+	PushAction(*ActionMoveTo);
 }
 
 void UCompanionActionStack::OnAddActionPickUp()
 {
-	if (!OwnerCharacter)
-	{
-		return;
-	}
+	check(IsValid(OwnerCharacter));
 	
-	if (UActionPickUpItem* ActionRef = GetAction<UActionPickUpItem>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionTryToInteractWithWorld* ActionRef = GetAction<UActionTryToInteractWithWorld>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionPickUpItem* ActionPickUpItem = UActionPickUpItem::Create(this, 
+	UActionPickUpItem* ActionPickUpItem = 
+		CreateAction<UActionPickUpItem>(this, 
 		OwnerCharacter);
 	
-	this->PushAction(ActionPickUpItem);
+	PushAction(*ActionPickUpItem);
 }
 
-void UCompanionActionStack::OnAddActionContinuousMove(ABaseInteractableCharacter* InPlayer)
+void UCompanionActionStack::OnAddActionContinuousMove(const FVector& InMoveToLocation)
 {
-	if (!OwnerCharacter)
-	{
-		return;
-	}
+	check(IsValid(OwnerCharacter));
 	
-	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionMoveTo* ActionRef = GetAction<UActionMoveTo>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionContinuousMoveTo* ActionContinuousMoveTo = UActionContinuousMoveTo::Create(this, 
+	UActionContinuousMoveTo* ActionContinuousMoveTo =
+		CreateAction<UActionContinuousMoveTo>(this, 
 		OwnerCharacter, 
-		InPlayer);
+		InMoveToLocation,
+		MinDistanceForContinuousMoveTo);
 	
-	this->PushAction(ActionContinuousMoveTo);
+	PushAction(*ActionContinuousMoveTo);
 }
 
 void UCompanionActionStack::OnAddTryToInteractWithWorld()
 {
-	if (!OwnerCharacter)
-	{
-		return;
-	}
+	check(IsValid(OwnerCharacter));
 	
-	if (UActionContinuousMoveTo* ActionRef = GetAction<UActionContinuousMoveTo>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionPickUpItem* ActionRef = GetAction<UActionPickUpItem>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	if (UActionTryToInteractWithWorld* ActionRef = GetAction<UActionTryToInteractWithWorld>())
-	{
-		this->RemoveAction(ActionRef);
-	}
-	
-	UActionTryToInteractWithWorld* ActionContinuousMoveTo = UActionTryToInteractWithWorld::Create(this, 
+	UActionTryToInteractWithWorld* ActionContinuousMoveTo = 
+		CreateAction<UActionTryToInteractWithWorld>(this, 
 		OwnerCharacter);
 	
-	this->PushAction(ActionContinuousMoveTo);
+	 PushAction(*ActionContinuousMoveTo);
 }

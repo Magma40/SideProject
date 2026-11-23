@@ -1,26 +1,11 @@
 #include "ActionStack/AnimModelActionStack/ArmActions/ActionArmJumpingMovement.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "Player/BaseInteractableCharacter.h"
 
-UActionArmJumpingMovement* UActionArmJumpingMovement::Create(UObject* Outer, 
-	UMoveArm* InMoveArm)
+bool UActionArmJumpingMovement::IsDone() const
 {
-	UActionArmJumpingMovement* Action = NewObject<UActionArmJumpingMovement>(Outer);
+	check(IsValid(OwnerCharacter));
+	check(IsValid(OwnerCharacter->GetMovementComponent()));
 	
-	Action->MoveArmRef = InMoveArm;
-	
-	return Action;
-}
-
-void UActionArmJumpingMovement::OnBegin_Implementation(const bool bFirstTime)
-{
-	Super::OnBegin_Implementation(bFirstTime);
-}
-
-void UActionArmJumpingMovement::OnUpdate_Implementation(const float DeltaTime) 
-{
-	Super::OnUpdate_Implementation(DeltaTime);
-}
-
-bool UActionArmJumpingMovement::IsDone_Implementation() const
-{
-	return Super::IsDone_Implementation();
+	return !OwnerCharacter->GetMovementComponent()->IsFalling();
 }

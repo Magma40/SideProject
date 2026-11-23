@@ -48,16 +48,16 @@ void UInteractDoor::TickComponent(const float DeltaTime,
 	
 	if (bInteracting)
 	{
-		UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
+		//UArmActionStack* ArmActionStack = InteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R();
 		
-		TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
+		//TScriptInterface<IActionInterface> ActionInterfaceArmToLocation = ArmActionStack->GetInterfacedAction(ArmActionStack->GetAction<UActionArmHandToLocation>());
 		
-		 if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
-		 {
-		 	bInteracting = false;
-		 	
-		 	return;
-		 }
+		 // if (!ArmActionStack->Contains(ActionInterfaceArmToLocation))
+		 // {
+		 // 	bInteracting = false;
+		 // 	
+		 // 	return;
+		 // }
 		
 		if (!IsValid(InteractingCharacter->GetItemInHand()) || 
 			InteractingCharacter->GetItemInHand() != ItemNeeded)
@@ -81,7 +81,7 @@ void UInteractDoor::PerformInteraction_Implementation(ABaseInteractableCharacter
 {
 	Super::PerformInteraction_Implementation(InInteractingCharacter);
 	
-	InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(Lock->GetActorLocation(), false);
+	//InInteractingCharacter->GetMovingModel()->GetAnimModelActionStack()->GetArmActionStack_R()->AddHandToLocation(Lock->GetActorLocation(), false);
 }
 
 TArray<UStaticMeshComponent*> UInteractDoor::GetAllStaticMeshesInOwner_Implementation()

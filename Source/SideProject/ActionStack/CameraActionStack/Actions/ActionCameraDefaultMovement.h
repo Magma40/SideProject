@@ -15,34 +15,43 @@ class SIDEPROJECT_API UActionCameraDefaultMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionCameraDefaultMovement* Create(UObject* Outer, 
-		AMainCharacter* InOwnerCharacter, 
-		APlayerCamera* InPlayerCamera);
+	//Typed initialization called by the templated factory.
+	void Init(AMainCharacter* InOwnerCharacter, 
+		APlayerCamera* InPlayerCamera,
+		APlayerController* InPlayerController,
+		UInputDeviceSubsystem* InInputDeviceSubsystem,
+		const float InRotationLimit,
+		const float InSliderMoveSpeed)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		PlayerCamera = InPlayerCamera;
+		PlayerController = InPlayerController;
+		InputDeviceSubsystem = InInputDeviceSubsystem;
+		RotationLimit = InRotationLimit;
+		SliderMoveSpeed = InSliderMoveSpeed;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual bool IsDone() const override { return false; }
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-
 	void LimitLookRangeForCamera(const FInputActionValue& Value);
 	
 	void LimitMoveRangeForCamera();
-
-	//~ Begin Getters & Setters
-	FORCEINLINE void SetRotationLimit(const float InRotationLimit)
-	{
-		RotationLimit = InRotationLimit;
-	}
-	//~ End Getters & Setters
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<AMainCharacter> OwnerCharacter = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<APlayerCamera> PlayerCamera = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<APlayerController> PlayerController = nullptr;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UInputDeviceSubsystem> InputDeviceSubsystem = nullptr;
 	
 	float RotationLimit = 45.0f;
 	

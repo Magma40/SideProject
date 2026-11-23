@@ -7,7 +7,7 @@
 class UCompanionActionStack;
 class APlayerCamera;
 class AInteractableItemBase;
-class AMovingModel;
+class UMovingModel;
 
 struct FPickupCandidate
 {
@@ -78,7 +78,7 @@ public:
 	}
 	
 	UFUNCTION(BlueprintCallable) 
-	FORCEINLINE AMovingModel* GetMovingModel() const
+	FORCEINLINE UMovingModel* GetMovingModel() const
 	{
 		return MovingModel;
 	}
@@ -129,7 +129,7 @@ protected:
 	TObjectPtr<APlayerCamera> TheMainCameraInScene = nullptr;
 	
 	UPROPERTY() 
-	TObjectPtr<AMovingModel> MovingModel = nullptr;
+	TObjectPtr<UMovingModel> MovingModel = nullptr;
 	
 	UPROPERTY() 
 	TObjectPtr<UCompanionActionStack> CompanionActionStack = nullptr;

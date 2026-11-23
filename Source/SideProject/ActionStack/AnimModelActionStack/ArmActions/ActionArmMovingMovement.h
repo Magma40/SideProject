@@ -5,6 +5,7 @@
 #include "ActionArmMovingMovement.generated.h"
 
 class UMoveArm;
+
 UCLASS()
 class SIDEPROJECT_API UActionArmMovingMovement : public UAction
 {
@@ -12,19 +13,22 @@ class SIDEPROJECT_API UActionArmMovingMovement : public UAction
 	
 	//FUNCTIONS:
 public:
-	static UActionArmMovingMovement* Create(UObject* Outer,
-		UMoveArm* InMoveArm);
+	//Typed initialization called by the templated factory.
+	virtual void Init(UMoveArm* InMoveArm)
+	{
+		MoveArmRef = InMoveArm;
+	}
 	
-	virtual void OnUpdate_Implementation(float DeltaTime) override;
+	virtual void OnBegin(bool bFirstTime) override;
 	
-	virtual bool IsDone_Implementation() const override;
+	virtual void OnUpdate(float DeltaTime) override;
 	
-	virtual void OnBegin_Implementation(bool bFirstTime) override;
-
+	virtual bool IsDone() const override { 	return false; }
+	
 	bool ShouldHoldUpHands() const;
 	
 	//FIELDS:
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UMoveArm> MoveArmRef = nullptr;
 };

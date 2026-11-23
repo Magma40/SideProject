@@ -7,28 +7,30 @@
 class UMoveLeg;
 class ABaseInteractableCharacter;
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class SIDEPROJECT_API ULegActionStack : public UActionStack
 {
 	GENERATED_BODY()
 
 	//FUNCTIONS:
 public:
-	void Init(const TArray<UMoveLeg*>& InLegsRef, 
-		ABaseInteractableCharacter* InOwnerCharacter);
+	void Init(ABaseInteractableCharacter* InOwnerCharacter, 
+		const TArray<UMoveLeg*>& InLegs)
+	{
+		OwnerCharacter = InOwnerCharacter;
+		Legs = InLegs;
+	}
 	
+	//Actions:
 	void AddMovingAction();
 	
 	void AddJumpingAction();
 	
-protected:
-	virtual void BeginPlay() override;
-	
 	//FIELDS:
 private:
-	UPROPERTY()
-	TArray<TObjectPtr<UMoveLeg>> LegsRef;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UMoveLeg>> Legs;
 	
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ABaseInteractableCharacter> OwnerCharacter = nullptr;
 };

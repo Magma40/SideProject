@@ -1,15 +1,126 @@
 #include "ProcedualAnimation/MovingModel.h"
+
+#include "Joint.h"
+#include "Limb.h"
 #include "ProcedualAnimation/MoveLeg.h"
 #include "ProcedualAnimation/MoveArm.h"
 #include "ActionStack/AnimModelActionStack/AnimModelActionStack.h"
 #include "Tools/GenericCalls.h"
 
-AMovingModel::AMovingModel()
+DEFINE_LOG_CATEGORY(ProceduralAnimationLogCategory);
+
+UMovingModel::UMovingModel()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void AMovingModel::InitSceneComponents() //This one is called through UAnimModelActionStack
+void UMovingModel::BuildProceduralBodyParts()
+{
+	AActor* Owner = GetOwner();
+	
+	if (IsValid(Owner))
+	{
+		UE_LOG(ProceduralAnimationLogCategory, Error, 
+			TEXT("%s::BuildProceduralBodyParts() - Owner is not valid - returning"), *GetName());
+		return;
+	}
+	
+	for (int32 Instance = 0; Instance < ProceduralBodyParts.Num(); ++Instance)
+	{
+		FProceduralBodyPart& BodyPart = ProceduralBodyParts[Instance];
+		
+		BodyPart.Joints.Empty();
+		BodyPart.Limbs.Empty();
+		
+		USceneComponent* LastKnownParent = this;
+		
+		//Create instances of the joints
+		for (const TPair<FVector, bool>& JointsPosition : BodyPart.JointsPositions)
+		{
+			//Create an instance of the joint
+			UJoint* JointInstance =	NewObject<UJoint>(this, UJoint::StaticClass(), TEXT("GenerateJointName(Instance)"));
+			
+			if (IsValid(JointInstance))
+			{
+				//Register with the world so it renders and updates
+				JointInstance->RegisterComponent();
+    
+				//Attach to the owner's root component
+				JointInstance->AttachToComponent(LastKnownParent, FAttachmentTransformRules::KeepRelativeTransform);
+    
+				//Ensure the editor structure updates correctly
+				Owner->AddInstanceComponent(JointInstance);
+
+				//Set the location
+				JointInstance->SetRelativeLocation(JointsPosition.Key);
+				
+				//Should the joint be visible?
+				JointInstance->SetHiddenInGame(JointsPosition.Value);
+				
+				LastKnownParent = JointInstance;
+				
+				BodyPart.Joints.Add(JointInstance);
+			}
+		}
+		
+		//Create Instances of the limbs
+		for (int32 JointIndex = 0; JointIndex < BodyPart.Joints.Num() - 1; ++JointIndex)
+		{
+			const int32 NextJointIndex = JointIndex + 1;
+			
+			UJoint* LastJoint = BodyPart.Joints[JointIndex];
+			const UJoint* NextJoint = BodyPart.Joints[NextJointIndex];
+			
+			if (!IsValid(LastJoint) || !IsValid(NextJoint))
+			{
+				break;
+			}
+			
+			//Create an instance of the limb
+			ULimb* LimbInstance = NewObject<ULimb>(this, ULimb::StaticClass(), TEXT("GenerateJointName(Instance)"));
+			
+			if (IsValid(LimbInstance))
+			{
+				//Register with the world so it renders and updates
+				LimbInstance->RegisterComponent();
+    
+				//Attach to the owner's root component
+				LimbInstance->AttachToComponent(LastJoint, FAttachmentTransformRules::KeepRelativeTransform);
+				
+				const FVector ParentPos = LastJoint->GetComponentLocation();
+				const FVector ChildPos = NextJoint->GetComponentLocation();
+
+				const FVector MidPoint = (ParentPos + ChildPos) * 0.5f;
+				const FVector Direction = (ParentPos - ChildPos).GetSafeNormal();
+	
+				const FRotator LookAtRotation = (Direction.Rotation() + FRotator(90, 0, 0));
+	
+				SetWorldLocation(MidPoint);
+				SetWorldRotation(LookAtRotation);
+    
+				//Ensure the editor structure updates correctly
+				Owner->AddInstanceComponent(LimbInstance);
+				
+				BodyPart.Limbs.Add(LimbInstance);
+			}
+		}
+	}
+}
+
+FName UMovingModel::GenerateJointName(const int32 InstanceIndex) const
+{
+	if (InstanceIndex % 2) //Left hand instance
+	{
+		//return FName("%s_L_%i", InTypePart, InstanceIndex); 
+	}
+	else //Right hand Instance
+	{
+		//return FName("%s_R_%i", InTypePart, InstanceIndex); 
+	}
+	return FName();
+}
+
+void UMovingModel::InitSceneComponents() //This one is called through UAnimModelActionStack
 {
 	//Get Hips
 	Hips_Ref = GenericCalls::FindChildByExactName(this, TEXT("Hips"));
@@ -34,12 +145,12 @@ void AMovingModel::InitSceneComponents() //This one is called through UAnimModel
 	Arms = BuildLimbChains<UMoveArm>( Chest_Ref,TEXT("UpperArm_"),TEXT("Elbow_"),TEXT("Hand_"));
 }
 
-void AMovingModel::BeginPlay()
+void UMovingModel::BeginPlay()
 {
 	Super::BeginPlay();
 
 	//Setup base hip height reference 
-	const FTransform ParentXform = GetRootComponent()->GetComponentTransform();
+	const FTransform ParentXform = GetComponentTransform();
 	
 	const float HipLocalZ  = ParentXform.InverseTransformPosition(Hips_Ref->GetComponentLocation()).Z;
 	const float FootLocalZ = ParentXform.InverseTransformPosition(Legs[0].End->GetComponentLocation()).Z;
@@ -47,15 +158,20 @@ void AMovingModel::BeginPlay()
 	BaseHipHeight = HipLocalZ - FootLocalZ;
 }
 
-void AMovingModel::Tick(const float DeltaTime)
+void UMovingModel::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::Tick(DeltaTime);
+	
+}
+
+void UMovingModel::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
 	//DrawDebugJoints();
 	//DrawDebugLimbs();
 }
 
-void AMovingModel::UpdateHips()
+void UMovingModel::UpdateHips()
 {
 	if (Legs.Num() == 0 ||
 		!IsValid(Hips_Ref))
@@ -76,7 +192,7 @@ void AMovingModel::UpdateHips()
 
 
 //Get if the legs are stepping, return hip sway, else don't 
-float AMovingModel::GetHipSway()
+float UMovingModel::GetHipSway()
 {
 	float HipSway = 0.0f;
 	
@@ -104,7 +220,7 @@ float AMovingModel::GetHipSway()
 	return HipSway;
 }
 
-void AMovingModel::SetJumpingAnim() const
+void UMovingModel::SetJumpingAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
@@ -114,7 +230,7 @@ void AMovingModel::SetJumpingAnim() const
 	AnimModelActionStack_Ref->PushJumpingActionMovement();
 }
 
-void AMovingModel::SetArmsWaveAnim() const
+void UMovingModel::SetArmsWaveAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
@@ -123,7 +239,7 @@ void AMovingModel::SetArmsWaveAnim() const
 	
 	AnimModelActionStack_Ref->PushWaveActionMovement();
 }
-void AMovingModel::SetArmsBackHolsterAnim() const
+void UMovingModel::SetArmsBackHolsterAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
@@ -133,38 +249,34 @@ void AMovingModel::SetArmsBackHolsterAnim() const
 	AnimModelActionStack_Ref->PushHolsterActionMovement();
 }
 
-void AMovingModel::SetArmsPointingAnim() const
+void UMovingModel::SetArmsPointingAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
 		return;
 	}
 	
-	AnimModelActionStack_Ref->PushPointingActionMovement();
+	//AnimModelActionStack_Ref->PushPointingActionMovement();
 }
 
-void AMovingModel::RemoveArmsPointingAnim() const
+void UMovingModel::RemoveArmsPointingAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
 		return;
 	}
-	
-	AnimModelActionStack_Ref->RemovePointingActionMovement();
 }
 
-void AMovingModel::SetArmsHoldingHandsAnim() const
+void UMovingModel::SetArmsHoldingHandsAnim() const
 {
 	if (!IsValid(AnimModelActionStack_Ref))
 	{
 		return;
 	}
-	
-	AnimModelActionStack_Ref->PushHandHoldingActionMovement();
 }
 
 //Debug draw line the procedural animation joints
-void AMovingModel::DrawDebugJoints()
+void UMovingModel::DrawDebugJoints()
 {
 	FVector Pos_Hips = Hips_Ref->GetComponentLocation();
 	FVector Pos_Chest = Chest_Ref->GetComponentLocation();
@@ -266,7 +378,7 @@ void AMovingModel::DrawDebugJoints()
 }
 
 //Debug draw line the procedural animation limbs
-void AMovingModel::DrawDebugLimbs()
+void UMovingModel::DrawDebugLimbs()
 {
 	FVector Pos_Hips = Hips_Ref->GetComponentLocation();
 	FVector Pos_Chest = Chest_Ref->GetComponentLocation();
@@ -370,7 +482,7 @@ void AMovingModel::DrawDebugLimbs()
 
 //Builds a limb reference to store arms or legs references
 template<typename TUpperClass>
-TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const
+TArray<FLimbChain> UMovingModel::BuildLimbChains( USceneComponent* Root, const FString& UpperPrefix, const FString& MiddlePrefix, const FString& EndPrefix) const
 {
 	TArray<FLimbChain> OutChains;
 
@@ -409,7 +521,7 @@ TArray<FLimbChain> AMovingModel::BuildLimbChains( USceneComponent* Root, const F
 	return OutChains;
 }
 
-USceneComponent* AMovingModel::GetRightHand() const
+USceneComponent* UMovingModel::GetRightHand() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
@@ -421,7 +533,7 @@ USceneComponent* AMovingModel::GetRightHand() const
 	return nullptr;
 }
 
-USceneComponent* AMovingModel::GetLeftHand() const
+USceneComponent* UMovingModel::GetLeftHand() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
@@ -433,7 +545,7 @@ USceneComponent* AMovingModel::GetLeftHand() const
 	return nullptr;
 }
 
-UMoveArm* AMovingModel::GetRightArm() const
+UMoveArm* UMovingModel::GetRightArm() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
@@ -445,7 +557,7 @@ UMoveArm* AMovingModel::GetRightArm() const
 	return nullptr;
 }
 
-UMoveArm* AMovingModel::GetLeftArm() const
+UMoveArm* UMovingModel::GetLeftArm() const
 {
 	for(const FLimbChain Arm : Arms)
 	{
@@ -457,7 +569,7 @@ UMoveArm* AMovingModel::GetLeftArm() const
 	return nullptr;
 }
 
-TArray<UMoveLeg*> AMovingModel::GetLegs()
+TArray<UMoveLeg*> UMovingModel::GetLegs()
 {
 	TArray<UMoveLeg*> LegsTops;
 	
@@ -469,7 +581,7 @@ TArray<UMoveLeg*> AMovingModel::GetLegs()
 	return LegsTops;
 }
 
-TArray<UMoveArm*> AMovingModel::GetArms()
+TArray<UMoveArm*> UMovingModel::GetArms()
 {
 	TArray<UMoveArm*> ArmsTops;
 	
